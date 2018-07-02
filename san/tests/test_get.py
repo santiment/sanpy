@@ -1,4 +1,6 @@
 import san
+from san.error import SanError
+from nose.tools import assert_raises
 from unittest.mock import Mock, patch
 import pandas as pd
 import pandas.testing as pdt
@@ -43,3 +45,13 @@ def test_prices():
 
     df = pd.DataFrame(expected['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
+
+
+def test_invalid_request():
+    with assert_raises(ValueError):
+        san.get("invalid_request")
+
+
+def test_invalid_method():
+    with assert_raises(SanError):
+        san.get("invalid_method/slug")
