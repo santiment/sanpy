@@ -25,15 +25,13 @@ def test_batch():
 
     batch = Batch()
     batch.get(
-        "santiment/daily_active_addresses",
-        slug="santiment",
+        "daily_active_addresses/santiment",
         from_date="2018-06-01",
         to_date="2018-06-05",
         interval="1d"
     )
     batch.get(
-        "santiment/daily_active_addresses",
-        slug="santiment",
+        "daily_active_addresses/santiment",
         from_date="2018-06-06",
         to_date="2018-06-10",
         interval="1d"
