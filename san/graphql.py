@@ -1,10 +1,12 @@
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
+from san.env_vars import SANBASE_GQL_HOST, SANBASE_GQL_APIKEY
 
 
 def get_sanbase_gql_client():
     return Client(
-            transport=RequestsHTTPTransport(url="https://api.santiment.net/graphql"),
+            transport=RequestsHTTPTransport(url=SANBASE_GQL_HOST,
+                                            headers={'authorization':  "Apikey {}".format(SANBASE_GQL_APIKEY)}),
             fetch_schema_from_transport=True
         )
 
