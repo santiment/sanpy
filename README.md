@@ -2,6 +2,16 @@
 
 ## Installation
 
+```bash
+pip install -r requirements.txt
+```
+
+Run tests:
+```bash
+python3.6 setup.py test
+```
+
+
 ## Configuration
 
 ## Retrieving data from the API
