@@ -19,6 +19,7 @@ daa = san.get(
 ```
 
 ```python
+from san import Batch
 
 batch = Batch()
 batch.get(
