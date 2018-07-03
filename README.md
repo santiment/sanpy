@@ -14,7 +14,7 @@ python setup.py test
 
 ## Configuration
 
-To retrieve data from the Sanbase API you need to provide api key via:
+Optionally you can provide an api key which gives access to some restricted metrics:
 
 ```python
 import san
