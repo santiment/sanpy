@@ -1,0 +1,2 @@
+class SanError(ValueError):
+    pass

@@ -22,7 +22,6 @@ class Batch:
         res = execute_gql(gql_string)
 
         for k in sorted(res.keys()):
-            print(res[k])
             df = pd.DataFrame(res[k])
             result.append(df)
 
