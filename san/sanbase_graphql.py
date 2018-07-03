@@ -12,11 +12,7 @@ QUERY_MAPPING = {
     'transaction_volume': {
         'query': 'transactionVolume',
         'return_fields': ['transactionVolume', 'datetime']
-    },
-    'github_activity': {
-        'query': 'githubActivity',
-        'return_fields': ['githubActivity', 'datetime']
-    },
+    }
 }
 
 
@@ -38,12 +34,6 @@ def transaction_volume(idx, slug, **kwargs):
     return query_str
 
 
-def github_activity(idx, slug, **kwargs):
-    query_str = _create_query_str('github_activity', idx, slug, **kwargs)
-
-    return query_str
-
-
 def prices(idx, currencies_from_to_string, **kwargs):
     curr_from, curr_to = currencies_from_to_string.split("_")
 
@@ -61,8 +51,6 @@ def prices(idx, currencies_from_to_string, **kwargs):
         datetime
     }}
     """.format(idx=idx, ticker=curr_from.upper(), result_curr=_result_curr(curr_to), **kwargs)
-
-    print(query_str)
 
     return query_str
 
@@ -87,8 +75,6 @@ def _create_query_str(query, idx, slug, **kwargs):
         return_fields=_format_return_fields(QUERY_MAPPING[query]['return_fields']),
         **kwargs
     )
-
-    print(query_str)
 
     return query_str
 
