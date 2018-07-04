@@ -25,6 +25,22 @@ san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
 
 The data is fetched by providing a string in the format `query/slug` and additional parameters.
 
+* `query`: Available queries can be found in section: [Available metrics](#available_metrics)
+* `slug`: A list of projects with their slugs, names, etc. can be fetched like this:
+
+```python
+import san
+san.get("projects/all")
+```
+
+```
+               name                      slug ticker
+0                0x                        0x    ZRX
+1            Achain                    achain    ACT
+2              AdEx                   adx-net    ADX
+...
+```
+
 Parameters:
 
 * `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
@@ -45,7 +61,7 @@ daa = san.get(
 )
 
 prices = san.get(
-    "prices/san_usd",
+    "prices/santiment_usd",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -74,6 +90,7 @@ batch.get(
 
 ```
 
+<a name='available_metrics'></a>
 ## Available metrics
 
 Below are described some available metrics and are given examples for fetching and for the returned format.
@@ -96,12 +113,13 @@ daa = san.get(
 Example result:
 
 ```
-   activeAddresses              datetime
-0                2  2018-06-01T00:00:00Z
-1                4  2018-06-02T00:00:00Z
-2                6  2018-06-03T00:00:00Z
-3                6  2018-06-04T00:00:00Z
-4               14  2018-06-05T00:00:00Z
+                           activeAddresses
+datetime
+2018-06-01 00:00:00+00:00                2
+2018-06-02 00:00:00+00:00                4
+2018-06-03 00:00:00+00:00                6
+2018-06-04 00:00:00+00:00                6
+2018-06-05 00:00:00+00:00               14
 ```
 
 ### Token aging (burn rate)
@@ -122,13 +140,14 @@ burn_rate = san.get(
 Example result:
 
 ```
-       burnRate              datetime
-0  3.009476e+06  2018-05-01T11:00:00Z
-1  2.161845e+09  2018-05-01T14:00:00Z
-2  7.263414e+05  2018-05-01T17:00:00Z
-3  7.424445e+07  2018-05-01T19:00:00Z
-4  6.987085e+07  2018-05-01T21:00:00Z
-5  2.052304e+08  2018-05-01T22:00:00Z
+                               burnRate
+datetime
+2018-05-01 11:00:00+00:00  3.009476e+06
+2018-05-01 14:00:00+00:00  2.161845e+09
+2018-05-01 17:00:00+00:00  7.263414e+05
+2018-05-01 19:00:00+00:00  7.424445e+07
+2018-05-01 21:00:00+00:00  6.987085e+07
+2018-05-01 22:00:00+00:00  2.052304e+08
 ```
 
 ### Transaction volume
@@ -149,15 +168,43 @@ tv = san.get(
 Example result:
 
 ```
-               datetime  transactionVolume
-0  2018-05-01T11:00:00Z         298.707310
-1  2018-05-01T14:00:00Z       19356.439888
-2  2018-05-01T17:00:00Z        1088.967586
-3  2018-05-01T19:00:00Z          99.600000
-4  2018-05-01T21:00:00Z        6177.411536
-5  2018-05-01T22:00:00Z       41397.348795
-6  2018-05-01T23:00:00Z         300.000000
+                           transactionVolume
+datetime
+2018-05-01 11:00:00+00:00         298.707310
+2018-05-01 14:00:00+00:00       19356.439888
+2018-05-01 17:00:00+00:00        1088.967586
+2018-05-01 19:00:00+00:00          99.600000
+2018-05-01 21:00:00+00:00        6177.411536
+2018-05-01 22:00:00+00:00       41397.348795
+2018-05-01 23:00:00+00:00         300.000000
 ```
+
+### Github Activity
+
+Returns a list of github activity for a given slug and time interval.
+
+[An article explaining our approach to tracking github activity](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
+
+```python
+ga = san.get(
+    "github_activity/santiment",
+    from_date="2018-05-01",
+    to_date="2018-05-05",
+    interval="24h"
+)
+
+```
+
+Example result:
+
+```
+                           activity
+datetime
+2018-05-02 00:00:00+00:00        32
+2018-05-03 00:00:00+00:00         9
+2018-05-04 00:00:00+00:00        18
+```
+
 
 ### Prices
 Fetch price history for a given ticker in USD or BTC.
@@ -165,21 +212,21 @@ Fetch price history for a given ticker in USD or BTC.
 ```python
 
 prices = san.get(
-    "prices/san_usd",
+    "prices/santiment_usd",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
 
 prices = san.get(
-    "prices/san_btc",
+    "prices/santiment_btc",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
 
 prices = san.get(
-    "prices/eos_usd",
+    "prices/ethereum_usd",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -191,24 +238,27 @@ Example result:
 
 ```
 
-               datetime            priceUsd
-0  2018-06-01T00:00:00Z   1.234634930555555
-1  2018-06-02T00:00:00Z  1.2551352777777771
-2  2018-06-03T00:00:00Z   1.251881943462897
-3  2018-06-04T00:00:00Z  1.2135782638888888
+                                     priceUsd
+datetime
+2018-06-01 00:00:00+00:00   1.234634930555555
+2018-06-02 00:00:00+00:00  1.2551352777777771
+2018-06-03 00:00:00+00:00   1.251881943462897
+2018-06-04 00:00:00+00:00  1.2135782638888888
 
 
-               datetime                priceBtc
-0  2018-06-01T00:00:00Z   0.0001649780416666666
-1  2018-06-02T00:00:00Z  0.00016521851041666669
-2  2018-06-03T00:00:00Z    0.000162902558303887
-3  2018-06-04T00:00:00Z   0.0001600935277777778
+                                         priceBtc
+datetime
+2018-06-01 00:00:00+00:00   0.0001649780416666666
+2018-06-02 00:00:00+00:00  0.00016521851041666669
+2018-06-03 00:00:00+00:00    0.000162902558303887
+2018-06-04 00:00:00+00:00   0.0001600935277777778
 
 
-               datetime            priceUsd
-0  2018-06-01T00:00:00Z  12.179371527777779
-1  2018-06-02T00:00:00Z  13.733567361111099
-2  2018-06-03T00:00:00Z   14.72066584507042
-3  2018-06-04T00:00:00Z   13.91701289198606
+                                    priceUsd
+datetime
+2018-06-01 00:00:00+00:00   576.862577060932
+2018-06-02 00:00:00+00:00  588.6194336917561
+2018-06-03 00:00:00+00:00  610.5163418181814
+2018-06-04 00:00:00+00:00  602.5116327272724
 
 ```

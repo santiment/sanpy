@@ -2,7 +2,7 @@ import san
 from san.error import SanError
 from nose.tools import assert_raises
 from unittest.mock import Mock, patch
-import pandas as pd
+from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
 
 
@@ -24,7 +24,7 @@ def test_get(mock):
         to_date="2018-06-05",
         interval="1d"
     )
-    df = pd.DataFrame(expected['query_0'])
+    df = convert_to_datetime_idx_df(expected['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
@@ -40,13 +40,13 @@ def test_prices(mock):
     mock.return_value = Mock()
     mock.return_value.execute.return_value = expected
     res = san.get(
-        "prices/san_usd",
+        "prices/santiment_usd",
         from_date="2018-06-01",
         to_date="2018-06-05",
         interval="1d"
     )
 
-    df = pd.DataFrame(expected['query_0'])
+    df = convert_to_datetime_idx_df(expected['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
