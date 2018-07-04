@@ -12,7 +12,7 @@ Optionally you can provide an api key which gives access to some restricted metr
 
 ```python
 import san
-san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
+sanpy.ApiConfig.api_key = 'api-key-provided-by-sanbase'
 ```
 
 ## Retrieving data from the API
