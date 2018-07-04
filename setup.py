@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="san-python",
+    name="sanpy",
     version="0.0.1",
     author="Santiment",
     author_email="admin@santiment.net",
@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
-    url="https://github.com/santiment/san-python",
+    url="https://github.com/santiment/sanpy",
     test_suite='nose.collector',
     tests_require=['nose'],
     packages=setuptools.find_packages(),
