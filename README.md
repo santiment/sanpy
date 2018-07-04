@@ -207,7 +207,7 @@ datetime
 
 
 ### Prices
-Fetch price history for a given ticker in USD or BTC.
+Fetch price history for a given slug in USD or BTC.
 
 ```python
 
