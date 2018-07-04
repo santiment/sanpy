@@ -183,7 +183,7 @@ datetime
 
 Returns a list of github activity for a given slug and time interval.
 
-[An article explaining our approach to tracking github activity](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
+[An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
 
 ```python
 ga = san.get(
