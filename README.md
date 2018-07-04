@@ -46,7 +46,7 @@ Parameters:
 * `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
 * `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
-The returned value is in `pandas DataFrame` format.
+The returned value for time-series data is in `pandas DataFrame` format indexed by `datetime`.
 
 #### Fetch single metric
 
