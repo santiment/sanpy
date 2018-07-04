@@ -32,10 +32,28 @@ def test_get(mock):
 def test_prices(mock):
     expected = {
         'query_0':
-            [{'priceUsd': '1.234634930555555', 'datetime': '2018-06-01T00:00:00Z'},
-             {'priceUsd': '1.2551352777777771', 'datetime': '2018-06-02T00:00:00Z'},
-             {'priceUsd': '1.251881943462897', 'datetime': '2018-06-03T00:00:00Z'},
-             {'priceUsd': '1.2135782638888888', 'datetime': '2018-06-04T00:00:00Z'}]
+            [
+                {
+                    'priceUsd': '1.234634930555555',
+                    'priceBtc': '0.0001649780416666666',
+                    'datetime': '2018-06-01T00:00:00Z'
+                },
+                {
+                    'priceUsd': '1.2551352777777771',
+                    'priceBtc': '0.00016521851041666669',
+                    'datetime': '2018-06-02T00:00:00Z'
+                },
+                {
+                    'priceUsd': '1.251881943462897',
+                    'priceBtc': '0.000162902558303887',
+                    'datetime': '2018-06-03T00:00:00Z'
+                },
+                {
+                    'priceUsd': '1.2135782638888888',
+                    'priceBtc': '0.0001600935277777778',
+                    'datetime': '2018-06-04T00:00:00Z'
+                }
+            ]
     }
     mock.return_value = Mock()
     mock.return_value.execute.return_value = expected
