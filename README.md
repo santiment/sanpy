@@ -3,14 +3,8 @@
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+pip install sanpy
 ```
-
-Running tests:
-```bash
-python setup.py test
-```
-
 
 ## Configuration
 
