@@ -4,3 +4,5 @@ san/__pycache__/
 .eggs/
 *.egg-info/
 .env
+dist
+build
