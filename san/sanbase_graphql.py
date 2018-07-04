@@ -3,15 +3,23 @@ import iso8601
 QUERY_MAPPING = {
     'daily_active_addresses': {
         'query': 'dailyActiveAddresses',
-        'return_fields': ['activeAddresses', 'datetime']
+        'return_fields': ['datetime', 'activeAddresses']
     },
     'burn_rate': {
         'query': 'burnRate',
-        'return_fields': ['burnRate', 'datetime']
+        'return_fields': ['datetime', 'burnRate']
     },
     'transaction_volume': {
         'query': 'transactionVolume',
-        'return_fields': ['transactionVolume', 'datetime']
+        'return_fields': ['datetime', 'transactionVolume']
+    },
+    'github_activity': {
+        'query': 'githubActivity',
+        'return_fields': ['datetime', 'activity']
+    },
+    'prices': {
+        'query': 'historyPrice',
+        'return_fields': ['datetime', 'priceUsd', 'priceBtc']
     }
 }
 
@@ -34,23 +42,27 @@ def transaction_volume(idx, slug, **kwargs):
     return query_str
 
 
-def prices(idx, currencies_from_to_string, **kwargs):
-    curr_from, curr_to = currencies_from_to_string.split("_")
+def github_activity(idx, slug, **kwargs):
+    query_str = _create_query_str('github_activity', idx, slug, **kwargs)
 
-    kwargs['from_date'] = _format_date(kwargs['from_date'])
-    kwargs['to_date'] = _format_date(kwargs['to_date'])
+    return query_str
 
+
+def prices(idx, slug, **kwargs):
+    query_str = _create_query_str('prices', idx, slug, **kwargs)
+
+    return query_str
+
+
+def projects(idx, slug, **kwargs):
     query_str = """
-    query_{idx}: historyPrice(
-        ticker: \"{ticker}\",
-        from: \"{from_date}\",
-        to: \"{to_date}\",
-        interval: \"{interval}\"
-    ){{
-        {result_curr},
-        datetime
+    query_{idx}: allProjects
+    {{
+        name,
+        slug,
+        ticker
     }}
-    """.format(idx=idx, ticker=curr_from.upper(), result_curr=_result_curr(curr_to), **kwargs)
+    """.format(idx=idx)
 
     return query_str
 

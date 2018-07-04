@@ -1,6 +1,6 @@
 from san import Batch
 from unittest.mock import Mock, patch
-import pandas as pd
+from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
 
 
@@ -38,8 +38,8 @@ def test_batch(mock):
     )
     [res1, res2] = batch.execute()
 
-    df1 = pd.DataFrame(expected['query_0'])
-    df2 = pd.DataFrame(expected['query_1'])
+    df1 = convert_to_datetime_idx_df(expected['query_0'])
+    df2 = convert_to_datetime_idx_df(expected['query_1'])
 
     pdt.assert_frame_equal(res1, df1, check_dtype=False)
     pdt.assert_frame_equal(res2, df2, check_dtype=False)

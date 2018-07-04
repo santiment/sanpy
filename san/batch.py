@@ -1,6 +1,6 @@
 from san.get import get_gql_query
 from san.graphql import execute_gql
-import pandas as pd
+from san.pandas_utils import convert_to_datetime_idx_df
 
 
 class Batch:
@@ -22,7 +22,7 @@ class Batch:
         res = execute_gql(gql_string)
 
         for k in sorted(res.keys()):
-            df = pd.DataFrame(res[k])
+            df = convert_to_datetime_idx_df(res[k])
             result.append(df)
 
         return result
