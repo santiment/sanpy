@@ -14,5 +14,5 @@ def execute_gql(gql_query_str):
     if response.status_code == 200:
         return response.json()['data']
     else:
-        raise SanError("Query failed to run by returning code of {}.\n {} \n errors: {}"
+        raise SanError("Error running query. Status code: {}.\n {} \n errors: {}"
             .format(response.status_code, gql_query_str, response.json()['errors']))
