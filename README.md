@@ -40,6 +40,11 @@ Parameters:
 * `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
 * `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
+Default values for parameters:
+* `from_date`: `datetime.now() - 365 days`
+* `to_date`: `datetime.now()`
+* `interval`: `'1d'`
+
 The returned value for time-series data is in `pandas DataFrame` format indexed by `datetime`.
 
 #### Fetch single metric
@@ -60,6 +65,16 @@ prices = san.get(
     to_date="2018-06-05",
     interval="1d"
 )
+
+```
+
+Using the defaults params:
+
+```python
+
+daa = san.get("daily_active_addresses/santiment")
+prices = san.get("prices/santiment")
+
 ```
 
 #### Batching multiple queries
