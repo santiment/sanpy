@@ -1,8 +1,8 @@
 import iso8601
 import datetime
 
-DEFAULT_TO_DATE = datetime.datetime.now().isoformat()
-DEFAULT_FROM_DATE = (datetime.datetime.now() - datetime.timedelta(days=365)).isoformat()
+DEFAULT_TO_DATE = lambda: datetime.datetime.now().isoformat()
+DEFAULT_FROM_DATE = lambda: (datetime.datetime.now() - datetime.timedelta(days=365)).isoformat()
 DEFAULT_INTERVAL = '1d'
 
 QUERY_MAPPING = {
@@ -95,8 +95,8 @@ def _create_query_str(query, idx, slug, **kwargs):
     return query_str
 
 def _transform_query_args(**kwargs):
-    kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else DEFAULT_FROM_DATE
-    kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else DEFAULT_TO_DATE
+    kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else DEFAULT_FROM_DATE()
+    kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else DEFAULT_TO_DATE()
     kwargs['interval'] = kwargs['interval'] if 'interval' in kwargs else DEFAULT_INTERVAL
 
     kwargs['from_date'] = _format_date(kwargs['from_date'])
