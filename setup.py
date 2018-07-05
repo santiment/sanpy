@@ -21,7 +21,6 @@ setuptools.setup(
       'pandas',
       'numpy',
       'requests',
-      'gql',
       'iso8601'
     ]
 )

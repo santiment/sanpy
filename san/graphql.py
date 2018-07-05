@@ -1,20 +1,18 @@
-from gql import Client, gql
-from gql.transport.requests import RequestsHTTPTransport
+import requests
 from san.api_config import ApiConfig
 from san.env_vars import SANBASE_GQL_HOST
-
-
-def get_sanbase_gql_client():
-    kwargs = dict(url=SANBASE_GQL_HOST)
-    if ApiConfig.api_key:
-        kwargs['headers'] = {'authorization':  "Apikey {}".format(ApiConfig.api_key)}
-
-    return Client(
-            transport=RequestsHTTPTransport(**kwargs),
-            fetch_schema_from_transport=True
-        )
+from san.error import SanError
 
 
 def execute_gql(gql_query_str):
-    query = gql(gql_query_str)
-    return get_sanbase_gql_client().execute(query)
+    headers = {}
+    if ApiConfig.api_key:
+        headers = {'authorization':  "Apikey {}".format(ApiConfig.api_key)}
+
+    response = requests.post(SANBASE_GQL_HOST, json={'query': gql_query_str}, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()['data']
+    else:
+        raise SanError("Query failed to run by returning code of {}.\n {} \n errors: {}"
+            .format(response.status_code, gql_query_str, response.json()['errors']))

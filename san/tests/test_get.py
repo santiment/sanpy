@@ -4,9 +4,10 @@ from nose.tools import assert_raises
 from unittest.mock import Mock, patch
 from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
+from san.graphql import execute_gql
+from san.tests.utils import TestResponse
 
-
-@patch('san.graphql.get_sanbase_gql_client')
+@patch('san.graphql.requests.post')
 def test_get(mock):
     expected = {
         'query_0':
@@ -16,8 +17,8 @@ def test_get(mock):
              {'datetime': '2018-06-04T00:00:00Z', 'activeAddresses': 6},
              {'datetime': '2018-06-05T00:00:00Z', 'activeAddresses': 14}]
     }
-    mock.return_value = Mock()
-    mock.return_value.execute.return_value = expected
+    mock.return_value = TestResponse(status_code=200, data=expected)
+
     res = san.get(
         "daily_active_addresses/santiment",
         from_date="2018-06-01",
@@ -28,7 +29,7 @@ def test_get(mock):
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
-@patch('san.graphql.get_sanbase_gql_client')
+@patch('san.graphql.requests.post')
 def test_prices(mock):
     expected = {
         'query_0':
@@ -55,8 +56,8 @@ def test_prices(mock):
                 }
             ]
     }
-    mock.return_value = Mock()
-    mock.return_value.execute.return_value = expected
+    mock.return_value = TestResponse(status_code=200, data=expected)
+
     res = san.get(
         "prices/santiment_usd",
         from_date="2018-06-01",
@@ -67,6 +68,16 @@ def test_prices(mock):
     df = convert_to_datetime_idx_df(expected['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
+@patch('san.graphql.requests.post')
+def test_error_response(mock):
+    mock.return_value = TestResponse(status_code=400, data={'errors': {'detail': 'Internal server error'}})
+    with assert_raises(SanError):
+        san.get(
+            "prices/santiment_usd",
+            from_date="2018-06-01",
+            to_date="2018-06-05",
+            interval="1d"
+        )
 
 def test_invalid_request():
     with assert_raises(ValueError):
