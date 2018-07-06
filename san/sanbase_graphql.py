@@ -113,7 +113,3 @@ def _format_date(datetime_obj_or_str):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
     return iso8601.parse_date(datetime_obj_or_str).isoformat()
-
-
-def _result_curr(curr_to):
-    return "price" + curr_to.title()
