@@ -1,8 +1,8 @@
 import iso8601
 import datetime
 
-DEFAULT_TO_DATE = lambda: datetime.datetime.now().isoformat()
-DEFAULT_FROM_DATE = lambda: (datetime.datetime.now() - datetime.timedelta(days=365)).isoformat()
+DEFAULT_TO_DATE = lambda: datetime.datetime.now()
+DEFAULT_FROM_DATE = lambda: datetime.datetime.now() - datetime.timedelta(days=365)
 DEFAULT_INTERVAL = '1d'
 
 QUERY_MAPPING = {
@@ -108,8 +108,11 @@ def _format_return_fields(return_fields):
     return ",\n".join(return_fields)
 
 
-def _format_date(date_str):
-    return iso8601.parse_date(date_str).isoformat()
+def _format_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, datetime.datetime):
+        datetime_obj_or_str = datetime_obj_or_str.isoformat()
+
+    return iso8601.parse_date(datetime_obj_or_str).isoformat()
 
 
 def _result_curr(curr_to):
