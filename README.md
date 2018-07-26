@@ -15,6 +15,10 @@ import san
 san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
 ```
 
+To obtain an api key you should [log in to sanbase](https://sanbase-low.santiment.net/login) and go to the `account` page - [https://sanbase-low.santiment.net/login](https://sanbase-low.santiment.net/account). There is an `API Keys` section and a `Generate new api key` button.
+
+If the account used for generating the api key has enough SAN tokens, the api key will give you access to the data that requires SAN token staking. The api key can only be used to fetch data and not to execute graphql mutations.
+
 ## Retrieving data from the API
 
 The data is fetched by providing a string in the format `query/slug` and additional parameters.
