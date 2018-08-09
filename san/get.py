@@ -17,7 +17,7 @@ def get_gql_query(idx, dataset, **kwargs):
         san.sanbase_graphql,
         query,
         lambda *args, **kwargs: not_found(query)
-        )(idx, slug, **kwargs)
+    )(idx, slug, **kwargs)
 
 
 def _parse_dataset(dataset):
