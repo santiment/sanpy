@@ -2,7 +2,7 @@
 
 ## Installation
 
-```bash
+```console
 pip install sanpy
 ```
 
@@ -31,7 +31,7 @@ import san
 san.get("projects/all")
 ```
 
-```bash
+```console
                name                      slug ticker
 0                0x                        0x    ZRX
 1            Achain                    achain    ACT
@@ -125,7 +125,7 @@ daa = san.get(
 
 Example result:
 
-```bash
+```console
                            activeAddresses
 datetime
 2018-06-01 00:00:00+00:00                2
@@ -152,7 +152,7 @@ burn_rate = san.get(
 
 Example result:
 
-```bash
+```console
                                burnRate
 datetime
 2018-05-01 11:00:00+00:00  3.009476e+06
@@ -180,7 +180,7 @@ tv = san.get(
 
 Example result:
 
-```bash
+```console
                            transactionVolume
 datetime
 2018-05-01 11:00:00+00:00         298.707310
@@ -210,7 +210,7 @@ ga = san.get(
 
 Example result:
 
-```bash
+```console
                            activity
 datetime
 2018-05-02 00:00:00+00:00        32
@@ -242,7 +242,7 @@ prices = san.get(
 
 Example result:
 
-```bash
+```console
 
                                          priceBtc            priceUsd
 datetime
@@ -263,11 +263,11 @@ datetime
 
 ### Exchange funds flow
 
-Fetch the difference between the tokens that were put in minus the tokens that were taken out from an exchange for a given slug in the selected time period.
+Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period.
 
 ```python
 
-prices = san.get(
+exchange_funds_flow = san.get(
     "exchange_funds_flow/santiment",
     from_date="2018-04-16T10:02:19Z",
     to_date="2018-05-23T10:02:19Z"
@@ -277,7 +277,7 @@ prices = san.get(
 
 Example result:
 
-```bash
+```console
 
                               fundsFlow
 datetime
@@ -301,27 +301,26 @@ Fields description:
 
 * ticker - The ticker of the project
 * contract - The contract identifier of the project
-* exchangeIn - How many tokens were bought in the given period
-* exchangeOut - How many tokens were sold in the given period
-* exchangeDiff - The difference between the bought and the sold tokens: exchangeIn - exchangeOut
-* exchangeInUsd - How many tokens were bought in the given period converted to USD based on the daily average price of the token
-* exchangeOutUsd - How many tokens were sold in the given period converted to USD based on the daily average price of the token
-* exchangeDiffUsd - The difference between the bought and the sold tokens in USD: exchangeInUsd - exchangeOutUsd
+* exchangeIn - How many tokens were deposited in the given period
+* exchangeOut - How many tokens were withdrawn in the given period
+* exchangeDiff - The difference between the deposited and the withdrawn tokens: exchangeIn - exchangeOut
+* exchangeInUsd - How many tokens were deposited in the given period converted to USD based on the daily average price of the token
+* exchangeOutUsd - How many tokens were withdrawn in the given period converted to USD based on the daily average price of the token
+* exchangeDiffUsd - The difference between the deposited and the withdrawn tokens in USD: exchangeInUsd - exchangeOutUsd
 * percentDiffExchangeDiffUsd - The percent difference between exchangeDiffUsd for the current period minus the exchangeDiffUsd for the previous period based on exchangeDiffUsd for the current period: (exchangeDiffUsd for current period - exchangeDiffUsd for previous period) * 100 / abs(exchangeDiffUsd for current period)
 * exchangeVolumeUsd - The volume of all tokens in and out for the given period in USD: exchangeInUsd + exchangeOutUsd
 * percentDiffExchangeVolumeUsd - The percent difference between exchangeVolumeUsd for the current period minus the exchangeVolumeUsd for the previous period based on exchangeVolumeUsd for the current period: (exchangeVolumeUsd for current period - exchangeVolumeUsd for previous period) * 100 / abs(exchangeVolumeUsd for current period)
-* exchangeInBtc - How many tokens were bought in the given period converted to BTC based on the daily average price of the token
-* exchangeOutBtc - How many tokens were sold in the given period converted to BTC based on the daily average price of the token
-* exchangeDiffBtc - The difference between the bought and the sold tokens in BTC: exchangeInBtc - exchangeOutBtc
+* exchangeInBtc - How many tokens were deposited in the given period converted to BTC based on the daily average price of the token
+* exchangeOutBtc - How many tokens were withdrawn in the given period converted to BTC based on the daily average price of the token
+* exchangeDiffBtc - The difference between the deposited and the withdrawn tokens in BTC: exchangeInBtc - exchangeOutBtc
 * percentDiffExchangeDiffBtc - The percent difference between exchangeDiffBtc for the current period minus the exchangeDiffBtc for the previous period based on exchangeDiffBtc for the current period: (exchangeDiffBtc for current period - exchangeDiffBtc for previous period) * 100 / abs(exchangeDiffBtc for current period)
 * exchangeVolumeBtc - The volume of all tokens in and out for the given period in BTC: exchangeInBtc + exchangeOutBtc
 * percentDiffExchangeVolumeBtc - The percent difference between exchangeVolumeBtc for the current period minus the exchangeVolumeBtc for the previous period based on exchangeVolumeBtc for the current period: (exchangeVolumeBtc for current period - exchangeVolumeBtc for previous period) * 100 / abs(exchangeVolumeBtc for current period)
 
 ```python
 
-# The "/" at the end of the first argument is important. If you omit it you'll get an error.
-prices = san.get(
-    "erc20_exchange_funds_flow/",
+erc20_exchange_funds_flow = san.get(
+    "erc20_exchange_funds_flow",
     from_date="2018-04-16T10:02:19Z",
     to_date="2018-05-23T10:02:19Z"
 )
@@ -330,7 +329,7 @@ prices = san.get(
 
 Example result:
 
-```bash
+```console
 
                                      contract  exchangeDiff  exchangeDiffBtc  \
 0   0x006bea43baa3f7a6f765f14f10a1a1b08334ef45 -5.353089e+03        -0.691860
@@ -375,14 +374,13 @@ Fetch a list of slugs for which there is social volume data.
 
 ```python
 
-# The "/" at the end of the first argument is important. If you omit it you'll get an error.
-prices = san.get("social_volume_projects/")
+projects = san.get("social_volume_projects")
 
 ```
 
 Example result:
 
-```bash
+```console
 
                    0
 0            cardano
@@ -411,7 +409,7 @@ Fetch a list of mentions count for a given project and time interval.
 
 Arguments description:
 
-* endpoint - social_volume/dragonchain
+* endpoint - social_volume/project_slug
 * interval - an integer followed by one of: `m`, `h`, `d`, `w`
 * from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 * to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
@@ -424,7 +422,7 @@ Arguments description:
 
 ```python
 
-prices = san.get(
+social_volume = san.get(
     "social_volume/dragonchain",
     interval="1d",
     from_date="2018-04-16T10:02:19Z",
@@ -436,7 +434,7 @@ prices = san.get(
 
 Example result:
 
-```bash
+```console
 
                            mentionsCount
 datetime

@@ -2,13 +2,6 @@ import iso8601
 import datetime
 
 
-def DEFAULT_TO_DATE(): return datetime.datetime.now()
-
-
-def DEFAULT_FROM_DATE(): return datetime.datetime.now() - \
-    datetime.timedelta(days=365)
-
-
 DEFAULT_INTERVAL = '1d'
 DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
 
@@ -191,8 +184,8 @@ def _create_query_str(query, idx, slug, **kwargs):
 
 
 def _transform_query_args(**kwargs):
-    kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else DEFAULT_FROM_DATE()
-    kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else DEFAULT_TO_DATE()
+    kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else _default_from_date()
+    kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else _default_to_date()
     kwargs['interval'] = kwargs['interval'] if 'interval' in kwargs else DEFAULT_INTERVAL
     kwargs['social_volume_type'] = kwargs['social_volume_type'] if 'social_volume_type' in kwargs else DEFAULT_SOCIAL_VOLUME_TYPE
 
@@ -200,6 +193,14 @@ def _transform_query_args(**kwargs):
     kwargs['to_date'] = _format_date(kwargs['to_date'])
 
     return kwargs
+
+
+def _default_to_date():
+    return datetime.datetime.now()
+
+
+def _default_from_date():
+    return datetime.datetime.now() - datetime.timedelta(days=365)
 
 
 def _format_return_fields(return_fields):

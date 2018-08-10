@@ -21,7 +21,8 @@ def get_gql_query(idx, dataset, **kwargs):
 
 
 def _parse_dataset(dataset):
-    return dataset.split("/")
+    left, _separator, right = dataset.partition("/")
+    return [left, right]
 
 
 def not_found(query):
