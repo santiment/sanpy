@@ -25,6 +25,10 @@ QUERY_MAPPING = {
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc']
+    },
+    'exchange_funds_flow': {
+        'query': 'exchangeFundsFlow',
+        'return_fields': ['datetime', 'fundsFlow']
     }
 }
 
@@ -74,22 +78,7 @@ def projects(idx, slug, **kwargs):
 
 
 def exchange_funds_flow(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
-
-    query_str = """
-    query_{idx}: exchangeFundsFlow (
-        slug: \"{slug}\",
-        from: \"{from_date}\",
-        to: \"{to_date}\"
-    ){{
-        datetime,
-        fundsFlow
-    }}
-    """.format(
-        idx=idx,
-        slug=slug,
-        **kwargs
-    )
+    query_str = _create_query_str('exchange_funds_flow', idx, slug, **kwargs)
 
     return query_str
 
