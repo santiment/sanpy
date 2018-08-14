@@ -2,7 +2,7 @@
 
 ## Installation
 
-```console
+```
 pip install sanpy
 ```
 
@@ -31,7 +31,7 @@ import san
 san.get("projects/all")
 ```
 
-```console
+```
                name                      slug ticker
 0                0x                        0x    ZRX
 1            Achain                    achain    ACT
@@ -125,7 +125,7 @@ daa = san.get(
 
 Example result:
 
-```console
+```
                            activeAddresses
 datetime
 2018-06-01 00:00:00+00:00                2
@@ -152,7 +152,7 @@ burn_rate = san.get(
 
 Example result:
 
-```console
+```
                                burnRate
 datetime
 2018-05-01 11:00:00+00:00  3.009476e+06
@@ -180,7 +180,7 @@ tv = san.get(
 
 Example result:
 
-```console
+```
                            transactionVolume
 datetime
 2018-05-01 11:00:00+00:00         298.707310
@@ -210,7 +210,7 @@ ga = san.get(
 
 Example result:
 
-```console
+```
                            activity
 datetime
 2018-05-02 00:00:00+00:00        32
@@ -242,7 +242,7 @@ prices = san.get(
 
 Example result:
 
-```console
+```
 
                                          priceBtc            priceUsd
 datetime
@@ -278,7 +278,7 @@ exchange_funds_flow = san.get(
 
 Example result:
 
-```console
+```
 
                               fundsFlow
 datetime
@@ -331,7 +331,7 @@ erc20_exchange_funds_flow = san.get(
 
 Example result:
 
-```console
+```
 
                                      contract  exchangeDiff  exchangeDiffBtc  \
 0   0x006bea43baa3f7a6f765f14f10a1a1b08334ef45 -5.353089e+03        -0.691860
@@ -382,7 +382,7 @@ projects = san.get("social_volume_projects")
 
 Example result:
 
-```console
+```
 
                    0
 0            cardano
@@ -407,7 +407,7 @@ Example result:
 
 ### Social Volume
 
-Fetch a list of mentions count for a given project and time interval.
+Fetch a list of mentions count for a given project and time interval. For this metric you'll need to set the [api key](#configuration) and have at least 1000 SAN tokens in your account.
 
 Arguments description:
 
@@ -436,7 +436,7 @@ social_volume = san.get(
 
 Example result:
 
-```console
+```
 
                            mentionsCount
 datetime
