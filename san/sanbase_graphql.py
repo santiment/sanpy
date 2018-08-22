@@ -150,8 +150,42 @@ def social_volume(idx, slug, **kwargs):
     return query_str
 
 
-def topic_search(idx, _slug, **kwargs):
+def topic_search(idx, field, **kwargs):
     kwargs = _transform_query_args(**kwargs)
+    return_fields = {
+        'messages': """
+        messages {
+            telegram {
+                datetime
+                text
+            }
+            professionalTradersChat {
+                datetime
+                text
+            }
+            reddit {
+                datetime
+                text
+            }
+        }
+        """,
+        'charts_data': """
+        chartsData {
+            telegram {
+                mentionsCount
+                datetime
+            }
+            professionalTradersChat {
+                mentionsCount
+                datetime
+            }
+            reddit {
+                mentionsCount
+                datetime
+            }
+        }
+        """
+    }
 
     query_str = """
     query_{idx}: topicSearch (
@@ -161,37 +195,11 @@ def topic_search(idx, _slug, **kwargs):
         to: \"{to_date}\",
         interval: \"{interval}\"
     ){{
-        messages {{
-            telegram {{
-                datetime
-                text
-            }}
-            professionalTradersChat {{
-                datetime
-                text
-            }}
-            reddit {{
-                datetime
-                text
-            }}
-        }}
-        chartsData {{
-            telegram {{
-                mentionsCount
-                datetime
-            }}
-            professionalTradersChat {{
-                mentionsCount
-                datetime
-            }}
-            reddit {{
-                mentionsCount
-                datetime
-            }}
-        }}
+        {return_fields}
     }}
     """.format(
         idx=idx,
+        return_fields=return_fields[field],
         **kwargs
     )
 

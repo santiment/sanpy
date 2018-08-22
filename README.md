@@ -110,7 +110,7 @@ Below are described some available metrics and are given examples for fetching a
 
 ### Daily Active Addresses
 
-This metric includes the number of unique addresses that participated in the transfers of given token during the day.
+This metric includes the number of unique addresses that participated in the transfers of given token during the day. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -137,7 +137,7 @@ datetime
 
 ### Token aging (burn rate)
 
-Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time.
+Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -165,7 +165,7 @@ datetime
 
 ### Transaction volume
 
-Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges.
+Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -194,7 +194,7 @@ datetime
 
 ### Github Activity
 
-Returns a list of github activity for a given slug and time interval.
+Returns a list of github activity for a given slug and time interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 [An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
 
@@ -263,7 +263,7 @@ datetime
 
 ### Exchange funds flow
 
-Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period.
+Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -292,7 +292,7 @@ datetime
 
 ### ERC20 Exchange Funds Flow
 
-Fetch the exchange funds flow for all ERC20 projects in the given interval.
+Fetch the exchange funds flow for all ERC20 projects in the given interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -407,7 +407,7 @@ Example result:
 
 ### Social Volume
 
-Fetch a list of mentions count for a given project and time interval. For this metric you'll need to set the [api key](#configuration) and have at least 1000 SAN tokens in your account.
+Fetch a list of mentions count for a given project and time interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -452,10 +452,13 @@ datetime
 
 ### Topic search
 
-Returns lists with the mentions of the search phrase grouped by source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have at least 1000 SAN tokens in your account.
+Returns lists with the mentions of the search phrase grouped by source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
+* A string in the format "topic_search/`fields`" where `fields` is one of the following:
+    1. "messages"
+    2. "charts_data"
 * sources - an array of enum values that specify which sources should be searched. The sources are:
     1. TELEGRAM
     2. PROFESSIONAL_TRADERS_CHAT
@@ -468,7 +471,7 @@ Arguments description:
 ```python
 
 topic_search = san.get(
-    "topic_search",
+    "topic_search/messages",
     sources="TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT",
     search_text="btc moon",
     from_date="2018-08-01T12:00:00Z",
@@ -482,14 +485,35 @@ Example result:
 
 ```
 
-                                                                chartsData  \
-professionalTradersChat  [{'mentionsCount': 170, 'datetime': '2018-08-0...
-reddit                   [{'mentionsCount': 316, 'datetime': '2018-08-0...
-telegram                 [{'mentionsCount': 219, 'datetime': '2018-08-0...
-
                                                                   messages
 professionalTradersChat  [{'text': 'damn if eth does break tendline btc...
 reddit                   [{'text': 'In the last 2 bull markets (April-M...
 telegram                 [{'text': 'Btc dominance increasing', 'datetim...
+
+```
+
+or
+
+```python
+
+topic_search = san.get(
+    "topic_search/charts_data",
+    sources="TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT",
+    search_text="btc moon",
+    from_date="2018-08-01T12:00:00Z",
+    to_date="2018-08-15T12:00:00Z",
+    interval="6h"
+)
+
+```
+
+Example result:
+
+```
+
+                                                                chartsData
+professionalTradersChat  [{'mentionsCount': 170, 'datetime': '2018-08-0...
+reddit                   [{'mentionsCount': 316, 'datetime': '2018-08-0...
+telegram                 [{'mentionsCount': 219, 'datetime': '2018-08-0...
 
 ```
