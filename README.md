@@ -449,3 +449,47 @@ datetime
 2018-04-23 00:00:00+00:00              1
 
 ```
+
+### Topic search
+
+Returns lists with the mentions of the search phrase grouped by source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have at least 1000 SAN tokens in your account.
+
+Arguments description:
+
+* sources - an array of enum values that specify which sources should be searched. The sources are:
+    1. TELEGRAM
+    2. PROFESSIONAL_TRADERS_CHAT
+    3. REDDIT
+* search_text - a string containing the key words for which the sources should be searched.
+* from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+* to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+* interval - an integer followed by one of: `m`, `h`, `d`, `w`
+
+```python
+
+topic_search = san.get(
+    "topic_search",
+    sources="TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT",
+    search_text="btc moon",
+    from_date="2018-08-01T12:00:00Z",
+    to_date="2018-08-15T12:00:00Z",
+    interval="6h"
+)
+
+```
+
+Example result:
+
+```
+
+                                                                chartsData  \
+professionalTradersChat  [{'mentionsCount': 170, 'datetime': '2018-08-0...
+reddit                   [{'mentionsCount': 316, 'datetime': '2018-08-0...
+telegram                 [{'mentionsCount': 219, 'datetime': '2018-08-0...
+
+                                                                  messages
+professionalTradersChat  [{'text': 'damn if eth does break tendline btc...
+reddit                   [{'text': 'In the last 2 bull markets (April-M...
+telegram                 [{'text': 'Btc dominance increasing', 'datetim...
+
+```
