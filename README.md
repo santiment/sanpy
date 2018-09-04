@@ -452,14 +452,14 @@ datetime
 
 ### Topic search
 
-Returns lists with the mentions of the search phrase grouped by source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Returns lists with the mentions of the search phrase from the selected source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
 * A string in the format "topic_search/`fields`" where `fields` is one of the following:
     1. "messages"
-    2. "charts_data"
-* sources - an array of enum values that specify which sources should be searched. The sources are:
+    2. "chart_data"
+* source - one of the following:
     1. TELEGRAM
     2. PROFESSIONAL_TRADERS_CHAT
     3. REDDIT
@@ -472,7 +472,7 @@ Arguments description:
 
 topic_search = san.get(
     "topic_search/messages",
-    sources="TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT",
+    source="TELEGRAM",
     search_text="btc moon",
     from_date="2018-08-01T12:00:00Z",
     to_date="2018-08-15T12:00:00Z",
@@ -485,10 +485,10 @@ Example result:
 
 ```
 
-                                                                  messages
-professionalTradersChat  [{'text': 'damn if eth does break tendline btc...
-reddit                   [{'text': 'In the last 2 bull markets (April-M...
-telegram                 [{'text': 'Btc dominance increasing', 'datetim...
+                                             messages
+0   {'text': 'Btc dominance increasing', 'datetime...
+1   {'text': 'Above the deafening noise of Sidera ...
+2   {'text': 'Neo could finosh today in the green ...
 
 ```
 
@@ -497,8 +497,8 @@ or
 ```python
 
 topic_search = san.get(
-    "topic_search/charts_data",
-    sources="TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT",
+    "topic_search/chart_data",
+    source="TELEGRAM",
     search_text="btc moon",
     from_date="2018-08-01T12:00:00Z",
     to_date="2018-08-15T12:00:00Z",
@@ -511,9 +511,9 @@ Example result:
 
 ```
 
-                                                                chartsData
-professionalTradersChat  [{'mentionsCount': 170, 'datetime': '2018-08-0...
-reddit                   [{'mentionsCount': 316, 'datetime': '2018-08-0...
-telegram                 [{'mentionsCount': 219, 'datetime': '2018-08-0...
+                                            chartData
+0   {'mentionsCount': 224, 'datetime': '2018-08-01...
+1   {'mentionsCount': 266, 'datetime': '2018-08-01...
+2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 
 ```

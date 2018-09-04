@@ -4,7 +4,7 @@ import datetime
 
 DEFAULT_INTERVAL = '1d'
 DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
-DEFAULT_SOURCES = 'TELEGRAM, PROFESSIONAL_TRADERS_CHAT, REDDIT'
+DEFAULT_SOURCE = 'TELEGRAM'
 DEFAULT_SEARCH_TEXT = ''
 
 QUERY_MAPPING = {
@@ -155,41 +155,21 @@ def topic_search(idx, field, **kwargs):
     return_fields = {
         'messages': """
         messages {
-            telegram {
-                datetime
-                text
-            }
-            professionalTradersChat {
-                datetime
-                text
-            }
-            reddit {
-                datetime
-                text
-            }
+            datetime
+            text
         }
         """,
-        'charts_data': """
-        chartsData {
-            telegram {
-                mentionsCount
-                datetime
-            }
-            professionalTradersChat {
-                mentionsCount
-                datetime
-            }
-            reddit {
-                mentionsCount
-                datetime
-            }
+        'chart_data': """
+        chartData {
+            mentionsCount
+            datetime
         }
         """
     }
 
     query_str = """
     query_{idx}: topicSearch (
-        sources: [{sources}],
+        source: {source},
         searchText: \"{search_text}\",
         from: \"{from_date}\",
         to: \"{to_date}\",
@@ -235,7 +215,7 @@ def _transform_query_args(**kwargs):
     kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else _default_to_date()
     kwargs['interval'] = kwargs['interval'] if 'interval' in kwargs else DEFAULT_INTERVAL
     kwargs['social_volume_type'] = kwargs['social_volume_type'] if 'social_volume_type' in kwargs else DEFAULT_SOCIAL_VOLUME_TYPE
-    kwargs['sources'] = kwargs['sources'] if 'sources' in kwargs else DEFAULT_SOURCES
+    kwargs['source'] = kwargs['source'] if 'source' in kwargs else DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else DEFAULT_SEARCH_TEXT
 
     kwargs['from_date'] = _format_date(kwargs['from_date'])
