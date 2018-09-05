@@ -110,7 +110,7 @@ Below are described some available metrics and are given examples for fetching a
 
 ### Daily Active Addresses
 
-This metric includes the number of unique addresses that participated in the transfers of given token during the day. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+This metric includes the number of unique addresses that participated in the transfers of given token during the day. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -137,7 +137,7 @@ datetime
 
 ### Token aging (burn rate)
 
-Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -165,7 +165,7 @@ datetime
 
 ### Transaction volume
 
-Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -194,7 +194,7 @@ datetime
 
 ### Github Activity
 
-Returns a list of github activity for a given slug and time interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Returns a list of github activity for a given slug and time interval. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 [An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
 
@@ -263,7 +263,7 @@ datetime
 
 ### Exchange funds flow
 
-Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -292,7 +292,7 @@ datetime
 
 ### ERC20 Exchange Funds Flow
 
-Fetch the exchange funds flow for all ERC20 projects in the given interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Fetch the exchange funds flow for all ERC20 projects in the given interval. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -407,7 +407,7 @@ Example result:
 
 ### Social Volume
 
-Fetch a list of mentions count for a given project and time interval. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Fetch a list of mentions count for a given project and time interval. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -452,7 +452,7 @@ datetime
 
 ### Topic search
 
-Returns lists with the mentions of the search phrase from the selected source. The results are in two formats - the messages themselves and the data for building graph representation of the result. For this metric you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Returns lists with the mentions of the search phrase from the selected source. The results are in two formats - the messages themselves and the data for building graph representation of the result. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
