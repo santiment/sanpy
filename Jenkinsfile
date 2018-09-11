@@ -1,5 +1,5 @@
 podTemplate(label: 'sanpy-builder', containers: [
-    containerTemplate(name: 'python', image: 'python:3-alpine', command: 'cat', ttyEnabled: true)
+    containerTemplate(name: 'python', image: 'python:3-stretch', command: 'cat', ttyEnabled: true)
 ]) {
   node('sanpy-builder') {
     stage('Run Tests') {
