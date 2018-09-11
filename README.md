@@ -110,7 +110,7 @@ Below are described some available metrics and are given examples for fetching a
 
 ### Daily Active Addresses
 
-This metric includes the number of unique addresses that participated in the transfers of given token during the day.
+This metric includes the number of unique addresses that participated in the transfers of given token during the day. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -137,7 +137,7 @@ datetime
 
 ### Token aging (burn rate)
 
-Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time.
+Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -165,7 +165,7 @@ datetime
 
 ### Transaction volume
 
-Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges.
+Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -194,7 +194,7 @@ datetime
 
 ### Github Activity
 
-Returns a list of github activity for a given slug and time interval.
+Returns a list of github activity for a given slug and time interval. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 [An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
 
@@ -263,7 +263,7 @@ datetime
 
 ### Exchange funds flow
 
-Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period.
+Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 
@@ -292,7 +292,7 @@ datetime
 
 ### ERC20 Exchange Funds Flow
 
-Fetch the exchange funds flow for all ERC20 projects in the given interval.
+Fetch the exchange funds flow for all ERC20 projects in the given interval. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -407,7 +407,7 @@ Example result:
 
 ### Social Volume
 
-Fetch a list of mentions count for a given project and time interval. For this metric you'll need to set the [api key](#configuration) and have at least 1000 SAN tokens in your account.
+Fetch a list of mentions count for a given project and time interval. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 Arguments description:
 
@@ -447,5 +447,73 @@ datetime
 2018-04-21 00:00:00+00:00              3
 2018-04-22 00:00:00+00:00              2
 2018-04-23 00:00:00+00:00              1
+
+```
+
+### Topic search
+
+Returns lists with the mentions of the search phrase from the selected source. The results are in two formats - the messages themselves and the data for building graph representation of the result. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+Arguments description:
+
+* A string in the format "topic_search/`fields`" where `fields` is one of the following:
+    1. "messages"
+    2. "chart_data"
+* source - one of the following:
+    1. TELEGRAM
+    2. PROFESSIONAL_TRADERS_CHAT
+    3. REDDIT
+* search_text - a string containing the key words for which the sources should be searched.
+* from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+* to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+* interval - an integer followed by one of: `m`, `h`, `d`, `w`
+
+```python
+
+topic_search = san.get(
+    "topic_search/messages",
+    source="TELEGRAM",
+    search_text="btc moon",
+    from_date="2018-08-01T12:00:00Z",
+    to_date="2018-08-15T12:00:00Z",
+    interval="6h"
+)
+
+```
+
+Example result:
+
+```
+
+                                             messages
+0   {'text': 'Btc dominance increasing', 'datetime...
+1   {'text': 'Above the deafening noise of Sidera ...
+2   {'text': 'Neo could finosh today in the green ...
+
+```
+
+or
+
+```python
+
+topic_search = san.get(
+    "topic_search/chart_data",
+    source="TELEGRAM",
+    search_text="btc moon",
+    from_date="2018-08-01T12:00:00Z",
+    to_date="2018-08-15T12:00:00Z",
+    interval="6h"
+)
+
+```
+
+Example result:
+
+```
+
+                                            chartData
+0   {'mentionsCount': 224, 'datetime': '2018-08-01...
+1   {'mentionsCount': 266, 'datetime': '2018-08-01...
+2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 
 ```
