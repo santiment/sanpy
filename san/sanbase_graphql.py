@@ -26,7 +26,7 @@ QUERY_MAPPING = {
     },
     'prices': {
         'query': 'historyPrice',
-        'return_fields': ['datetime', 'priceUsd', 'priceBtc']
+        'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
     },
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
@@ -72,7 +72,8 @@ def projects(idx, slug, **kwargs):
     {{
         name,
         slug,
-        ticker
+        ticker,
+        totalSupply
     }}
     """.format(idx=idx)
 
