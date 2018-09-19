@@ -72,7 +72,8 @@ def projects(idx, slug, **kwargs):
     {{
         name,
         slug,
-        ticker
+        ticker,
+        totalSupply
     }}
     """.format(idx=idx)
 

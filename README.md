@@ -32,10 +32,10 @@ san.get("projects/all")
 ```
 
 ```
-               name                      slug ticker
-0                0x                        0x    ZRX
-1            Achain                    achain    ACT
-2              AdEx                   adx-net    ADX
+                name             slug ticker   totalSupply
+0             0chain           0chain    ZCN     400000000
+1                 0x               0x    ZRX    1000000000
+2          0xBitcoin            0xbtc  0xBTC      20999984
 ...
 ```
 
