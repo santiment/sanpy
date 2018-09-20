@@ -1,7 +1,6 @@
-from san.get import get_gql_query
+from san.query import get_gql_query
 from san.graphql import execute_gql
 from san.pandas_utils import convert_to_datetime_idx_df
-
 
 class Batch:
 

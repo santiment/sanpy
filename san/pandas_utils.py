@@ -9,3 +9,7 @@ def convert_to_datetime_idx_df(data):
         df.set_index('datetime', inplace=True)
 
     return df
+
+
+def merge(df1, df2):
+    return pd.merge(df1, df2, on="datetime")
