@@ -6,3 +6,4 @@ san/__pycache__/
 .env
 dist
 build
+.vscode/

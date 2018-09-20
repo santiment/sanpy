@@ -260,6 +260,28 @@ datetime
 
 ```
 
+### open/close prices with volume and marketcap
+
+```python
+ohlcv = san.get(
+    "ohlcv/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+                           openPriceUsd  closePriceUsd   volume     marketcap
+datetime
+2018-06-01 00:00:00+00:00       1.24380        1.27668   852857  7.736268e+07
+2018-06-02 00:00:00+00:00       1.26136        1.30779  1242520  7.864724e+07
+2018-06-03 00:00:00+00:00       1.28270        1.28357  1032910  7.844339e+07
+2018-06-04 00:00:00+00:00       1.23276        1.24910   617451  7.604326e+07
+```
+
 ### Exchange funds flow
 
 Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.

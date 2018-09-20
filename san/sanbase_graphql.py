@@ -1,5 +1,7 @@
 import iso8601
 import datetime
+from san.pandas_utils import merge
+from san.batch import Batch
 
 
 DEFAULT_INTERVAL = '1d'
@@ -27,6 +29,13 @@ QUERY_MAPPING = {
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
+    },
+    'ohlc': {
+        'query': 'ohlc',
+        'return_fields': ['datetime', 'openPriceUsd', 'closePriceUsd']
+    },
+    'ohlcv': {
+        'return_fields': ['openPriceUsd', 'closePriceUsd', 'volume', 'marketcap']
     },
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
@@ -64,6 +73,27 @@ def prices(idx, slug, **kwargs):
     query_str = _create_query_str('prices', idx, slug, **kwargs)
 
     return query_str
+
+
+def ohlc(idx, slug, **kwargs):
+    query_str = _create_query_str('ohlc', idx, slug, **kwargs)
+
+    return query_str
+
+
+def ohlcv(idx, slug, **kwargs):
+    batch = Batch()
+    batch.get(
+        "prices/{slug}".format(slug=slug),
+        **kwargs
+    )
+    batch.get(
+        "ohlc/{slug}".format(slug=slug),
+        **kwargs
+    )
+    [price_df, ohlc_df] = batch.execute()
+    merged = merge(price_df, ohlc_df)
+    return merged[QUERY_MAPPING['ohlcv']['return_fields']]
 
 
 def projects(idx, slug, **kwargs):
