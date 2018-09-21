@@ -32,10 +32,10 @@ QUERY_MAPPING = {
     },
     'ohlc': {
         'query': 'ohlc',
-        'return_fields': ['datetime', 'openPriceUsd', 'closePriceUsd']
+        'return_fields': ['datetime', 'openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd']
     },
     'ohlcv': {
-        'return_fields': ['openPriceUsd', 'closePriceUsd', 'volume', 'marketcap']
+        'return_fields': ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
     },
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
