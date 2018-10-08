@@ -39,7 +39,7 @@ QUERY_MAPPING = {
     },
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
-        'return_fields': ['datetime', 'fundsFlow']
+        'return_fields': ['datetime', 'inOutDifference']
     }
 }
 

@@ -23,8 +23,8 @@ If the account used for generating the api key has enough SAN tokens, the api ke
 
 The data is fetched by providing a string in the format `query/slug` and additional parameters.
 
-* `query`: Available queries can be found in section: [Available metrics](#available-metrics)
-* `slug`: A list of projects with their slugs, names, etc. can be fetched like this:
+- `query`: Available queries can be found in section: [Available metrics](#available-metrics)
+- `slug`: A list of projects with their slugs, names, etc. can be fetched like this:
 
 ```python
 import san
@@ -41,14 +41,14 @@ san.get("projects/all")
 
 Parameters:
 
-* `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
-* `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
+- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
+- `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
 Default values for parameters:
 
-* `from_date`: `datetime.now() - 365 days`
-* `to_date`: `datetime.now()`
-* `interval`: `'1d'`
+- `from_date`: `datetime.now() - 365 days`
+- `to_date`: `datetime.now()`
+- `interval`: `'1d'`
 
 The returned value for time-series data is in `pandas DataFrame` format indexed by `datetime`.
 
@@ -70,16 +70,13 @@ prices = san.get(
     to_date="2018-06-05",
     interval="1d"
 )
-
 ```
 
 Using the defaults params:
 
 ```python
-
 daa = san.get("daily_active_addresses/santiment")
 prices = san.get("prices/santiment")
-
 ```
 
 ### Batching multiple queries
@@ -101,7 +98,6 @@ batch.get(
     interval="1d"
 )
 [daa1, daa2] = batch.execute()
-
 ```
 
 ## Available metrics
@@ -113,14 +109,12 @@ Below are described some available metrics and are given examples for fetching a
 This metric includes the number of unique addresses that participated in the transfers of given token during the day. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
-
 daa = san.get(
     "daily_active_addresses/santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
-
 ```
 
 Example result:
@@ -140,14 +134,12 @@ datetime
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
-
 burn_rate = san.get(
     "burn_rate/santiment",
     from_date="2018-05-01",
     to_date="2018-05-02",
     interval="1h"
 )
-
 ```
 
 Example result:
@@ -168,14 +160,12 @@ datetime
 Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
-
 tv = san.get(
     "transaction_volume/santiment",
     from_date="2018-05-01",
     to_date="2018-05-02",
     interval="1h"
 )
-
 ```
 
 Example result:
@@ -205,7 +195,6 @@ ga = san.get(
     to_date="2018-05-05",
     interval="24h"
 )
-
 ```
 
 Example result:
@@ -223,7 +212,6 @@ datetime
 Fetch history price in USD or BTC, traded volume and marketcap for a given slug.
 
 ```python
-
 prices = san.get(
     "prices/santiment",
     from_date="2018-06-01",
@@ -237,13 +225,11 @@ prices = san.get(
     to_date="2018-06-05",
     interval="1d"
 )
-
 ```
 
 Example result:
 
 ```
-
                               marketcap  priceBtc  priceUsd   volume
 datetime
 2018-06-01 00:00:00+00:00  7.736268e+07  0.000165  1.234635   852857
@@ -257,7 +243,6 @@ datetime
 2018-06-02 00:00:00+00:00  5.875660e+10  0.077475  588.620775  1880390000
 2018-06-03 00:00:00+00:00  6.097134e+10  0.079460  610.682490  1832550000
 2018-06-04 00:00:00+00:00  6.015676e+10  0.079466  602.399792  1903430000
-
 ```
 
 ### open/close prices with volume and marketcap
@@ -287,28 +272,24 @@ datetime
 Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
-
 exchange_funds_flow = san.get(
     "exchange_funds_flow/santiment",
     from_date="2018-04-16T10:02:19Z",
     to_date="2018-05-23T10:02:19Z",
     interval="1d"
 )
-
 ```
 
 Example result:
 
 ```
-
-                              fundsFlow
+                              inOutDifference
 datetime
 2018-04-16 10:02:19+00:00    -208.797310
 2018-04-17 00:00:00+00:00     164.006467
 2018-04-18 00:00:00+00:00       0.000000
 2018-04-19 00:00:00+00:00  -45213.112849
 2018-04-20 00:00:00+00:00 -135364.839572
-
 ```
 
 ### ERC20 Exchange Funds Flow
@@ -317,43 +298,40 @@ Fetch the exchange funds flow for all ERC20 projects in the given interval. In o
 
 Arguments description:
 
-* from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-* to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
+- from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+- to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
 
 Fields description:
 
-* ticker - The ticker of the project
-* contract - The contract identifier of the project
-* exchangeIn - How many tokens were deposited in the given period
-* exchangeOut - How many tokens were withdrawn in the given period
-* exchangeDiff - The difference between the deposited and the withdrawn tokens: exchangeIn - exchangeOut
-* exchangeInUsd - How many tokens were deposited in the given period converted to USD based on the daily average price of the token
-* exchangeOutUsd - How many tokens were withdrawn in the given period converted to USD based on the daily average price of the token
-* exchangeDiffUsd - The difference between the deposited and the withdrawn tokens in USD: exchangeInUsd - exchangeOutUsd
-* percentDiffExchangeDiffUsd - The percent difference between exchangeDiffUsd for the current period minus the exchangeDiffUsd for the previous period based on exchangeDiffUsd for the current period: (exchangeDiffUsd for current period - exchangeDiffUsd for previous period) * 100 / abs(exchangeDiffUsd for current period)
-* exchangeVolumeUsd - The volume of all tokens in and out for the given period in USD: exchangeInUsd + exchangeOutUsd
-* percentDiffExchangeVolumeUsd - The percent difference between exchangeVolumeUsd for the current period minus the exchangeVolumeUsd for the previous period based on exchangeVolumeUsd for the current period: (exchangeVolumeUsd for current period - exchangeVolumeUsd for previous period) * 100 / abs(exchangeVolumeUsd for current period)
-* exchangeInBtc - How many tokens were deposited in the given period converted to BTC based on the daily average price of the token
-* exchangeOutBtc - How many tokens were withdrawn in the given period converted to BTC based on the daily average price of the token
-* exchangeDiffBtc - The difference between the deposited and the withdrawn tokens in BTC: exchangeInBtc - exchangeOutBtc
-* percentDiffExchangeDiffBtc - The percent difference between exchangeDiffBtc for the current period minus the exchangeDiffBtc for the previous period based on exchangeDiffBtc for the current period: (exchangeDiffBtc for current period - exchangeDiffBtc for previous period) * 100 / abs(exchangeDiffBtc for current period)
-* exchangeVolumeBtc - The volume of all tokens in and out for the given period in BTC: exchangeInBtc + exchangeOutBtc
-* percentDiffExchangeVolumeBtc - The percent difference between exchangeVolumeBtc for the current period minus the exchangeVolumeBtc for the previous period based on exchangeVolumeBtc for the current period: (exchangeVolumeBtc for current period - exchangeVolumeBtc for previous period) * 100 / abs(exchangeVolumeBtc for current period)
+- ticker - The ticker of the project
+- contract - The contract identifier of the project
+- exchangeIn - How many tokens were deposited in the given period
+- exchangeOut - How many tokens were withdrawn in the given period
+- exchangeDiff - The difference between the deposited and the withdrawn tokens: exchangeIn - exchangeOut
+- exchangeInUsd - How many tokens were deposited in the given period converted to USD based on the daily average price of the token
+- exchangeOutUsd - How many tokens were withdrawn in the given period converted to USD based on the daily average price of the token
+- exchangeDiffUsd - The difference between the deposited and the withdrawn tokens in USD: exchangeInUsd - exchangeOutUsd
+- percentDiffExchangeDiffUsd - The percent difference between exchangeDiffUsd for the current period minus the exchangeDiffUsd for the previous period based on exchangeDiffUsd for the current period: (exchangeDiffUsd for current period - exchangeDiffUsd for previous period) \* 100 / abs(exchangeDiffUsd for current period)
+- exchangeVolumeUsd - The volume of all tokens in and out for the given period in USD: exchangeInUsd + exchangeOutUsd
+- percentDiffExchangeVolumeUsd - The percent difference between exchangeVolumeUsd for the current period minus the exchangeVolumeUsd for the previous period based on exchangeVolumeUsd for the current period: (exchangeVolumeUsd for current period - exchangeVolumeUsd for previous period) \* 100 / abs(exchangeVolumeUsd for current period)
+- exchangeInBtc - How many tokens were deposited in the given period converted to BTC based on the daily average price of the token
+- exchangeOutBtc - How many tokens were withdrawn in the given period converted to BTC based on the daily average price of the token
+- exchangeDiffBtc - The difference between the deposited and the withdrawn tokens in BTC: exchangeInBtc - exchangeOutBtc
+- percentDiffExchangeDiffBtc - The percent difference between exchangeDiffBtc for the current period minus the exchangeDiffBtc for the previous period based on exchangeDiffBtc for the current period: (exchangeDiffBtc for current period - exchangeDiffBtc for previous period) \* 100 / abs(exchangeDiffBtc for current period)
+- exchangeVolumeBtc - The volume of all tokens in and out for the given period in BTC: exchangeInBtc + exchangeOutBtc
+- percentDiffExchangeVolumeBtc - The percent difference between exchangeVolumeBtc for the current period minus the exchangeVolumeBtc for the previous period based on exchangeVolumeBtc for the current period: (exchangeVolumeBtc for current period - exchangeVolumeBtc for previous period) \* 100 / abs(exchangeVolumeBtc for current period)
 
 ```python
-
 erc20_exchange_funds_flow = san.get(
     "erc20_exchange_funds_flow",
     from_date="2018-04-16T10:02:19Z",
     to_date="2018-05-23T10:02:19Z"
 )
-
 ```
 
 Example result:
 
 ```
-
                                      contract  exchangeDiff  exchangeDiffBtc  \
 0   0x006bea43baa3f7a6f765f14f10a1a1b08334ef45 -5.353089e+03        -0.691860
 1   0x0371a82e4a9d0a4312f3ee2ac9c6958512891372 -1.993464e+04        -0.050134
@@ -388,7 +366,6 @@ Example result:
 2                      10.075328                     22.742302    EDG
 3                            NaN                           NaN    PGL
 4                      41.544110                     48.203277    TNT
-
 ```
 
 ### Social Volume Projects
@@ -396,15 +373,12 @@ Example result:
 Fetch a list of slugs for which there is social volume data.
 
 ```python
-
 projects = san.get("social_volume_projects")
-
 ```
 
 Example result:
 
 ```
-
                    0
 0            cardano
 1       bitcoin-cash
@@ -423,7 +397,6 @@ Example result:
 14            ripple
 15             verge
 16                0x
-
 ```
 
 ### Social Volume
@@ -432,19 +405,19 @@ Fetch a list of mentions count for a given project and time interval. In order t
 
 Arguments description:
 
-* endpoint - social_volume/project_slug
-* interval - an integer followed by one of: `m`, `h`, `d`, `w`
-* from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-* to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
-* social_volume_type - one of the following:
-    1. PROFESSIONAL_TRADERS_CHAT_OVERVIEW
-    2. TELEGRAM_CHATS_OVERVIEW
-    3. TELEGRAM_DISCUSSION_OVERVIEW
+- endpoint - social_volume/project_slug
+- interval - an integer followed by one of: `m`, `h`, `d`, `w`
+- from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+- to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
+- social_volume_type - one of the following:
 
-    It is used to select the source of the mentions count.
+  1. PROFESSIONAL_TRADERS_CHAT_OVERVIEW
+  2. TELEGRAM_CHATS_OVERVIEW
+  3. TELEGRAM_DISCUSSION_OVERVIEW
+
+  It is used to select the source of the mentions count.
 
 ```python
-
 social_volume = san.get(
     "social_volume/dragonchain",
     interval="1d",
@@ -452,13 +425,11 @@ social_volume = san.get(
     to_date="2018-05-23T10:02:19Z",
     social_volume_type="PROFESSIONAL_TRADERS_CHAT_OVERVIEW"
 )
-
 ```
 
 Example result:
 
 ```
-
                            mentionsCount
 datetime
 2018-04-17 00:00:00+00:00              4
@@ -468,7 +439,6 @@ datetime
 2018-04-21 00:00:00+00:00              3
 2018-04-22 00:00:00+00:00              2
 2018-04-23 00:00:00+00:00              1
-
 ```
 
 ### Topic search
@@ -477,20 +447,19 @@ Returns lists with the mentions of the search phrase from the selected source. T
 
 Arguments description:
 
-* A string in the format "topic_search/`fields`" where `fields` is one of the following:
-    1. "messages"
-    2. "chart_data"
-* source - one of the following:
-    1. TELEGRAM
-    2. PROFESSIONAL_TRADERS_CHAT
-    3. REDDIT
-* search_text - a string containing the key words for which the sources should be searched.
-* from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-* to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-* interval - an integer followed by one of: `m`, `h`, `d`, `w`
+- A string in the format "topic_search/`fields`" where `fields` is one of the following:
+  1. "messages"
+  2. "chart_data"
+- source - one of the following:
+  1. TELEGRAM
+  2. PROFESSIONAL_TRADERS_CHAT
+  3. REDDIT
+- search_text - a string containing the key words for which the sources should be searched.
+- from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+- to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
+- interval - an integer followed by one of: `m`, `h`, `d`, `w`
 
 ```python
-
 topic_search = san.get(
     "topic_search/messages",
     source="TELEGRAM",
@@ -499,24 +468,20 @@ topic_search = san.get(
     to_date="2018-08-15T12:00:00Z",
     interval="6h"
 )
-
 ```
 
 Example result:
 
 ```
-
                                              messages
 0   {'text': 'Btc dominance increasing', 'datetime...
 1   {'text': 'Above the deafening noise of Sidera ...
 2   {'text': 'Neo could finosh today in the green ...
-
 ```
 
 or
 
 ```python
-
 topic_search = san.get(
     "topic_search/chart_data",
     source="TELEGRAM",
@@ -525,16 +490,13 @@ topic_search = san.get(
     to_date="2018-08-15T12:00:00Z",
     interval="6h"
 )
-
 ```
 
 Example result:
 
 ```
-
                                             chartData
 0   {'mentionsCount': 224, 'datetime': '2018-08-01...
 1   {'mentionsCount': 266, 'datetime': '2018-08-01...
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
-
 ```
