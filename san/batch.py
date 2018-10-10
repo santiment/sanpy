@@ -20,8 +20,10 @@ class Batch:
         gql_string = self.__batch_gql_queries(batched_queries)
         res = execute_gql(gql_string)
 
-        for k in sorted(res.keys()):
-            df = convert_to_datetime_idx_df(res[k])
+        idxs = sorted([int(k.split('_')[1]) for k in res.keys()])
+        for idx in idxs:
+            key = "query_{}".format(idx)
+            df = convert_to_datetime_idx_df(res[key])
             result.append(df)
 
         return result
