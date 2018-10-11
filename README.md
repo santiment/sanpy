@@ -500,3 +500,16 @@ Example result:
 1   {'mentionsCount': 266, 'datetime': '2018-08-01...
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 ```
+
+
+## Running tests
+
+```
+python setyp.py test
+```
+
+## Running integration tests
+
+```
+python setup.py nosetests -a integration
+```
