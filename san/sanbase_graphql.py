@@ -34,9 +34,6 @@ QUERY_MAPPING = {
         'query': 'ohlc',
         'return_fields': ['datetime', 'openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd']
     },
-    'ohlcv': {
-        'return_fields': ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
-    },
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
         'return_fields': ['datetime', 'inOutDifference']
@@ -82,6 +79,8 @@ def ohlc(idx, slug, **kwargs):
 
 
 def ohlcv(idx, slug, **kwargs):
+    return_fields = ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
+    
     batch = Batch()
     batch.get(
         "prices/{slug}".format(slug=slug),
@@ -93,7 +92,7 @@ def ohlcv(idx, slug, **kwargs):
     )
     [price_df, ohlc_df] = batch.execute()
     merged = merge(price_df, ohlc_df)
-    return merged[QUERY_MAPPING['ohlcv']['return_fields']]
+    return merged[return_fields]
 
 
 def projects(idx, slug, **kwargs):
