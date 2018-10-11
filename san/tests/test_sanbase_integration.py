@@ -44,18 +44,18 @@ def test_batched_queries_different_format():
         "topic_search/messages",
         source="TELEGRAM",
         search_text="btc",
-        from_date=params["from_date"],
+        from_date=month_ago(),
         to_date=params["to_date"],
-        interval="6h"
+        interval=params["interval"]
     )
 
     batch.get(
         "topic_search/chart_data",
         source="TELEGRAM",
         search_text="btc",
-        from_date=params["from_date"],
+        from_date=month_ago(),
         to_date=params["to_date"],
-        interval="6h"
+        interval=params["interval"]
     )
     
     result = batch.execute()
