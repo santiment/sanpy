@@ -2,7 +2,9 @@ import san
 from san import Batch
 from san import sanbase_graphql
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
+
 import datetime
+from nose.plugins.attrib import attr
 
 params = {
     "project_slug":  "santiment",
@@ -11,6 +13,7 @@ params = {
     "interval": "1d"
 }
 
+@attr('integration')
 def test_batched_queries_equal_format():
     queries = sanbase_graphql.QUERY_MAPPING.keys()
 
@@ -27,7 +30,7 @@ def test_batched_queries_equal_format():
     for df in result:
         assert len(df.index) >= 1
     
-
+@attr('integration')
 def test_batched_queries_different_format():
     batch = Batch()
 
@@ -62,6 +65,7 @@ def test_batched_queries_different_format():
     for df in result:
         assert len(df.index) >= 1
 
+@attr('integration')
 def test_ohlcv():
     ohlcv_df = san.get(
         "{}/{}".format('ohlcv', params["project_slug"]),
@@ -72,6 +76,7 @@ def test_ohlcv():
 
     assert len(ohlcv_df.index) >= 1
 
+@attr('integration')
 # FIXME: test to be added. Currently query timeouts
 def test_erc20_exchange_funds_flow():
     pass
