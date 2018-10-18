@@ -2,6 +2,7 @@ import iso8601
 import datetime
 from san.pandas_utils import merge
 from san.batch import Batch
+from san.error import SanError
 
 
 DEFAULT_INTERVAL = '1d'
