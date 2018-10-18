@@ -27,9 +27,10 @@ def test_batched_queries_equal_format():
         )
 
     result = batch.execute()
+
     for df in result:
         assert len(df.index) >= 1
-    
+
 @attr('integration')
 def test_batched_queries_different_format():
     batch = Batch()
@@ -60,10 +61,17 @@ def test_batched_queries_different_format():
         to_date=params["to_date"],
         interval=params["interval"]
     )
-    
+
     result = batch.execute()
     for df in result:
         assert len(df.index) >= 1
+
+@attr('integration')
+def test_erc20_projects():
+    result = san.get("projects/erc20")
+
+    assert len(result) > 0
+    assert len(result[result.slug == "bitcoin"]) == 0
 
 @attr('integration')
 def test_ohlcv():
