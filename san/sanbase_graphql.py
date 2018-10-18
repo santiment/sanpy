@@ -80,7 +80,7 @@ def ohlc(idx, slug, **kwargs):
 
 def ohlcv(idx, slug, **kwargs):
     return_fields = ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
-    
+
     batch = Batch()
     batch.get(
         "prices/{slug}".format(slug=slug),
@@ -94,10 +94,30 @@ def ohlcv(idx, slug, **kwargs):
     merged = merge(price_df, ohlc_df)
     return merged[return_fields]
 
-
 def projects(idx, slug, **kwargs):
+    if (slug == "erc20"):
+        return erc20_projects(idx, **kwargs)
+    elif (slug == "all"):
+        return all_projects(idx, **kwargs)
+
+    raise SanError("Unknown project group: {}".format(slug))
+
+def all_projects(idx, **kwargs):
     query_str = """
     query_{idx}: allProjects
+    {{
+        name,
+        slug,
+        ticker,
+        totalSupply
+    }}
+    """.format(idx=idx)
+
+    return query_str
+
+def erc20_projects(idx, **kwargs):
+    query_str = """
+    query_{idx}: allErc20Projects
     {{
         name,
         slug,
