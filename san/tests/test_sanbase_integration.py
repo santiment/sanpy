@@ -8,7 +8,7 @@ from nose.plugins.attrib import attr
 
 params = {
     "project_slug":  "santiment",
-    "from_date": four_days_ago(),
+    "from_date": month_ago(),
     "to_date": two_days_ago(),
     "interval": "1d"
 }
