@@ -504,6 +504,7 @@ Arguments description:
   1. TELEGRAM
   2. PROFESSIONAL_TRADERS_CHAT
   3. REDDIT
+  4. DISCORD
 - search_text - a string containing the key words for which the sources should be searched.
 - from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 - to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
