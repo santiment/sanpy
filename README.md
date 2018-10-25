@@ -297,6 +297,8 @@ datetime
 
 ### open/close prices with volume and marketcap
 
+Note: this query cannot be batched!
+
 ```python
 ohlcv = san.get(
     "ohlcv/santiment",
