@@ -461,13 +461,11 @@ Arguments description:
 - interval - an integer followed by one of: `m`, `h`, `d`, `w`
 - from_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 - to_date - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
-- social_volume_type - one of the following:
+- social_volume_type - the source of mention counts, one of the following:
 
-  1. PROFESSIONAL_TRADERS_CHAT_OVERVIEW
-  2. TELEGRAM_CHATS_OVERVIEW
-  3. TELEGRAM_DISCUSSION_OVERVIEW
-
-  It is used to select the source of the mentions count.
+  1. "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
+  2. "TELEGRAM_CHATS_OVERVIEW" - shows how many times times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
+  3. "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat  (if there is one)
 
 ```python
 social_volume = san.get(
