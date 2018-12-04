@@ -27,6 +27,10 @@ QUERY_MAPPING = {
         'query': 'githubActivity',
         'return_fields': ['datetime', 'activity']
     },
+    'dev_activity': {
+        'query': 'devActivity',
+        'return_fields': ['datetime', 'activity']
+    },
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
@@ -66,6 +70,10 @@ def github_activity(idx, slug, **kwargs):
 
     return query_str
 
+def dev_activity(idx, slug, **kwargs):
+    query_str = _create_query_str('dev_activity', idx, slug, **kwargs)
+
+    return query_str
 
 def prices(idx, slug, **kwargs):
     query_str = _create_query_str('prices', idx, slug, **kwargs)

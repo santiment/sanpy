@@ -257,6 +257,27 @@ datetime
 2018-05-04 00:00:00+00:00        18
 ```
 
+You can also fetch only events connected to development activity by using the `devActivity` query.
+
+```python
+ga = san.get(
+    "dev_activity/santiment",
+    from_date="2018-05-01",
+    to_date="2018-05-05",
+    interval="24h"
+)
+```
+
+Example result:
+
+```
+                           activity
+datetime
+2018-05-02 00:00:00+00:00        29
+2018-05-03 00:00:00+00:00         9
+2018-05-04 00:00:00+00:00        16
+```
+
 ### Prices
 
 Fetch history price in USD or BTC, traded volume and marketcap for a given slug.
@@ -552,7 +573,6 @@ Example result:
 1   {'mentionsCount': 266, 'datetime': '2018-08-01...
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 ```
-
 
 ## Running tests
 
