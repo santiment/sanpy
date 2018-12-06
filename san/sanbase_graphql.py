@@ -31,6 +31,10 @@ QUERY_MAPPING = {
         'query': 'devActivity',
         'return_fields': ['datetime', 'activity']
     },
+    'network_growth': {
+        'query': 'networkGrowth',
+        'return_fields': ['datetime', 'newAddresses']
+    },
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
@@ -72,6 +76,11 @@ def github_activity(idx, slug, **kwargs):
 
 def dev_activity(idx, slug, **kwargs):
     query_str = _create_query_str('dev_activity', idx, slug, **kwargs)
+
+    return query_str
+
+def network_growth(idx, slug, **kwargs):
+    query_str = _create_query_str('network_growth', idx, slug, **kwargs)
 
     return query_str
 
