@@ -179,6 +179,29 @@ datetime
 2018-06-05 00:00:00+00:00               14
 ```
 
+### Network growth
+
+Network Growth shows the number of new addresses being created on the project network each day.
+In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+san.get(
+    "network_growth/santiment",
+    from_date="2018-12-01",
+    to_date="2018-12-05"
+)
+```
+
+```
+                          newAddresses
+datetime
+2018-12-01 00:00:00+00:00            3
+2018-12-02 00:00:00+00:00            2
+2018-12-03 00:00:00+00:00            6
+2018-12-04 00:00:00+00:00            2
+2018-12-05 00:00:00+00:00            1
+```
+
 ### Token aging (burn rate)
 
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
