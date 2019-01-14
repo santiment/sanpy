@@ -127,7 +127,8 @@ def all_projects(idx, **kwargs):
         name,
         slug,
         ticker,
-        totalSupply
+        totalSupply,
+        marketSegment
     }}
     """.format(idx=idx)
 
@@ -140,7 +141,8 @@ def erc20_projects(idx, **kwargs):
         name,
         slug,
         ticker,
-        totalSupply
+        totalSupply,
+        marketSegment
     }}
     """.format(idx=idx)
 
