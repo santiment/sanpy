@@ -21,6 +21,7 @@ setuptools.setup(
         'pandas',
         'numpy',
         'requests',
-        'iso8601'
+        'iso8601',
+        'setuptools'
     ]
 )
