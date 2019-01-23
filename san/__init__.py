@@ -8,8 +8,11 @@ from warnings import warn
 
 def get_latest(project):
     url = 'https://pypi.python.org/pypi/%s/json' % (project)
-    response = requests.get(url).text
-    return json.loads(response)['info']['version']
+    try:
+      response = requests.get(url).text
+      return json.loads(response)['info']['version']
+    except requests.exceptions.RequestException as e:
+      return pkg_resources.require(project)[0].version
 
 project = 'sanpy'
 current_version = pkg_resources.require(project)[0].version

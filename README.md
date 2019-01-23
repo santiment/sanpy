@@ -6,6 +6,12 @@
 pip install sanpy
 ```
 
+## Upgrade to latest version
+
+```
+pip install --upgrade sanpy
+```
+
 ## Configuration
 
 Optionally you can provide an api key which gives access to some restricted metrics:
