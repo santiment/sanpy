@@ -5,7 +5,7 @@ import pkg_resources
 import requests
 import json
 from warnings import warn
-from multiprocessing import Pool
+import asyncio
 
 PROJECT = 'sanpy'
 
@@ -17,7 +17,7 @@ def get_latest():
     except requests.exceptions.RequestException as e:
       return pkg_resources.get_distribution(PROJECT).version
 
-def warn_if_outdated():
+async def warn_if_outdated(): 
     project = 'sanpy'
     current_version = pkg_resources.get_distribution(PROJECT).version
     latest_version = get_latest()
@@ -27,7 +27,8 @@ def warn_if_outdated():
       warn(warning)
       pass
 
-
-pool = Pool(processes=1)
-pool.apply_async(warn_if_outdated, [])
+# python 3.6 compatible syntax (for 3.7 just asyncio.run(warn_if_outdated()))
+loop = asyncio.get_event_loop()
+loop.run_until_complete(warn_if_outdated())
+loop.close()
 
