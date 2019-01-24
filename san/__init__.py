@@ -7,24 +7,27 @@ import json
 from warnings import warn
 from multiprocessing import Pool
 
-def get_latest(project):
-    url = 'https://pypi.python.org/pypi/%s/json' % (project)
+PROJECT = 'sanpy'
+
+def get_latest():
+    url = 'https://pypi.python.org/pypi/%s/json' % (PROJECT)
     try:
       response = requests.get(url).text
       return json.loads(response)['info']['version']
     except requests.exceptions.RequestException as e:
-      return pkg_resources.get_distribution(project).version
+      return pkg_resources.get_distribution(PROJECT).version
 
 def warn_if_outdated():
     project = 'sanpy'
-    current_version = pkg_resources.get_distribution(project).version
-    latest = get_latest(project)
+    current_version = pkg_resources.get_distribution(PROJECT).version
+    latest_version = get_latest()
 
-    if current_version != latest:
-      warning = 'The package %s is out of date. Your version is %s, the latest is %s.' % (project, current_version, latest)
+    if current_version != latest_version:
+      warning = 'The package %s is out of date. Your version is %s, the latest is %s.' % (project, current_version, latest_version)
       warn(warning)
       pass
 
-pool = Pool(1)
+
+pool = Pool(processes=1)
 pool.apply_async(warn_if_outdated, [])
 
