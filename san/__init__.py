@@ -18,12 +18,11 @@ def get_latest():
       return pkg_resources.get_distribution(PROJECT).version
 
 async def warn_if_outdated(): 
-    project = 'sanpy'
     current_version = pkg_resources.get_distribution(PROJECT).version
     latest_version = get_latest()
 
     if current_version != latest_version:
-      warning = 'The package %s is out of date. Your version is %s, the latest is %s.' % (project, current_version, latest_version)
+      warning = 'The package %s is out of date. Your version is %s, the latest is %s.' % (PROJECT, current_version, latest_version)
       warn(warning)
       pass
 
