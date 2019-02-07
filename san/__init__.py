@@ -5,7 +5,6 @@ import pkg_resources
 import requests
 import json
 from warnings import warn
-import asyncio
 
 PROJECT = 'sanpy'
 
@@ -17,7 +16,7 @@ def get_latest():
     except requests.exceptions.RequestException as e:
       return pkg_resources.get_distribution(PROJECT).version
 
-async def warn_if_outdated(): 
+def warn_if_outdated(): 
     current_version = pkg_resources.get_distribution(PROJECT).version
     latest_version = get_latest()
 
@@ -26,8 +25,6 @@ async def warn_if_outdated():
       warn(warning)
       pass
 
-# python 3.6 compatible syntax (for 3.7 just asyncio.run(warn_if_outdated()))
-loop = asyncio.get_event_loop()
-loop.run_until_complete(warn_if_outdated())
-loop.close()
+warn_if_outdated()
+
 
