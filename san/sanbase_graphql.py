@@ -317,4 +317,4 @@ def _format_to_date(datetime_obj_or_str):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
     dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
-    dt.isoformat()
+    return dt.isoformat()
