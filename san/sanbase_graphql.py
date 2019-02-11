@@ -288,8 +288,8 @@ def _transform_query_args(**kwargs):
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else DEFAULT_SEARCH_TEXT
 
-    kwargs['from_date'] = _format_date(kwargs['from_date'])
-    kwargs['to_date'] = _format_date(kwargs['to_date'])
+    kwargs['from_date'] = _format_from_date(kwargs['from_date'])
+    kwargs['to_date'] = _format_to_date(kwargs['to_date'])
 
     return kwargs
 
@@ -306,8 +306,15 @@ def _format_return_fields(return_fields):
     return ",\n".join(return_fields)
 
 
-def _format_date(datetime_obj_or_str):
+def _format_from_date(datetime_obj_or_str):
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
     return iso8601.parse_date(datetime_obj_or_str).isoformat()
+
+def _format_to_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, datetime.datetime):
+        datetime_obj_or_str = datetime_obj_or_str.isoformat()
+
+    dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
+    return dt.isoformat()
