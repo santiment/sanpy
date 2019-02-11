@@ -6,6 +6,12 @@
 pip install sanpy
 ```
 
+## Upgrade to latest version
+
+```
+pip install --upgrade sanpy
+```
+
 ## Configuration
 
 Optionally you can provide an api key which gives access to some restricted metrics:
@@ -15,7 +21,7 @@ import san
 san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
 ```
 
-To obtain an api key you should [log in to sanbase](https://sanbase-low.santiment.net/login) and go to the `account` page - [https://sanbase-low.santiment.net/account](https://sanbase-low.santiment.net/account). There is an `API Keys` section and a `Generate new api key` button.
+To obtain an api key you should [log in to sanbase](https://app.santiment.net/login) and go to the `account` page - [https://app.santiment.net/account](https://app.santiment.net/account). There is an `API Keys` section and a `Generate new api key` button.
 
 If the account used for generating the api key has enough SAN tokens, the api key will give you access to the data that requires SAN token staking. The api key can only be used to fetch data and not to execute graphql mutations.
 
@@ -179,6 +185,29 @@ datetime
 2018-06-05 00:00:00+00:00               14
 ```
 
+### Network growth
+
+Network Growth shows the number of new addresses being created on the project network each day.
+In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+san.get(
+    "network_growth/santiment",
+    from_date="2018-12-01",
+    to_date="2018-12-05"
+)
+```
+
+```
+                          newAddresses
+datetime
+2018-12-01 00:00:00+00:00            3
+2018-12-02 00:00:00+00:00            2
+2018-12-03 00:00:00+00:00            6
+2018-12-04 00:00:00+00:00            2
+2018-12-05 00:00:00+00:00            1
+```
+
 ### Token aging (burn rate)
 
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
@@ -255,6 +284,27 @@ datetime
 2018-05-02 00:00:00+00:00        32
 2018-05-03 00:00:00+00:00         9
 2018-05-04 00:00:00+00:00        18
+```
+
+You can also fetch only events connected to development activity by using the `devActivity` query.
+
+```python
+ga = san.get(
+    "dev_activity/santiment",
+    from_date="2018-05-01",
+    to_date="2018-05-05",
+    interval="24h"
+)
+```
+
+Example result:
+
+```
+                           activity
+datetime
+2018-05-02 00:00:00+00:00        29
+2018-05-03 00:00:00+00:00         9
+2018-05-04 00:00:00+00:00        16
 ```
 
 ### Prices
@@ -466,6 +516,7 @@ Arguments description:
   1. "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
   2. "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
   3. "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat (if there is one)
+  4. "DISCORD_DISCUSSION_OVERVIEW" - shows how many times the given project has been mentioned in the discord channels
 
 ```python
 social_volume = san.get(
@@ -551,7 +602,6 @@ Example result:
 1   {'mentionsCount': 266, 'datetime': '2018-08-01...
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 ```
-
 
 ## Running tests
 

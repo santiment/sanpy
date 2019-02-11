@@ -27,6 +27,14 @@ QUERY_MAPPING = {
         'query': 'githubActivity',
         'return_fields': ['datetime', 'activity']
     },
+    'dev_activity': {
+        'query': 'devActivity',
+        'return_fields': ['datetime', 'activity']
+    },
+    'network_growth': {
+        'query': 'networkGrowth',
+        'return_fields': ['datetime', 'newAddresses']
+    },
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
@@ -66,6 +74,15 @@ def github_activity(idx, slug, **kwargs):
 
     return query_str
 
+def dev_activity(idx, slug, **kwargs):
+    query_str = _create_query_str('dev_activity', idx, slug, **kwargs)
+
+    return query_str
+
+def network_growth(idx, slug, **kwargs):
+    query_str = _create_query_str('network_growth', idx, slug, **kwargs)
+
+    return query_str
 
 def prices(idx, slug, **kwargs):
     query_str = _create_query_str('prices', idx, slug, **kwargs)
@@ -110,7 +127,8 @@ def all_projects(idx, **kwargs):
         name,
         slug,
         ticker,
-        totalSupply
+        totalSupply,
+        marketSegment
     }}
     """.format(idx=idx)
 
@@ -123,7 +141,8 @@ def erc20_projects(idx, **kwargs):
         name,
         slug,
         ticker,
-        totalSupply
+        totalSupply,
+        marketSegment
     }}
     """.format(idx=idx)
 
