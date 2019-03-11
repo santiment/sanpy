@@ -155,40 +155,6 @@ def exchange_funds_flow(idx, slug, **kwargs):
     return query_str
 
 
-def erc20_exchange_funds_flow(idx, _slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
-
-    query_str = """
-    query_{idx}: erc20ExchangeFundsFlow (
-        from: \"{from_date}\",
-        to: \"{to_date}\"
-    ){{
-        ticker,
-        contract,
-        exchangeIn,
-        exchangeOut,
-        exchangeDiff,
-        exchangeInUsd,
-        exchangeOutUsd,
-        exchangeDiffUsd,
-        percentDiffExchangeDiffUsd,
-        exchangeVolumeUsd,
-        percentDiffExchangeVolumeUsd,
-        exchangeInBtc,
-        exchangeOutBtc,
-        exchangeDiffBtc,
-        percentDiffExchangeDiffBtc,
-        exchangeVolumeBtc,
-        percentDiffExchangeVolumeBtc
-    }}
-    """.format(
-        idx=idx,
-        **kwargs
-    )
-
-    return query_str
-
-
 def social_volume_projects(idx, _slug, **kwargs):
     query_str = """
     query_{idx}: socialVolumeProjects
