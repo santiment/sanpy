@@ -83,8 +83,3 @@ def test_ohlcv():
     )
 
     assert len(ohlcv_df.index) >= 1
-
-@attr('integration')
-# FIXME: test to be added. Currently query timeouts
-def test_erc20_exchange_funds_flow():
-    pass
