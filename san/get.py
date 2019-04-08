@@ -10,9 +10,13 @@ CUSTOM_QUERIES = {
 def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in CUSTOM_QUERIES:
-        return getattr(san.sanbase_graphql, query)(0, slug, **kwargs) 
+        return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
 
     gql_query = get_gql_query(0, dataset, **kwargs)
     gql_query = "{\n" + gql_query + "\n}"
     res = execute_gql(gql_query)
-    return convert_to_datetime_idx_df(res["query_0"])
+
+    if "allProjects" in res:
+        return convert_to_datetime_idx_df(res["allProjects"])
+    else:
+        return convert_to_datetime_idx_df(res["query_0"])
