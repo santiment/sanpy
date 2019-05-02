@@ -225,7 +225,7 @@ burn_rate = san.get(
 Example result:
 
 ```
-                           tokenAgeConsumed
+                               burnRate
 datetime                                   
 2018-05-01 00:00:00+00:00      2.514926e+09
 2018-05-02 00:00:00+00:00      1.363158e+10

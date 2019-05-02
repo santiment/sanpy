@@ -16,8 +16,8 @@ QUERY_MAPPING = {
         'return_fields': ['datetime', 'activeAddresses']
     },
     'burn_rate': { # to be removed
-        'query': 'tokenAgeConsumed',
-        'return_fields': ['datetime', 'tokenAgeConsumed']
+        'query': 'burnRate',
+        'return_fields': ['datetime', 'burnRate']
     },
     'token_age_consumed': {
         'query': 'tokenAgeConsumed',
@@ -66,7 +66,7 @@ def daily_active_addresses(idx, slug, **kwargs):
 
 # to be removed
 def burn_rate(idx, slug, **kwargs):
-    query_str = _create_query_str('token_age_consumed', idx, slug, **kwargs)
+    query_str = _create_query_str('burn_rate', idx, slug, **kwargs)
 
     return query_str
 
