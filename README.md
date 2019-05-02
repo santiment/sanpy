@@ -208,31 +208,82 @@ datetime
 2018-12-05 00:00:00+00:00            1
 ```
 
-### Token aging (burn rate)
+### Token aging (burn rate) - deprecated, replaced by 'Token Age Consumed'
 
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
+Burn rate returns the same results as 'Token Age Consumed' and will be removed in the near future.
 ```python
 burn_rate = san.get(
     "burn_rate/santiment",
     from_date="2018-05-01",
-    to_date="2018-05-02",
-    interval="1h"
+    to_date="2018-05-05",
+    interval="1d"
 )
 ```
 
 Example result:
 
 ```
-                               burnRate
-datetime
-2018-05-01 11:00:00+00:00  3.009476e+06
-2018-05-01 14:00:00+00:00  2.161845e+09
-2018-05-01 17:00:00+00:00  7.263414e+05
-2018-05-01 19:00:00+00:00  7.424445e+07
-2018-05-01 21:00:00+00:00  6.987085e+07
-2018-05-01 22:00:00+00:00  2.052304e+08
+                           tokenAgeConsumed
+datetime                                   
+2018-05-01 00:00:00+00:00      2.514926e+09
+2018-05-02 00:00:00+00:00      1.363158e+10
+2018-05-03 00:00:00+00:00      2.182971e+09
+2018-05-04 00:00:00+00:00      9.731035e+09
+2018-05-05 00:00:00+00:00      2.867054e+10
 ```
+
+### Token Age Consumed
+
+Each transaction has an equivalent 'Age consumed' record. The consumed age is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in consumed token age could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+token_age_consumed = san.get(
+    "token_age_consumed/santiment",
+    from_date="2018-05-01",
+    to_date="2018-05-05",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+                           tokenAgeConsumed
+datetime                                   
+2018-05-01 00:00:00+00:00      2.514926e+09
+2018-05-02 00:00:00+00:00      1.363158e+10
+2018-05-03 00:00:00+00:00      2.182971e+09
+2018-05-04 00:00:00+00:00      9.731035e+09
+2018-05-05 00:00:00+00:00      2.867054e+10
+```
+
+### Average Token Age Consumed in Days
+
+Based on 'Token Age Consumed' above, this returns the Token Age that gets consumed on average over the interval. The result is given in days instead of blocks. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+average_token_age_consumed_in_days = san.get(
+    "average_token_age_consumed_in_days/santiment",
+    from_date="2018-05-01",
+    to_date="2018-05-05",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+                             tokenAge
+datetime                             
+2018-05-01 00:00:00+00:00    6.353738
+2018-05-02 00:00:00+00:00   22.303985
+2018-05-03 00:00:00+00:00    3.873644
+2018-05-04 00:00:00+00:00  140.566428
+2018-05-05 00:00:00+00:00   56.730010
+```
+
 
 ### Transaction volume
 

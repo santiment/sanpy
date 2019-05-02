@@ -15,9 +15,17 @@ QUERY_MAPPING = {
         'query': 'dailyActiveAddresses',
         'return_fields': ['datetime', 'activeAddresses']
     },
-    'burn_rate': {
-        'query': 'burnRate',
-        'return_fields': ['datetime', 'burnRate']
+    'burn_rate': { # to be removed
+        'query': 'tokenAgeConsumed',
+        'return_fields': ['datetime', 'tokenAgeConsumed']
+    },
+    'token_age_consumed': {
+        'query': 'tokenAgeConsumed',
+        'return_fields': ['datetime', 'tokenAgeConsumed']
+    },
+    'average_token_age_consumed_in_days': {
+        'query': 'averageTokenAgeConsumedInDays',
+        'return_fields': ['datetime', 'tokenAge']
     },
     'transaction_volume': {
         'query': 'transactionVolume',
@@ -56,15 +64,24 @@ def daily_active_addresses(idx, slug, **kwargs):
 
     return query_str
 
-
+# to be removed
 def burn_rate(idx, slug, **kwargs):
-    query_str = _create_query_str('burn_rate', idx, slug, **kwargs)
+    query_str = _create_query_str('token_age_consumed', idx, slug, **kwargs)
 
     return query_str
 
-
 def transaction_volume(idx, slug, **kwargs):
     query_str = _create_query_str('transaction_volume', idx, slug, **kwargs)
+
+    return query_str
+
+def token_age_consumed(idx, slug, **kwargs):
+    query_str = _create_query_str('token_age_consumed', idx, slug, **kwargs)
+
+    return query_str
+
+def average_token_age_consumed_in_days(idx, slug, **kwargs):
+    query_str = _create_query_str('average_token_age_consumed_in_days', idx, slug, **kwargs)
 
     return query_str
 
