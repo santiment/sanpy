@@ -312,6 +312,82 @@ datetime
 2018-05-01 23:00:00+00:00         300.000000
 ```
 
+### Velocity of tokens
+
+Token Velocity returns the average number of times that a token changes wallets over the interval.
+
+Simply put, a higher token velocity means that the same token is used in transactions more often within a set time frame. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+token_velocity = san.get(
+    "token_velocity/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d")
+```
+
+Example result:
+
+```
+                           tokenVelocity
+datetime                                
+2018-06-01 00:00:00+00:00           1.00
+2018-06-02 00:00:00+00:00           3.00
+2018-06-03 00:00:00+00:00           1.97
+2018-06-04 00:00:00+00:00           1.00
+2018-06-05 00:00:00+00:00           2.92
+```
+
+### Token Circulation
+
+Token Circulation returns the total amount of tokens that have been sent at least once during each given time period. Minimum interval is '1d'. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+token_circulation = san.get(
+    "token_circulation/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+```
+
+Example result:
+
+```
+                           tokenCirculation
+datetime                                   
+2018-06-01 00:00:00+00:00         46.848943
+2018-06-02 00:00:00+00:00        222.194095
+2018-06-03 00:00:00+00:00      15933.955221
+2018-06-04 00:00:00+00:00       1371.245641
+2018-06-05 00:00:00+00:00      14678.249398
+```
+
+### Realized Value
+
+Realized Value returns the total acquisition cost of all tokens on the network, based on the historical price when each coin was last sent, in USD. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+realized_value = san.get(
+    "realized_value/santiment",
+    from_date="2018-05-01",
+    to_date="2018-06-05",
+    interval="1w"
+```
+
+Example result:
+
+```
+                           nonExchangeRealizedValue  realizedValue
+datetime                                                          
+2018-04-26 00:00:00+00:00              2.396886e+07   5.244488e+07
+2018-05-03 00:00:00+00:00              2.375955e+07   5.241845e+07
+2018-05-10 00:00:00+00:00              2.350528e+07   6.382359e+07
+2018-05-17 00:00:00+00:00              2.344805e+07   9.254465e+07
+2018-05-24 00:00:00+00:00              2.338782e+07   9.251160e+07
+2018-05-31 00:00:00+00:00              2.335015e+07   9.247528e+07
+```
+
+
 ### Github Activity
 
 Returns a list of github activity for a given slug and time interval. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
