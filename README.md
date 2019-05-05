@@ -364,7 +364,7 @@ datetime
 
 ### Realized Value
 
-Realized Value returns the total acquisition cost of all tokens on the network, based on the historical price when each coin was last sent, in USD. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+Realized Value returns the total acquisition cost of all tokens on the network, based on the historical price when each coin was last sent, in USD. Returns RV for all tokens and RV for all tokens known to be on exchanges. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
 ```python
 realized_value = san.get(
@@ -385,6 +385,78 @@ datetime
 2018-05-17 00:00:00+00:00              2.344805e+07   9.254465e+07
 2018-05-24 00:00:00+00:00              2.338782e+07   9.251160e+07
 2018-05-31 00:00:00+00:00              2.335015e+07   9.247528e+07
+```
+
+### MVRV Ratio
+
+MVRV ratio returns the ratio of the market value of all tokens (market cap) to the realized value of all tokens. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+mvrv_ratio = san.get(
+    "mvrv_ratio/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+```
+
+Example result:
+
+```
+                              ratio
+datetime                           
+2018-06-01 00:00:00+00:00  0.836489
+2018-06-02 00:00:00+00:00  0.850379
+2018-06-03 00:00:00+00:00  0.848195
+2018-06-04 00:00:00+00:00  0.822243
+2018-06-05 00:00:00+00:00  0.781964
+```
+
+### NVT Ratio
+
+NVT ratio returns the Network-Value-to-Transactions ratio. We use the market cap as network value and either token circulation or transaction volume as a measurement for transactions, returning two values. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+nvt_ratio = san.get(
+    "nvt_ratio/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+```
+
+Example result:
+
+```
+                           nvtRatioCirculation  nvtRatioTxVolume
+datetime                                                        
+2018-06-01 00:00:00+00:00         1.337498e+06      1.337498e+06
+2018-06-02 00:00:00+00:00         2.820074e+05      9.405723e+04
+2018-06-03 00:00:00+00:00         3.868500e+03      2.000213e+03
+2018-06-04 00:00:00+00:00         4.569595e+04      4.569595e+04
+2018-06-05 00:00:00+00:00         4.268927e+03      1.463171e+03
+```
+
+### Daily Active Deposits
+
+Daily Active Deposits, similar to Daily Active Addresses, returns the number of unique addresses that participated in the transfers of tokens to exchange deposit addresses during the day. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+daily_active_deposits = san.get(
+    "daily_active_deposits/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+```
+
+Example result:
+
+```
+                           activeDeposits
+datetime                                 
+2018-06-01 00:00:00+00:00               0
+2018-06-02 00:00:00+00:00               2
+2018-06-03 00:00:00+00:00               0
+2018-06-04 00:00:00+00:00               2
+2018-06-05 00:00:00+00:00               6
 ```
 
 
