@@ -54,6 +54,30 @@ QUERY_MAPPING = {
     'exchange_funds_flow': {
         'query': 'exchangeFundsFlow',
         'return_fields': ['datetime', 'inOutDifference']
+    },
+    'token_velocity': {
+        'query': 'tokenVelocity',
+        'return_fields': ['datetime', 'tokenVelocity']
+    },
+    'token_circulation': {
+        'query': 'tokenCirculation',
+        'return_fields': ['datetime', 'tokenCirculation']
+    },
+    'realized_value': {
+        'query': 'realizedValue',
+        'return_fields': ['datetime', 'nonExchangeRealizedValue', 'realizedValue']
+    },
+    'mvrv_ratio': {
+        'query': 'mvrvRatio',
+        'return_fields': ['datetime', 'ratio']
+    },
+    'nvt_ratio': {
+        'query': 'nvtRatio',
+        'return_fields': ['datetime', 'nvtRatioCirculation', 'nvtRatioTxVolume']
+    },
+    'daily_active_deposits': {
+        'query': 'dailyActiveDeposits',
+        'return_fields': ['datetime', 'activeDeposits']
     }
 }
 
@@ -106,6 +130,35 @@ def prices(idx, slug, **kwargs):
 
     return query_str
 
+def token_velocity(idx, slug, **kwargs):
+    query_str = _create_query_str('token_velocity', idx, slug, **kwargs)
+
+    return query_str
+
+def token_circulation(idx, slug, **kwargs):
+    query_str = _create_query_str('token_circulation', idx, slug, **kwargs)
+
+    return query_str
+
+def realized_value(idx, slug, **kwargs):
+    query_str = _create_query_str('realized_value', idx, slug, **kwargs)
+
+    return query_str
+
+def mvrv_ratio(idx, slug, **kwargs):
+    query_str = _create_query_str('mvrv_ratio', idx, slug, **kwargs)
+
+    return query_str
+
+def nvt_ratio(idx, slug, **kwargs):
+    query_str = _create_query_str('nvt_ratio', idx, slug, **kwargs)
+
+    return query_str
+
+def daily_active_deposits(idx, slug, **kwargs):
+    query_str = _create_query_str('daily_active_deposits', idx, slug, **kwargs)
+
+    return query_str
 
 def ohlc(idx, slug, **kwargs):
     query_str = _create_query_str('ohlc', idx, slug, **kwargs)
