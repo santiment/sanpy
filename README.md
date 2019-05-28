@@ -1,5 +1,38 @@
 # Santiment API python client
 
+## Table of contents
+
+- [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Upgrade to latest version](#upgrade-to-latest-version)
+  - [Configuration](#configuration)
+  - [Retrieving data from the API](#retrieving-data-from-the-api)
+    - [Fetch single metric](#fetch-single-metric)
+    - [Batching multiple queries](#batching-multiple-queries)
+  - [Available metrics](#available-metrics)
+    - [All Projects](#all-projects)
+    - [ERC20 Projects](#erc20-projects)
+    - [Daily Active Addresses](#daily-active-addresses)
+    - [Network Growth](#network-growth)
+    - [Burn Rate - deprecated, replaced by 'Token Age Consumed'](#burn-rate---deprecated-replaced-by-token-age-consumed)
+    - [Token Age Consumed](#token-age-consumed)
+    - [Average Token Age Consumed in Days](#average-token-age-consumed-in-days)
+    - [Transaction volume](#transaction-volume)
+    - [Token Velocity](#token-velocity)
+    - [Token Circulation](#token-circulation)
+    - [Realized Value](#realized-value)
+    - [MVRV Ratio](#mvrv-ratio)
+    - [NVT Ratio](#nvt-ratio)
+    - [Daily Active Deposits](#daily-active-deposits)
+    - [Github Activity](#github-activity)
+    - [Prices](#prices)
+    - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
+    - [Exchange Funds Flow](#exchange-funds-flow)
+    - [Social Volume Projects](#social-volume-projects)
+    - [Social Volume](#social-volume)
+  - [Running tests](#running-tests)
+  - [Running integration tests](#running-integration-tests)
+    
 ## Installation
 
 ```
@@ -110,7 +143,7 @@ batch.get(
 
 Below are described some available metrics and are given examples for fetching and for the returned format.
 
-### All projects
+### All Projects
 
 Returns a DataFrame with all the projects available in the Santiment API. Not all
 metrics will be available for all the projects. The `slug` is a unique identifier
@@ -135,7 +168,7 @@ name             slug ticker   totalSupply
 <more results>
 ```
 
-### ERC20 projects
+### ERC20 Projects
 
 Returns a DataFrame with all the ERC20 projects available in the Santiment API.
 Not all metrics will be available for all the projects. The `slug` is a unique
@@ -185,7 +218,7 @@ datetime
 2018-06-05 00:00:00+00:00               14
 ```
 
-### Network growth
+### Network Growth
 
 Network Growth shows the number of new addresses being created on the project network each day.
 In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
@@ -208,7 +241,7 @@ datetime
 2018-12-05 00:00:00+00:00            1
 ```
 
-### Token aging (burn rate) - deprecated, replaced by 'Token Age Consumed'
+### Burn Rate - deprecated, replaced by 'Token Age Consumed'
 
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying the number of tokens moved by the number of blocks in which they appeared. Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
@@ -285,7 +318,7 @@ datetime
 ```
 
 
-### Transaction volume
+### Transaction Volume
 
 Total amount of tokens for a project that were transacted on the blockchain. This metric includes only on-chain volume, not volume in exchanges. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
@@ -312,7 +345,7 @@ datetime
 2018-05-01 23:00:00+00:00         300.000000
 ```
 
-### Velocity of tokens
+### Token Velocity
 
 Token Velocity returns the average number of times that a token changes wallets over the interval.
 
@@ -544,7 +577,7 @@ datetime
 2018-06-04 00:00:00+00:00  6.015676e+10  0.079466  602.399792  1903430000
 ```
 
-### open/close prices with volume and marketcap
+### Open, High, Close, Low Prices, Volume, Marketcap
 
 Note: this query cannot be batched!
 
@@ -568,7 +601,7 @@ datetime
 2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528      1.18010   617451  7.604326e+07
 ```
 
-### Exchange funds flow
+### Exchange Funds Flow
 
 Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn from an exchange for a given slug in the selected time period. In order to access real time data or historical data (older than 3 months), you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 
