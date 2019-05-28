@@ -1,5 +1,38 @@
 # Santiment API python client
 
+## Table of contents
+
+- [Table of contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Upgrade to latest version](#upgrade-to-latest-version)
+  - [Configuration](#configuration)
+  - [Retrieving data from the API](#retrieving-data-from-the-api)
+    - [Fetch single metric](#fetch-single-metric)
+    - [Batching multiple queries](#batching-multiple-queries)
+  - [Available metrics](#available-metrics)
+    - [All projects](#all-projects)
+    - [ERC20 projects](#erc20-projects)
+    - [Daily Active Addresses](#daily-active-addresses)
+    - [Network growth](#network-growth)
+    - [Token aging (burn rate) - deprecated, replaced by 'Token Age Consumed'](#token-aging-burn-rate---deprecated-replaced-by-token-age-consumed)
+    - [Token Age Consumed](#token-age-consumed)
+    - [Average Token Age Consumed in Days](#average-token-age-consumed-in-days)
+    - [Transaction volume](#transaction-volume)
+    - [Velocity of tokens](#velocity-of-tokens)
+    - [Token Circulation](#token-circulation)
+    - [Realized Value](#realized-value)
+    - [MVRV Ratio](#mvrv-ratio)
+    - [NVT Ratio](#nvt-ratio)
+    - [Daily Active Deposits](#daily-active-deposits)
+    - [Github Activity](#github-activity)
+    - [Prices](#prices)
+    - [open/close prices with volume and marketcap](#openclose-prices-with-volume-and-marketcap)
+    - [Exchange funds flow](#exchange-funds-flow)
+    - [Social Volume Projects](#social-volume-projects)
+    - [Social Volume](#social-volume)
+  - [Running tests](#running-tests)
+  - [Running integration tests](#running-integration-tests)
+    
 ## Installation
 
 ```
