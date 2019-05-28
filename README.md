@@ -13,7 +13,7 @@
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
     - [Daily Active Addresses](#daily-active-addresses)
-    - [Network growth](#network-growth)
+    - [Network Growth](#network-growth)
     - [Burn Rate - deprecated, replaced by 'Token Age Consumed'](#burn-rate---deprecated-replaced-by-token-age-consumed)
     - [Token Age Consumed](#token-age-consumed)
     - [Average Token Age Consumed in Days](#average-token-age-consumed-in-days)
