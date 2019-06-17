@@ -79,6 +79,10 @@ QUERY_MAPPING = {
         'query': 'dailyActiveDeposits',
         'return_fields': ['datetime', 'activeDeposits']
     }
+    'share_of_deposits':{
+        'query': 'shareOfDeposits',
+        'return_fields': ['datetime', 'shareOfDeposits']
+    }
 }
 
 
@@ -157,6 +161,11 @@ def nvt_ratio(idx, slug, **kwargs):
 
 def daily_active_deposits(idx, slug, **kwargs):
     query_str = _create_query_str('daily_active_deposits', idx, slug, **kwargs)
+
+    return query_str
+
+def share_of_deposits(idx, slug, **kwargs):
+    query_str = _create_query_str('share_of_deposits', idx, slug, **kwargs)
 
     return query_str
 
@@ -354,3 +363,4 @@ def _format_to_date(datetime_obj_or_str):
 
     dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
+
