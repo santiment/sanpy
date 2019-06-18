@@ -78,7 +78,7 @@ QUERY_MAPPING = {
     'daily_active_deposits': {
         'query': 'dailyActiveDeposits',
         'return_fields': ['datetime', 'activeDeposits']
-    }
+    },
     'share_of_deposits':{
         'query': 'shareOfDeposits',
         'return_fields': ['datetime', 'shareOfDeposits']
@@ -321,7 +321,6 @@ def _create_query_str(query, idx, slug, **kwargs):
             QUERY_MAPPING[query]['return_fields']),
         **kwargs
     )
-
     return query_str
 
 
