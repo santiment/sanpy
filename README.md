@@ -30,6 +30,7 @@
     - [Exchange Funds Flow](#exchange-funds-flow)
     - [Social Volume Projects](#social-volume-projects)
     - [Social Volume](#social-volume)
+    - [Share of Deposits](#share-of-deposits)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
     
@@ -758,6 +759,34 @@ Example result:
 1   {'mentionsCount': 266, 'datetime': '2018-08-01...
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 ```
+
+
+### Share of Deposits
+
+Returns information for the shares of deposits that a given project has during the time interval. In order to access real time data, you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+
+```python
+share_of_deposits = san.get(
+    "share_of_deposits/santiment",
+    from_date="2019-01-01T00:00:00Z",
+    to_date="2019-05-01T00:00:00Z",
+    interval="1d"
+)
+```
+
+Example result:
+
+
+```
+                           shareOfDeposits
+datetime
+2018-06-01 00:00:00+00:00         0.000000
+2018-06-02 00:00:00+00:00        25.000000
+2018-06-03 00:00:00+00:00         0.000000
+2018-06-04 00:00:00+00:00        16.666667
+2018-06-05 00:00:00+00:00        21.428571
+```
+
 
 ## Running tests
 
