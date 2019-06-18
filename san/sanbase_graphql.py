@@ -81,7 +81,7 @@ QUERY_MAPPING = {
     },
     'share_of_deposits':{
         'query': 'shareOfDeposits',
-        'return_fields': ['datetime', 'shareOfDeposits']
+        'return_fields': ['activeAddresses','activeDeposits','datetime', 'shareOfDeposits']
     }
 }
 
