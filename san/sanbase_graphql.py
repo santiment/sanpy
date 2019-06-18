@@ -321,6 +321,7 @@ def _create_query_str(query, idx, slug, **kwargs):
             QUERY_MAPPING[query]['return_fields']),
         **kwargs
     )
+    
     return query_str
 
 
