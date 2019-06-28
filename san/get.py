@@ -16,7 +16,4 @@ def get(dataset, **kwargs):
     gql_query = "{\n" + gql_query + "\n}"
     res = execute_gql(gql_query)
 
-    if "allProjects" in res:
-        return convert_to_datetime_idx_df(res["allProjects"])
-    else:
-        return convert_to_datetime_idx_df(res["query_0"])
+    return convert_to_datetime_idx_df(res["query_0"])

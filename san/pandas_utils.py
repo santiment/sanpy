@@ -12,4 +12,4 @@ def convert_to_datetime_idx_df(data):
 
 
 def merge(df1, df2):
-    return pd.concat([df1, df2], axis=1, join='inner')
+    return pd.concat([df1, df2], axis=1)
