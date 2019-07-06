@@ -86,6 +86,10 @@ QUERY_MAPPING = {
     'gas_used':{
         'query': 'gasUsed',
         'return_fields': ['datetime', 'gasUsed']
+    },
+    'miners_balance':{
+        'query': 'minersBalance',
+        'return_fields': ['balance', 'datetime']
     }
 }
 
@@ -180,6 +184,11 @@ def ohlc(idx, slug, **kwargs):
 
 def gas_used(idx, slug, **kwargs):
     query_str = _create_query_str('gas_used', idx, slug, **kwargs)
+
+    return query_str
+
+def miners_balance(idx, slug, **kwargs):
+    query_str = _create_query_str('miners_balance', idx, slug, **kwargs)
 
     return query_str
 

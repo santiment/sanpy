@@ -32,6 +32,7 @@
     - [Social Volume](#social-volume)
     - [Share of Deposits](#share-of-deposits)
     - [Gas Used](#gas-used)
+    - [Miners Balance](#miners-balance)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -857,7 +858,9 @@ datetime
 
 ### Gas Used
 
-Returns used Gas by a blockchain. When you send tokens, interact with a contract or do anything else on the blockchain, you must pay for that computation. That payment is calculated in Gas. Currently only ETH is supported.
+Returns used Gas by a blockchain. When you send tokens, interact with a contract or 
+do anything else on the blockchain, you must pay for that computation.
+That payment is calculated in Gas. Currently only ETH is supported.
 
 [Premium metric](#premium-metrics)
 
@@ -872,13 +875,40 @@ san.get(
 
 Example result:
 
-```                
+```
 datetime                       gasUsed
 2019-06-01 00:00:00+00:00  47405557702
 2019-06-02 00:00:00+00:00  44769162038
 2019-06-03 00:00:00+00:00  46415901420
 2019-06-04 00:00:00+00:00  46907686393
 2019-06-05 00:00:00+00:00  45925073341
+
+```
+
+### Miners Balance
+
+Returns miner balances over time. Currently only ETH is supported.
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "miners_balance/ethereum",
+    from_date="2019-06-01",
+    to_date="2019-06-05",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+datetime                        balance
+2019-06-01 00:00:00+00:00  1.529488e+06
+2019-06-02 00:00:00+00:00  1.533494e+06
+2019-06-03 00:00:00+00:00  1.527438e+06
+2019-06-04 00:00:00+00:00  1.525666e+06
+2019-06-05 00:00:00+00:00  1.527563e+06
 
 ```
 
