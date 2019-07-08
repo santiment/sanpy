@@ -90,6 +90,10 @@ QUERY_MAPPING = {
     'miners_balance':{
         'query': 'minersBalance',
         'return_fields': ['balance', 'datetime']
+    },
+    'mining_pools_distribution':{
+        'query': 'miningPoolsDistribution',
+        'return_fields': ['datetime', 'other', 'top10', 'top3']
     }
 }
 
@@ -189,6 +193,11 @@ def gas_used(idx, slug, **kwargs):
 
 def miners_balance(idx, slug, **kwargs):
     query_str = _create_query_str('miners_balance', idx, slug, **kwargs)
+    
+    return query_str
+
+def mining_pools_distribution(idx, slug, **kwargs):
+    query_str = _create_query_str('mining_pools_distribution', idx, slug, **kwargs)
 
     return query_str
 
