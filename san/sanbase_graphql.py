@@ -94,6 +94,10 @@ QUERY_MAPPING = {
     'mining_pools_distribution':{
         'query': 'miningPoolsDistribution',
         'return_fields': ['datetime', 'other', 'top10', 'top3']
+    },
+    'historical_balance':{
+        'query': 'historicalBalance',
+        'return_fields': ['balance', 'datetime']
     }
 }
 
@@ -193,11 +197,33 @@ def gas_used(idx, slug, **kwargs):
 
 def miners_balance(idx, slug, **kwargs):
     query_str = _create_query_str('miners_balance', idx, slug, **kwargs)
-    
+
     return query_str
 
 def mining_pools_distribution(idx, slug, **kwargs):
     query_str = _create_query_str('mining_pools_distribution', idx, slug, **kwargs)
+
+    return query_str
+
+def historical_balance(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: historicalBalance (
+        address: \"{address}\",
+        slug: \"{slug}\",
+        from: \"{from_date}\",
+        to: \"{to_date}\",
+        interval: \"{interval}\"
+    ){{
+        balance,
+        datetime
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
 
     return query_str
 

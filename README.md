@@ -1,5 +1,5 @@
 
-# sanpy 
+# sanpy
 [![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
 
 Santiment API python client.
@@ -38,6 +38,7 @@ Santiment API python client.
     - [Gas Used](#gas-used)
     - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
+    - [Historical Balance](#historical-balance)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -863,7 +864,7 @@ datetime
 
 ### Gas Used
 
-Returns used Gas by a blockchain. When you send tokens, interact with a contract or 
+Returns used Gas by a blockchain. When you send tokens, interact with a contract or
 do anything else on the blockchain, you must pay for that computation.
 That payment is calculated in Gas. Currently only ETH is supported.
 
@@ -887,7 +888,6 @@ datetime                       gasUsed
 2019-06-03 00:00:00+00:00  46415901420
 2019-06-04 00:00:00+00:00  46907686393
 2019-06-05 00:00:00+00:00  45925073341
-
 ```
 
 ### Miners Balance
@@ -932,6 +932,7 @@ san.get(
 ```
 
 Example result:
+
 ```
 datetime                      other     top10      top3
 2019-06-01 00:00:00+00:00  0.129237  0.249906  0.620857
@@ -939,6 +940,31 @@ datetime                      other     top10      top3
 2019-06-03 00:00:00+00:00  0.122058  0.249603  0.628339
 2019-06-04 00:00:00+00:00  0.127726  0.254982  0.617293
 2019-06-05 00:00:00+00:00  0.120436  0.265842  0.613722
+```
+
+### Historical Balance
+
+Historical balance for erc20 token or eth address. Returns the historical balance for a given address in the given interval.
+
+```python
+san.get(
+    "historical_balance/santiment",
+    address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+    from_date="2019-04-08",
+    to_date="2019-04-13",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+datetime                     balance
+2019-04-08 00:00:00+00:00  47.658736
+2019-04-09 00:00:00+00:00  47.658736
+2019-04-10 00:00:00+00:00  47.658736
+2019-04-11 00:00:00+00:00  47.658736
+2019-04-12 00:00:00+00:00  47.658736
 ```
 
 ## Running tests
