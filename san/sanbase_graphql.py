@@ -102,6 +102,10 @@ QUERY_MAPPING = {
     'social_dominance':{
         'query': 'socialDominance',
         'return_fields': ['datetime', 'dominance']
+    },
+    'top_holders_percent_of_total_supply':{
+        'query': 'topHoldersPercentOfTotalSupply',
+        'return_fields': ['datetime', 'inExchanges', 'inTopHoldersTotal', 'outsideExchanges']
     }
 }
 
@@ -244,6 +248,29 @@ def social_dominance(idx, slug, **kwargs):
     ){{
         datetime,
         dominance
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+def top_holders_percent_of_total_supply(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: topHoldersPercentOfTotalSupply(
+        slug: \"{slug}\",
+        numberOfHolders: {number_of_holders},
+        from: \"{from_date}\",
+        to: \"{to_date}\"
+    ){{
+        datetime,
+        inExchanges,
+        inTopHoldersTotal,
+        outsideExchanges
     }}
     """.format(
         idx=idx,
