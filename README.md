@@ -31,6 +31,7 @@
     - [Social Volume Projects](#social-volume-projects)
     - [Social Volume](#social-volume)
     - [Share of Deposits](#share-of-deposits)
+    - [Gas Used](#gas-used)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -851,6 +852,33 @@ datetime
 2019-01-03 00:00:00+00:00               13               2        15.384615
 2019-01-04 00:00:00+00:00                8               2        25.000000
 2019-01-05 00:00:00+00:00                7               1        14.285714
+
+```
+
+### Gas Used
+
+Returns used Gas by a blockchain. When you send tokens, interact with a contract or do anything else on the blockchain, you must pay for that computation. That payment is calculated in Gas. Currently only ETH is supported.
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "gas_used/ethereum",
+    from_date="2019-06-01",
+    to_date="2019-06-05",
+    interval="1d"
+)
+```
+
+Example result:
+
+```                
+datetime                       gasUsed
+2019-06-01 00:00:00+00:00  47405557702
+2019-06-02 00:00:00+00:00  44769162038
+2019-06-03 00:00:00+00:00  46415901420
+2019-06-04 00:00:00+00:00  46907686393
+2019-06-05 00:00:00+00:00  45925073341
 
 ```
 

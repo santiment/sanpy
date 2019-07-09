@@ -82,6 +82,10 @@ QUERY_MAPPING = {
     'share_of_deposits':{
         'query': 'shareOfDeposits',
         'return_fields': ['activeAddresses','activeDeposits','datetime', 'shareOfDeposits']
+    },
+    'gas_used':{
+        'query': 'gasUsed',
+        'return_fields': ['datetime', 'gasUsed']
     }
 }
 
@@ -174,6 +178,10 @@ def ohlc(idx, slug, **kwargs):
 
     return query_str
 
+def gas_used(idx, slug, **kwargs):
+    query_str = _create_query_str('gas_used', idx, slug, **kwargs)
+
+    return query_str
 
 def ohlcv(idx, slug, **kwargs):
     return_fields = ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
@@ -321,7 +329,7 @@ def _create_query_str(query, idx, slug, **kwargs):
             QUERY_MAPPING[query]['return_fields']),
         **kwargs
     )
-    
+
     return query_str
 
 
@@ -363,4 +371,3 @@ def _format_to_date(datetime_obj_or_str):
 
     dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
-
