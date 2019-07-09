@@ -41,6 +41,7 @@ Santiment API python client.
     - [Historical Balance](#historical-balance)
     - [Social Dominance](#social-dominance)
     - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
+    - [History Twitter Data](#history-twitter-data)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -952,8 +953,8 @@ Historical balance for erc20 token or eth address. Returns the historical balanc
 san.get(
     "historical_balance/santiment",
     address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
-    from_date="2019-04-08",
-    to_date="2019-04-13",
+    from_date="2019-04-18",
+    to_date="2019-04-23",
     interval="1d"
 )
 ```
@@ -962,11 +963,11 @@ Example result:
 
 ```
 datetime                     balance
-2019-04-08 00:00:00+00:00  47.658736
-2019-04-09 00:00:00+00:00  47.658736
-2019-04-10 00:00:00+00:00  47.658736
-2019-04-11 00:00:00+00:00  47.658736
-2019-04-12 00:00:00+00:00  47.658736
+2019-04-18 00:00:00+00:00  382338.33
+2019-04-19 00:00:00+00:00  382338.33
+2019-04-20 00:00:00+00:00  382338.33
+2019-04-21 00:00:00+00:00  215664.33
+2019-04-22 00:00:00+00:00  215664.33
 ```
 
 ### Social Dominance
@@ -1024,6 +1025,31 @@ datetime                   inExchanges  inTopHoldersTotal  outsideExchanges
 2019-04-09 00:00:00+00:00     7.977318          13.277961          5.300643
 2019-04-10 00:00:00+00:00     7.976282          13.310953          5.334671
 2019-04-11 00:00:00+00:00     7.975260          13.296356          5.321096
+```
+
+### History Twitter Data
+
+Fetch the historical count of twitter followers.
+
+```python
+san.get(
+    "history_twitter_data/santiment",
+    from_date="2019-04-08",
+    to_date="2019-04-13",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+datetime                   followers_count
+2019-04-08 00:00:00+00:00            10524
+2019-04-09 00:00:00+00:00            10524
+2019-04-10 00:00:00+00:00            10525
+2019-04-11 00:00:00+00:00            10520
+2019-04-12 00:00:00+00:00            10526
+2019-04-13 00:00:00+00:00            10529
 ```
 
 ## Running tests

@@ -106,6 +106,10 @@ QUERY_MAPPING = {
     'top_holders_percent_of_total_supply':{
         'query': 'topHoldersPercentOfTotalSupply',
         'return_fields': ['datetime', 'inExchanges', 'inTopHoldersTotal', 'outsideExchanges']
+    },
+    'history_twitter_data':{
+            'query': 'historyTwitterData',
+            'return_fields': ['datetime', 'followers_count']
     }
 }
 
@@ -277,6 +281,9 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
         slug=slug,
         **kwargs
     )
+
+def history_twitter_data(idx, slug, **kwargs):
+    query_str = _create_query_str('history_twitter_data', idx, slug, **kwargs)
 
     return query_str
 
