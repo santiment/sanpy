@@ -33,6 +33,7 @@
     - [Share of Deposits](#share-of-deposits)
     - [Gas Used](#gas-used)
     - [Miners Balance](#miners-balance)
+    - [Mining Pools Distribution](#mining-pools-distribution)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -909,7 +910,31 @@ datetime                        balance
 2019-06-03 00:00:00+00:00  1.527438e+06
 2019-06-04 00:00:00+00:00  1.525666e+06
 2019-06-05 00:00:00+00:00  1.527563e+06
+```
 
+### Mining Pools Distribution
+
+Returns distribution of miners between mining pools. What part of the miners are using top3, top10 and all the other pools. Currently only ETH is supported.
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "mining_pools_distribution/ethereum",
+    from_date="2019-06-01",
+    to_date="2019-06-05",
+    interval="1d"
+)
+```
+
+Example result:
+```
+datetime                      other     top10      top3
+2019-06-01 00:00:00+00:00  0.129237  0.249906  0.620857
+2019-06-02 00:00:00+00:00  0.127432  0.251903  0.620666
+2019-06-03 00:00:00+00:00  0.122058  0.249603  0.628339
+2019-06-04 00:00:00+00:00  0.127726  0.254982  0.617293
+2019-06-05 00:00:00+00:00  0.120436  0.265842  0.613722
 ```
 
 ## Running tests
