@@ -40,6 +40,7 @@ Santiment API python client.
     - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
     - [Social Dominance](#social-dominance)
+    - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1001,6 +1002,28 @@ datetime                   dominance
 2019-04-11 00:00:00+00:00   0.036051
 2019-04-12 00:00:00+00:00   0.035585
 2019-04-13 00:00:00+00:00   0.034957
+```
+
+### Top Holders Percent Of Total Supply
+
+Returns the top holders' percent of total supply - in exchanges, outside exchanges and combined.
+
+```python
+san.get(
+    "top_holders_percent_of_total_supply/ethereum",
+    number_of_holders=10,
+    from_date="2019-04-08",
+    to_date="2019-04-11"
+)
+```
+
+Example Result:
+
+```
+datetime                   inExchanges  inTopHoldersTotal  outsideExchanges                                                
+2019-04-09 00:00:00+00:00     7.977318          13.277961          5.300643
+2019-04-10 00:00:00+00:00     7.976282          13.310953          5.334671
+2019-04-11 00:00:00+00:00     7.975260          13.296356          5.321096
 ```
 
 ## Running tests
