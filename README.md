@@ -39,6 +39,7 @@ Santiment API python client.
     - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
+    - [Social Dominance](#social-dominance)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -965,6 +966,41 @@ datetime                     balance
 2019-04-10 00:00:00+00:00  47.658736
 2019-04-11 00:00:00+00:00  47.658736
 2019-04-12 00:00:00+00:00  47.658736
+```
+
+### Social Dominance
+
+Returns the % of the social dominance a given project has over time in a given social channel.
+
+Available sources are:
+* PROFESSIONAL_TRADERS_CHAT
+* TELEGRAM
+* DISCORD
+* REDDIT
+* ALL
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "social_dominance/santiment",
+    from_date="2019-04-08",
+    to_date="2019-04-13",
+    interval="1d",
+    source="ALL"
+)
+```
+
+Example result:
+
+```
+datetime                   dominance         
+2019-04-08 00:00:00+00:00   0.043028
+2019-04-09 00:00:00+00:00   0.025337
+2019-04-10 00:00:00+00:00   0.045376
+2019-04-11 00:00:00+00:00   0.036051
+2019-04-12 00:00:00+00:00   0.035585
+2019-04-13 00:00:00+00:00   0.034957
 ```
 
 ## Running tests

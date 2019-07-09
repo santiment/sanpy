@@ -98,6 +98,10 @@ QUERY_MAPPING = {
     'historical_balance':{
         'query': 'historicalBalance',
         'return_fields': ['balance', 'datetime']
+    },
+    'social_dominance':{
+        'query': 'socialDominance',
+        'return_fields': ['datetime', 'dominance']
     }
 }
 
@@ -218,6 +222,28 @@ def historical_balance(idx, slug, **kwargs):
     ){{
         balance,
         datetime
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+def social_dominance(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: socialDominance (
+        slug: \"{slug}\",
+        from: \"{from_date}\",
+        to: \"{to_date}\",
+        interval: \"{interval}\",
+        source: {source}
+    ){{
+        datetime,
+        dominance
     }}
     """.format(
         idx=idx,
