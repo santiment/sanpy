@@ -1,4 +1,8 @@
-# Santiment API python client
+
+# sanpy 
+[![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
+
+Santiment API python client.
 
 ## Table of contents
 
