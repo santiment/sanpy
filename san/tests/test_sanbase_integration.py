@@ -10,7 +10,7 @@ params = {
     "project_slug":  "santiment",
     "from_date": month_ago(),
     "to_date": two_days_ago(),
-    "interval": "1d"
+    "interval": "1d",
 }
 
 @attr('integration')
@@ -72,6 +72,25 @@ def test_erc20_projects():
 
     assert len(result) > 0
     assert len(result[result.slug == "bitcoin"]) == 0
+
+@attr('integration')
+def test_ordinary_function():
+    queries = sanbase_graphql.QUERY_MAPPING.keys()
+
+    for query in queries:
+        if query in ["gas_used", "miners_balance", "mining_pools_distribution"]:
+            slug_to_test = "ethereum"
+        elif query in ["historical_balance", "top_holders_percent_of_total_supply", "social_dominance"]:
+            continue
+        else:
+            slug_to_test = params["project_slug"]
+        result = san.get(
+            "{}/{}".format(query, slug_to_test),
+            from_date=params["from_date"],
+            to_date=params["to_date"],
+            interval=params["interval"]
+        )
+        assert len(result.index) >=1
 
 @attr('integration')
 def test_ohlcv():
