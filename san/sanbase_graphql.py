@@ -287,6 +287,30 @@ def history_twitter_data(idx, slug, **kwargs):
 
     return query_str
 
+def price_volume_difference(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: priceVolumeDiff (
+        slug: \"{slug}\",
+        from: \"{from_date}\",
+        to: \"{to_date}\",
+        interval: \"{interval}\",
+        currency: \"{currency}\"
+    ){{
+        datetime,
+        priceChange,
+        priceVolumeDiff,
+        volumeChange
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
 def ohlcv(idx, slug, **kwargs):
     return_fields = ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
 
