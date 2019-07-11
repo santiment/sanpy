@@ -328,16 +328,16 @@ def price_volume_difference(idx, slug, **kwargs):
     return query_str
 
 
+
 def eth_top_transactions(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
 
     query_str = """
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
-            ethTopTransactions (
-                from: \"{from_date}\",
-                to: \"{to_date}\",
-                limit: {limit},
-                transactionType: {transaction_type}
+        tokenTopTransactions (
+            from: \"{from_date}\",
+            to: \"{to_date}\",
+            limit: {limit}
             ){{
         datetime,
         fromAddress{{
@@ -398,6 +398,39 @@ def eth_spent_over_time(idx, slug, **kwargs):
             ){{
         datetime,
         ethSpent
+        }}
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+
+def token_top_transactions(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: projectBySlug (slug: \"{slug}\"){{
+            ethTopTransactions (
+                from: \"{from_date}\",
+                to: \"{to_date}\",
+                limit: {limit},
+                transactionType: {transaction_type}
+            ){{
+        datetime,
+        fromAddress{{
+            address,
+            isExchange
+        }},
+        toAddress{{
+            address,
+            isExchange
+        }},
+        trxHash,
+        trxValue
         }}
     }}
     """.format(
