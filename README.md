@@ -42,6 +42,7 @@ Santiment API python client.
     - [Social Dominance](#social-dominance)
     - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
     - [History Twitter Data](#history-twitter-data)
+    - [Price Volume Difference](#price-volume-difference)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1000,6 +1001,33 @@ datetime                   followers_count
 2019-04-11 00:00:00+00:00            10520
 2019-04-12 00:00:00+00:00            10526
 2019-04-13 00:00:00+00:00            10529
+```
+
+
+
+### Price Volume Difference
+
+Fetch the price-volume difference technical indicator for a given slug, display currency and time period. This indicator measures the difference in trend between price and volume, specifically when price goes up as volume goes down.
+
+```python
+san.get(
+    "price_volume_difference/santiment",
+    from_date="2019-04-18",
+    to_date="2019-04-23",
+    interval="1d",
+    currency="USD"
+)
+```
+
+Example result:
+
+```                           
+datetime                   priceChange  priceVolumeDiff  volumeChange
+2019-04-18 00:00:00+00:00     0.017779         0.013606 -39908.007476
+2019-04-19 00:00:00+00:00     0.012587         0.007332 -31195.568878
+2019-04-20 00:00:00+00:00     0.009062         0.004169 -24550.100411
+2019-04-21 00:00:00+00:00     0.002573         0.001035 -19307.845911
+2019-04-22 00:00:00+00:00     0.001527         0.000703 -20317.934666
 ```
 
 ## Running tests
