@@ -7,7 +7,8 @@ from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 
 QUERY_PATH_MAP = {
-    'eth_top_transactions': ['ethTopTransactions']
+    'eth_top_transactions': ['ethTopTransactions'],
+    'eth_spent_over_time': ['ethSpentOverTime']
 }
 
 def path_to_data(idx, query, data):
