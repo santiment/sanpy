@@ -11,16 +11,34 @@ params = {
     "from_date": month_ago(),
     "to_date": two_days_ago(),
     "interval": "1d",
+    "address": "0x1f3df0b8390bb8e9e322972c5e75583e87608ec2"
 }
+
+METRICS_USING_ETHEREUM = ["gas_used", "miners_balance", "mining_pools_distribution"]
+
+def ordinary_function_maker(query, slug=params['project_slug']):
+    result = san.get(query+'/'+slug,
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval=params['interval']
+        )
+    return result
 
 @attr('integration')
 def test_batched_queries_equal_format():
-    queries = sanbase_graphql.QUERY_MAPPING.keys()
+    queries = sanbase_graphql.QUERY_MAPPING.keys() - METRICS_USING_ETHEREUM
 
     batch = Batch()
     for query in queries:
         batch.get(
             "{}/{}".format(query, params["project_slug"]),
+            from_date=params["from_date"],
+            to_date=params["to_date"],
+            interval=params["interval"]
+        )
+    for query in METRICS_USING_ETHEREUM:
+        batch.get(
+            "{}/ethereum".format(query),
             from_date=params["from_date"],
             to_date=params["to_date"],
             interval=params["interval"]
@@ -74,23 +92,75 @@ def test_erc20_projects():
     assert len(result[result.slug == "bitcoin"]) == 0
 
 @attr('integration')
-def test_ordinary_function():
-    queries = sanbase_graphql.QUERY_MAPPING.keys()
+def test_ordinary_ethereum_queries():
+    for query in METRICS_USING_ETHEREUM:
+        result = ordinary_function_maker(query, "ethereum")
 
-    for query in queries:
-        if query in ["gas_used", "miners_balance", "mining_pools_distribution"]:
-            slug_to_test = "ethereum"
-        elif query in ["historical_balance", "top_holders_percent_of_total_supply", "social_dominance"]:
-            continue
-        else:
-            slug_to_test = params["project_slug"]
-        result = san.get(
-            "{}/{}".format(query, slug_to_test),
-            from_date=params["from_date"],
-            to_date=params["to_date"],
-            interval=params["interval"]
+        assert len(result.index) >= 1
+
+@attr('integration')
+def test_token_age_consumed():
+    result = ordinary_function_maker('token_age_consumed')
+
+    for row in result['tokenAgeConsumed']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_average_token_age_consumed_in_days():
+    result = ordinary_function_maker('average_token_age_consumed_in_days')
+
+    for row in result['tokenAge']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_transaction_volume():
+    result = ordinary_function_maker('transaction_volume')
+
+    for row in result['transactionVolume']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_github_activity():
+    result = ordinary_function_maker('github_activity')
+
+    for row in result['activity']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_dev_activity():
+    result = ordinary_function_maker('dev_activity')
+
+    for row in result['activity']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_network_growth():
+    result = ordinary_function_maker('network_growth')
+
+    for row in result['newAddresses']:
+        assert row >= 0
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_prices():
+    result = ordinary_function_maker('prices')
+
+    assert len(result.index) >= 1
+
+@attr('integration')
+def test_historical_balance():
+    result = san.get('historical_balance/'+params['project_slug'],
+        address=params['address'],
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval=params['interval']
         )
-        assert len(result.index) >=1
+    assert len(result.index) >= 1
 
 @attr('integration')
 def test_ohlcv():
