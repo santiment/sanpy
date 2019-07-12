@@ -44,6 +44,7 @@ Santiment API python client.
     - [History Twitter Data](#history-twitter-data)
     - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
+    - [News](#news)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1054,8 +1055,6 @@ datetime                   followers_count
 2019-04-13 00:00:00+00:00            10529
 ```
 
-
-
 ### Price Volume Difference
 
 Fetch the price-volume difference technical indicator for a given slug, display currency and time period. This indicator measures the difference in trend between price and volume, specifically when price goes up as volume goes down.
@@ -1109,6 +1108,40 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
 2019-04-19 14:14:52+00:00  0x1f3df0b8390bb8...                  False  0xd69bc0585e05e...                False  0x590512e1f1fbcf...         19.48
 2019-04-19 14:09:58+00:00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
+```
+
+### News
+
+Returns the news for given word.
+
+Arguments description:
+
+  *  tag - project name, ticker or other crypto related words.
+  *  from - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+  *  to - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+  *  size - size limit of the returned results
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "news/bitcoin",
+    from_date="2019-04-18",
+    to_date="2019-07-11",
+    size=5
+)
+```
+
+Example result:
+
+**The result is shortened for convenience**
+```
+                 datetime                                        description       sourceName                                              title                                                                                                                    url                                                   
+2019-06-16 22:08:54+00:00  Litecoin’s Charlie Lee Joins Warren Buffett’s ...      CCN Markets  Litecoin’s Charlie Lee Joins Warren Buffett’s ...  https://www.ccn.com/crypto/litecoins-charlie-lee-joins-warren-buffetts-crypto-power-lunch-with-justin-sun/2019/06/16/
+2019-06-26 06:11:15+00:00  The Crypto Daily – The Movers and Shakers 26/0...    Yahoo Finance  The Crypto Daily – The Movers and Shakers 26/0...                                           https://finance.yahoo.com/news/crypto-daily-movers-shakers-26-061640313.html
+2019-07-03 10:06:00+00:00  FCA proposes ban on cryptocurrency products  T...     The Guardian  FCA proposes ban on cryptocurrency products - ...                         https://www.theguardian.com/technology/2019/jul/03/fca-proposes-ban-on-cryptocurrency-products
+2019-07-05 06:15:21+00:00  The Crypto Daily – The Movers and Shakers 05/0...    Yahoo Finance  The Crypto Daily – The Movers and Shakers 05/0...                                           https://finance.yahoo.com/news/crypto-daily-movers-shakers-05-011131072.html
+2019-07-05 07:45:00+00:00  You can now buy shares in this brewery using c...     The Next Web  You can now buy shares in this brewery using c...                               https://thenextweb.com/hardfork/2019/07/05/brewdog-shares-equity-cryptocurrency-bitcoin/
 ```
 
 ## Running tests

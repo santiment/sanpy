@@ -361,6 +361,31 @@ def eth_top_transactions(idx, slug, **kwargs):
     return query_str
 
 
+def news(idx, tag, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: news(
+        tag: \"{tag}\",
+        from: \"{from_date}\",
+        to: \"{to_date}\",
+        size: {size}
+    ){{
+        datetime,
+        description,
+        sourceName,
+        title,
+        url
+    }}
+    """.format(
+        idx=idx,
+        tag=tag,
+        **kwargs
+    )
+
+    return query_str
+
+
 def ohlcv(idx, slug, **kwargs):
     return_fields = [
         'openPriceUsd',
