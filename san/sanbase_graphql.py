@@ -372,9 +372,9 @@ def news(idx, tag, **kwargs):
         size: {size}
     ){{
         datetime,
+        title,
         description,
         sourceName,
-        title,
         url
     }}
     """.format(

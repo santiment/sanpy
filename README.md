@@ -1136,12 +1136,14 @@ Example result:
 
 **The result is shortened for convenience**
 ```
-                 datetime                                        description       sourceName                                              title                                                                                                                    url                                                   
-2019-06-16 22:08:54+00:00  Litecoin’s Charlie Lee Joins Warren Buffett’s ...      CCN Markets  Litecoin’s Charlie Lee Joins Warren Buffett’s ...  https://www.ccn.com/crypto/litecoins-charlie-lee-joins-warren-buffetts-crypto-power-lunch-with-justin-sun/2019/06/16/
-2019-06-26 06:11:15+00:00  The Crypto Daily – The Movers and Shakers 26/0...    Yahoo Finance  The Crypto Daily – The Movers and Shakers 26/0...                                           https://finance.yahoo.com/news/crypto-daily-movers-shakers-26-061640313.html
-2019-07-03 10:06:00+00:00  FCA proposes ban on cryptocurrency products  T...     The Guardian  FCA proposes ban on cryptocurrency products - ...                         https://www.theguardian.com/technology/2019/jul/03/fca-proposes-ban-on-cryptocurrency-products
-2019-07-05 06:15:21+00:00  The Crypto Daily – The Movers and Shakers 05/0...    Yahoo Finance  The Crypto Daily – The Movers and Shakers 05/0...                                           https://finance.yahoo.com/news/crypto-daily-movers-shakers-05-011131072.html
-2019-07-05 07:45:00+00:00  You can now buy shares in this brewery using c...     The Next Web  You can now buy shares in this brewery using c...                               https://thenextweb.com/hardfork/2019/07/05/brewdog-shares-equity-cryptocurrency-bitcoin/
+
+datetime                                                               title                                        description       sourceName                                                                                                       url                                                                                                                                
+2019-04-26 18:39:00+00:00  Crypto Markets Slump, Oil Prices Report Losses...  Crypto Markets Slump, Oil Prices Report Losses...    Cointelegraph                              https://cointelegraph.com/news/crypto-markets-slump-oil-prices-report-losses
+2019-05-17 09:02:07+00:00  Debt-Ridden Crypto Exchange Cryptopia Suckers ...  Debt-Ridden Crypto Exchange Cryptopia Suckers ...              CCN                  https://www.ccn.com/debt-ridden-crypto-exchange-cryptopia-suckers-hacked-customers-again
+2019-05-27 18:56:15+00:00  Institutions Could Push Crypto Past A ‘Point O...  Institutions Could Push Crypto Past A ‘Point O...  Crypto Briefing                                          https://cryptobriefing.com/institutional-crypto-point-no-return/
+2019-06-22 14:31:00+00:00  ETH Hits 10-Month High as Crypto Markets See S...  ETH Hits 10-Month High as Crypto Markets See S...    Cointelegraph                   https://cointelegraph.com/news/eth-hits-10-month-high-as-crypto-markets-see-solid-green
+2019-07-06 18:42:00+00:00  Iranian Official Says US Congress is Working t...  Iranian Official Says US Congress is Working t...    Cointelegraph  https://cointelegraph.com/news/iranian-official-says-us-congress-is-working-to-block-irans-crypto-mining
+
 ```
 
 ## Running tests
