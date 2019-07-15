@@ -1,6 +1,7 @@
 import san.sanbase_graphql
 from san.error import SanError
 
+
 def get_gql_query(idx, dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     return getattr(
