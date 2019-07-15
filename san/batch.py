@@ -1,7 +1,5 @@
-from san.query import get_gql_query
+from san.query import get_gql_query, transform_query
 from san.graphql import execute_gql
-from san.pandas_utils import convert_to_datetime_idx_df
-
 
 class Batch:
 
@@ -23,8 +21,8 @@ class Batch:
 
         idxs = sorted([int(k.split('_')[1]) for k in res.keys()])
         for idx in idxs:
-            key = "query_{}".format(idx)
-            df = convert_to_datetime_idx_df(res[key])
+            query = self.queries[idx][0].split("/")[0]
+            df = transform_query(idx, query, res)
             result.append(df)
 
         return result
