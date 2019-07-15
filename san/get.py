@@ -7,6 +7,7 @@ CUSTOM_QUERIES = {
     'ohlcv': 'get_ohlcv',
 }
 
+
 def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in CUSTOM_QUERIES:
