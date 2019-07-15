@@ -1,88 +1,88 @@
 
 # sanpy
-[![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
+[![PyPI version](https: // badge.fury.io / py / sanpy.svg)](https: // badge.fury.io / py / sanpy)
 
 Santiment API python client.
 
-## Table of contents
+# Table of contents
 
-- [Table of contents](#table-of-contents)
-  - [Installation](#installation)
-  - [Upgrade to latest version](#upgrade-to-latest-version)
-  - [Configuration](#configuration)
-  - [Retrieving data from the API](#retrieving-data-from-the-api)
-    - [Fetch single metric](#fetch-single-metric)
-    - [Batching multiple queries](#batching-multiple-queries)
-  - [Available metrics](#available-metrics)
-    - [All Projects](#all-projects)
-    - [ERC20 Projects](#erc20-projects)
-    - [Daily Active Addresses](#daily-active-addresses)
-    - [Network Growth](#network-growth)
-    - [Burn Rate - deprecated, replaced by 'Token Age Consumed'](#burn-rate---deprecated-replaced-by-token-age-consumed)
-    - [Token Age Consumed](#token-age-consumed)
-    - [Average Token Age Consumed in Days](#average-token-age-consumed-in-days)
-    - [Transaction volume](#transaction-volume)
-    - [Token Velocity](#token-velocity)
-    - [Token Circulation](#token-circulation)
-    - [Realized Value](#realized-value)
-    - [MVRV Ratio](#mvrv-ratio)
-    - [NVT Ratio](#nvt-ratio)
-    - [Daily Active Deposits](#daily-active-deposits)
-    - [Github Activity](#github-activity)
-    - [Prices](#prices)
-    - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
-    - [Exchange Funds Flow](#exchange-funds-flow)
-    - [Social Volume Projects](#social-volume-projects)
-    - [Social Volume](#social-volume)
-    - [Share of Deposits](#share-of-deposits)
-    - [Gas Used](#gas-used)
-    - [Miners Balance](#miners-balance)
-    - [Mining Pools Distribution](#mining-pools-distribution)
-    - [Historical Balance](#historical-balance)
-    - [Social Dominance](#social-dominance)
-    - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
-    - [Ethereum Top Transactions](#ethereum-top-transactions)
-  - [Running tests](#running-tests)
-  - [Running integration tests](#running-integration-tests)
+- [Table of contents](  # table-of-contents)
+  - [Installation](  # installation)
+  - [Upgrade to latest version](  # upgrade-to-latest-version)
+  - [Configuration](  # configuration)
+  - [Retrieving data from the API](  # retrieving-data-from-the-api)
+    - [Fetch single metric](  # fetch-single-metric)
+    - [Batching multiple queries](  # batching-multiple-queries)
+  - [Available metrics](  # available-metrics)
+    - [All Projects](  # all-projects)
+    - [ERC20 Projects](  # erc20-projects)
+    - [Daily Active Addresses](  # daily-active-addresses)
+    - [Network Growth](  # network-growth)
+    - [Burn Rate - deprecated, replaced by 'Token Age Consumed'](  # burn-rate---deprecated-replaced-by-token-age-consumed)
+    - [Token Age Consumed](  # token-age-consumed)
+    - [Average Token Age Consumed in Days](  # average-token-age-consumed-in-days)
+    - [Transaction volume](  # transaction-volume)
+    - [Token Velocity](  # token-velocity)
+    - [Token Circulation](  # token-circulation)
+    - [Realized Value](  # realized-value)
+    - [MVRV Ratio](  # mvrv-ratio)
+    - [NVT Ratio](  # nvt-ratio)
+    - [Daily Active Deposits](  # daily-active-deposits)
+    - [Github Activity](  # github-activity)
+    - [Prices](  # prices)
+    - [Open, High, Close, Low Prices, Volume, Marketcap](  # open-high-close-low-prices-volume-marketcap)
+    - [Exchange Funds Flow](  # exchange-funds-flow)
+    - [Social Volume Projects](  # social-volume-projects)
+    - [Social Volume](  # social-volume)
+    - [Share of Deposits](  # share-of-deposits)
+    - [Gas Used](  # gas-used)
+    - [Miners Balance](  # miners-balance)
+    - [Mining Pools Distribution](  # mining-pools-distribution)
+    - [Historical Balance](  # historical-balance)
+    - [Social Dominance](  # social-dominance)
+    - [Top Holders Percent of Total Supply](  # top-holders-percent-of-total-supply)
+    - [Ethereum Top Transactions](  # ethereum-top-transactions)
+  - [Running tests](  # running-tests)
+  - [Running integration tests](  # running-integration-tests)
 
-## Installation
+# Installation
 
 ```
 pip install sanpy
 ```
 
-## Upgrade to latest version
+# Upgrade to latest version
 
 ```
-pip install --upgrade sanpy
+pip install - -upgrade sanpy
 ```
 
-## Premium metrics
-In order to access real time data or historical data (older than 3 months),
-you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
+# Premium metrics
+In order to access real time data or historical data(older than 3 months),
+you'll need to set the[api key](  # configuration) and have some SAN tokens in your account.
 All premium metrics are free for "santiment" token.
 
-## Configuration
+# Configuration
 
 Optionally you can provide an api key which gives access to some premium metrics:
 
 ```python
 import san
-san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
+san.ApiConfig.api_key='api-key-provided-by-sanbase'
 ```
 
-To obtain an api key you should [log in to sanbase](https://app.santiment.net/login)
-and go to the `account` page - [https://app.santiment.net/account](https://app.santiment.net/account).
+To obtain an api key you should[log in to sanbase](https: // app.santiment.net / login)
+and go to the `account` page - [https: // app.santiment.net / account](https: // app.santiment.net / account).
 There is an `API Keys` section and a `Generate new api key` button.
 
 If the account used for generating the api key has enough SAN tokens, the api key will give you
 access to the data that requires SAN token staking. The api key can only be used to fetch data and not to execute graphql mutations.
 
-## Retrieving data from the API
+# Retrieving data from the API
 
-The data is fetched by providing a string in the format `query/slug` and additional parameters.
+The data is fetched by providing a string in the format `query / slug` and additional parameters.
 
-- `query`: Available queries can be found in section: [Available metrics](#available-metrics)
+- `query`: Available queries can be found in section: [Available metrics](  # available-metrics)
 - `slug`: A list of projects with their slugs, names, etc. can be fetched like this:
 
 ```python
@@ -100,7 +100,7 @@ san.get("projects/all")
 
 Parameters:
 
-- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
+- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018 - 06 - 01`
 - `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
 Default values for parameters:
@@ -109,9 +109,9 @@ Default values for parameters:
 - `to_date`: `datetime.now()`
 - `interval`: `'1d'`
 
-The returned value for time-series data is in `pandas DataFrame` format indexed by `datetime`.
+The returned value for time - series data is in `pandas DataFrame` format indexed by `datetime`.
 
-### Fetch single metric
+# Fetch single metric
 
 ```python
 import san
@@ -138,12 +138,12 @@ san.get("daily_active_addresses/santiment")
 san.get("prices/santiment")
 ```
 
-### Batching multiple queries
+# Batching multiple queries
 
 ```python
 from san import Batch
 
-batch = Batch()
+batch=Batch()
 
 batch.get(
     "daily_active_addresses/santiment",
@@ -159,14 +159,14 @@ batch.get(
     interval="1d"
 )
 
-[daa1, daa2] = batch.execute()
+[daa1, daa2]=batch.execute()
 ```
 
-## Available metrics
+# Available metrics
 
 Below are described some available metrics and are given examples for fetching and for the returned format.
 
-### All Projects
+# All Projects
 
 Returns a DataFrame with all the projects available in the Santiment API. Not all
 metrics will be available for all the projects. The `slug` is a unique identifier
@@ -185,13 +185,13 @@ Example result:
 2           0xBitcoin            0xbtc  0xBTC      20999984
 3     0xcert Protocol           0xcert    ZXC     500000000
 4              1World           1world    1WO      37219453
-5        AB-Chain RTB     ab-chain-rtb    RTB      27857813
+5        AB - Chain RTB     ab - chain - rtb    RTB      27857813
 6             Abulaba          abulaba    AAA     397000000
 7                 AC3              ac3    AC3    80235326.0
 ...
 ```
 
-### ERC20 Projects
+# ERC20 Projects
 
 Returns a DataFrame with all the ERC20 projects available in the Santiment API.
 Not all metrics will be available for all the projects. The `slug` is a unique
@@ -210,17 +210,17 @@ Example result:
 2                0xBitcoin                  0xbtc  0xBTC      20999984
 3          0xcert Protocol                 0xcert    ZXC     500000000
 4                   1World                 1world    1WO      37219453
-5             AB-Chain RTB           ab-chain-rtb    RTB      27857813
+5             AB - Chain RTB           ab - chain - rtb    RTB      27857813
 6                  Abulaba                abulaba    AAA     397000000
 7                   adbank                 adbank    ADB    1000000000
 ...
 ```
 
-### Daily Active Addresses
+# Daily Active Addresses
 
 This metric includes the number of unique addresses that participated in the transfers of given token during the day.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -236,18 +236,18 @@ Example result:
 ```
                            activeAddresses
 datetime
-2018-06-01 00:00:00+00:00                2
-2018-06-02 00:00:00+00:00                4
-2018-06-03 00:00:00+00:00                6
-2018-06-04 00:00:00+00:00                6
-2018-06-05 00:00:00+00:00               14
+2018 - 06 - 01 00: 00: 00 + 00: 00                2
+2018 - 06 - 02 00: 00: 00 + 00: 00                4
+2018 - 06 - 03 00: 00: 00 + 00: 00                6
+2018 - 06 - 04 00: 00: 00 + 00: 00                6
+2018 - 06 - 05 00: 00: 00 + 00: 00               14
 ```
 
-### Network Growth
+# Network Growth
 
 Network Growth shows the number of new addresses being created on the project network each day.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -261,20 +261,20 @@ san.get(
 ```
                           newAddresses
 datetime
-2018-12-01 00:00:00+00:00            3
-2018-12-02 00:00:00+00:00            2
-2018-12-03 00:00:00+00:00            6
-2018-12-04 00:00:00+00:00            2
-2018-12-05 00:00:00+00:00            1
+2018 - 12 - 01 00: 00: 00 + 00: 00            3
+2018 - 12 - 02 00: 00: 00 + 00: 00            2
+2018 - 12 - 03 00: 00: 00 + 00: 00            6
+2018 - 12 - 04 00: 00: 00 + 00: 00            2
+2018 - 12 - 05 00: 00: 00 + 00: 00            1
 ```
 
-### Burn Rate - deprecated, replaced by 'Token Age Consumed'
+# Burn Rate - deprecated, replaced by 'Token Age Consumed'
 
 Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying
 the number of tokens moved by the number of blocks in which they appeared.
 Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 Burn rate returns the same results as 'Token Age Consumed' and will be removed in the near future.
 
@@ -291,22 +291,22 @@ Example result:
 
 ```
                                burnRate
-datetime                                   
-2018-05-01 00:00:00+00:00      2.514926e+09
-2018-05-02 00:00:00+00:00      1.363158e+10
-2018-05-03 00:00:00+00:00      2.182971e+09
-2018-05-04 00:00:00+00:00      9.731035e+09
-2018-05-05 00:00:00+00:00      2.867054e+10
+datetime
+2018 - 05 - 01 00: 00: 00 + 00: 00      2.514926e+09
+2018 - 05 - 02 00: 00: 00 + 00: 00      1.363158e+10
+2018 - 05 - 03 00: 00: 00 + 00: 00      2.182971e+09
+2018 - 05 - 04 00: 00: 00 + 00: 00      9.731035e+09
+2018 - 05 - 05 00: 00: 00 + 00: 00      2.867054e+10
 ```
 
-### Token Age Consumed
+# Token Age Consumed
 
 Each transaction has an equivalent 'Age consumed' record. The consumed age is calculated by multiplying
 the number of tokens moved by the number of blocks in which they appeared.
 Spikes in consumed token age could indicate large transactions or movement of tokens that
 have been held for a long time.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -321,20 +321,20 @@ Example result:
 
 ```
                            tokenAgeConsumed
-datetime                                   
-2018-05-01 00:00:00+00:00      2.514926e+09
-2018-05-02 00:00:00+00:00      1.363158e+10
-2018-05-03 00:00:00+00:00      2.182971e+09
-2018-05-04 00:00:00+00:00      9.731035e+09
-2018-05-05 00:00:00+00:00      2.867054e+10
+datetime
+2018 - 05 - 01 00: 00: 00 + 00: 00      2.514926e+09
+2018 - 05 - 02 00: 00: 00 + 00: 00      1.363158e+10
+2018 - 05 - 03 00: 00: 00 + 00: 00      2.182971e+09
+2018 - 05 - 04 00: 00: 00 + 00: 00      9.731035e+09
+2018 - 05 - 05 00: 00: 00 + 00: 00      2.867054e+10
 ```
 
-### Average Token Age Consumed in Days
+# Average Token Age Consumed in Days
 
 Based on 'Token Age Consumed' above, this returns the Token Age that gets consumed on
 average over the interval. The result is given in days instead of blocks.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 
 ```python
@@ -350,21 +350,21 @@ Example result:
 
 ```
                              tokenAge
-datetime                             
-2018-05-01 00:00:00+00:00    6.353738
-2018-05-02 00:00:00+00:00   22.303985
-2018-05-03 00:00:00+00:00    3.873644
-2018-05-04 00:00:00+00:00  140.566428
-2018-05-05 00:00:00+00:00   56.730010
+datetime
+2018 - 05 - 01 00: 00: 00 + 00: 00    6.353738
+2018 - 05 - 02 00: 00: 00 + 00: 00   22.303985
+2018 - 05 - 03 00: 00: 00 + 00: 00    3.873644
+2018 - 05 - 04 00: 00: 00 + 00: 00  140.566428
+2018 - 05 - 05 00: 00: 00 + 00: 00   56.730010
 ```
 
 
-### Transaction Volume
+# Transaction Volume
 
 Total amount of tokens for a project that were transacted on the blockchain.
-This metric includes only on-chain volume, not volume in exchanges.
+This metric includes only on - chain volume, not volume in exchanges.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 
 ```python
@@ -380,21 +380,21 @@ Example result:
 
 ```
                            transactionVolume
-datetime                                    
-2018-06-01 00:00:00+00:00          46.848943
-2018-06-02 00:00:00+00:00         666.194095
-2018-06-03 00:00:00+00:00       31326.856743
-2018-06-04 00:00:00+00:00        1371.245641
-2018-06-05 00:00:00+00:00       42825.036598
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00          46.848943
+2018 - 06 - 02 00: 00: 00 + 00: 00         666.194095
+2018 - 06 - 03 00: 00: 00 + 00: 00       31326.856743
+2018 - 06 - 04 00: 00: 00 + 00: 00        1371.245641
+2018 - 06 - 05 00: 00: 00 + 00: 00       42825.036598
 ```
 
-### Token Velocity
+# Token Velocity
 
 Token Velocity returns the average number of times that a token changes wallets over the interval.
 Simply put, a higher token velocity means that the same token is used in transactions more
 often within a set time frame.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 
 ```python
@@ -409,20 +409,20 @@ Example result:
 
 ```
                            tokenVelocity
-datetime                                
-2018-06-01 00:00:00+00:00           1.00
-2018-06-02 00:00:00+00:00           3.00
-2018-06-03 00:00:00+00:00           1.97
-2018-06-04 00:00:00+00:00           1.00
-2018-06-05 00:00:00+00:00           2.92
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00           1.00
+2018 - 06 - 02 00: 00: 00 + 00: 00           3.00
+2018 - 06 - 03 00: 00: 00 + 00: 00           1.97
+2018 - 06 - 04 00: 00: 00 + 00: 00           1.00
+2018 - 06 - 05 00: 00: 00 + 00: 00           2.92
 ```
 
-### Token Circulation
+# Token Circulation
 
 Token Circulation returns the total amount of tokens that have been sent at least once during
 each given time period. Minimum interval is '1d'.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 
 ```python
@@ -437,21 +437,21 @@ Example result:
 
 ```
                            tokenCirculation
-datetime                                   
-2018-06-01 00:00:00+00:00         46.848943
-2018-06-02 00:00:00+00:00        222.194095
-2018-06-03 00:00:00+00:00      15933.955221
-2018-06-04 00:00:00+00:00       1371.245641
-2018-06-05 00:00:00+00:00      14678.249398
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00         46.848943
+2018 - 06 - 02 00: 00: 00 + 00: 00        222.194095
+2018 - 06 - 03 00: 00: 00 + 00: 00      15933.955221
+2018 - 06 - 04 00: 00: 00 + 00: 00       1371.245641
+2018 - 06 - 05 00: 00: 00 + 00: 00      14678.249398
 ```
 
-### Realized Value
+# Realized Value
 
 Realized Value returns the total acquisition cost of all tokens on the network,
 based on the historical price when each coin was last sent, in USD.
 Returns RV for all tokens and RV for all tokens known to be on exchanges.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -466,20 +466,20 @@ Example result:
 
 ```
                            nonExchangeRealizedValue  realizedValue
-datetime                                                          
-2018-06-01 00:00:00+00:00              2.334917e+07   9.248495e+07
-2018-06-02 00:00:00+00:00              2.334917e+07   9.248498e+07
-2018-06-03 00:00:00+00:00              2.335106e+07   9.248275e+07
-2018-06-04 00:00:00+00:00              2.335138e+07   9.248269e+07
-2018-06-05 00:00:00+00:00              2.335073e+07   9.243114e+07
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00              2.334917e+07   9.248495e+07
+2018 - 06 - 02 00: 00: 00 + 00: 00              2.334917e+07   9.248498e+07
+2018 - 06 - 03 00: 00: 00 + 00: 00              2.335106e+07   9.248275e+07
+2018 - 06 - 04 00: 00: 00 + 00: 00              2.335138e+07   9.248269e+07
+2018 - 06 - 05 00: 00: 00 + 00: 00              2.335073e+07   9.243114e+07
 ```
 
-### MVRV Ratio
+# MVRV Ratio
 
-MVRV ratio returns the ratio of the market value of all tokens (market cap) to the
+MVRV ratio returns the ratio of the market value of all tokens(market cap) to the
 realized value of all tokens.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 
 ```python
@@ -495,20 +495,20 @@ Example result:
 
 ```
                               ratio
-datetime                           
-2018-06-01 00:00:00+00:00  0.836489
-2018-06-02 00:00:00+00:00  0.850379
-2018-06-03 00:00:00+00:00  0.848195
-2018-06-04 00:00:00+00:00  0.822243
-2018-06-05 00:00:00+00:00  0.781964
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00  0.836489
+2018 - 06 - 02 00: 00: 00 + 00: 00  0.850379
+2018 - 06 - 03 00: 00: 00 + 00: 00  0.848195
+2018 - 06 - 04 00: 00: 00 + 00: 00  0.822243
+2018 - 06 - 05 00: 00: 00 + 00: 00  0.781964
 ```
 
-### NVT Ratio
+# NVT Ratio
 
-NVT ratio returns the Network-Value-to-Transactions ratio. We use the market cap as network value
+NVT ratio returns the Network - Value - to - Transactions ratio. We use the market cap as network value
 and either token circulation or transaction volume as a measurement for transactions, returning two values.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -523,20 +523,20 @@ Example result:
 
 ```
                            nvtRatioCirculation  nvtRatioTxVolume
-datetime                                                        
-2018-06-01 00:00:00+00:00         1.337498e+06      1.337498e+06
-2018-06-02 00:00:00+00:00         2.820074e+05      9.405723e+04
-2018-06-03 00:00:00+00:00         3.868500e+03      2.000213e+03
-2018-06-04 00:00:00+00:00         4.569595e+04      4.569595e+04
-2018-06-05 00:00:00+00:00         4.268927e+03      1.463171e+03
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00         1.337498e+06      1.337498e+06
+2018 - 06 - 02 00: 00: 00 + 00: 00         2.820074e+05      9.405723e+04
+2018 - 06 - 03 00: 00: 00 + 00: 00         3.868500e+03      2.000213e+03
+2018 - 06 - 04 00: 00: 00 + 00: 00         4.569595e+04      4.569595e+04
+2018 - 06 - 05 00: 00: 00 + 00: 00         4.268927e+03      1.463171e+03
 ```
 
-### Daily Active Deposits
+# Daily Active Deposits
 
 Daily Active Deposits, similar to Daily Active Addresses, returns the number of unique addresses
 that participated in the transfers of tokens to exchange deposit addresses during the day.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -551,22 +551,22 @@ Example result:
 
 ```
                            activeDeposits
-datetime                                 
-2018-06-01 00:00:00+00:00               0
-2018-06-02 00:00:00+00:00               2
-2018-06-03 00:00:00+00:00               0
-2018-06-04 00:00:00+00:00               2
-2018-06-05 00:00:00+00:00               6
+datetime
+2018 - 06 - 01 00: 00: 00 + 00: 00               0
+2018 - 06 - 02 00: 00: 00 + 00: 00               2
+2018 - 06 - 03 00: 00: 00 + 00: 00               0
+2018 - 06 - 04 00: 00: 00 + 00: 00               2
+2018 - 06 - 05 00: 00: 00 + 00: 00               6
 ```
 
 
-### Github Activity
+# Github Activity
 
 Returns a list of github activity for a given slug and time interval.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
-[An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
+[An article explaining the github activity tracking](https: // medium.com / santiment / tracking - github - activity - of - crypto - projects - introducing - a - better - approach - 9fb1af3f1c32)
 
 ```python
 san.get(
@@ -582,9 +582,9 @@ Example result:
 ```
                            activity
 datetime
-2018-05-02 00:00:00+00:00        32
-2018-05-03 00:00:00+00:00         9
-2018-05-04 00:00:00+00:00        18
+2018 - 05 - 02 00: 00: 00 + 00: 00        32
+2018 - 05 - 03 00: 00: 00 + 00: 00         9
+2018 - 05 - 04 00: 00: 00 + 00: 00        18
 ```
 
 You can also fetch only events connected to development activity by using the `devActivity` query.
@@ -603,12 +603,12 @@ Example result:
 ```
                            activity
 datetime
-2018-05-02 00:00:00+00:00        29
-2018-05-03 00:00:00+00:00         9
-2018-05-04 00:00:00+00:00        16
+2018 - 05 - 02 00: 00: 00 + 00: 00        29
+2018 - 05 - 03 00: 00: 00 + 00: 00         9
+2018 - 05 - 04 00: 00: 00 + 00: 00        16
 ```
 
-### Prices
+# Prices
 
 Fetch history price in USD or BTC, traded volume and marketcap for a given slug.
 
@@ -633,20 +633,20 @@ Example result:
 ```
                               marketcap  priceBtc  priceUsd   volume
 datetime
-2018-06-01 00:00:00+00:00  7.736268e+07  0.000165  1.234635   852857
-2018-06-02 00:00:00+00:00  7.864724e+07  0.000165  1.255135  1242520
-2018-06-03 00:00:00+00:00  7.844339e+07  0.000163  1.251882  1032910
-2018-06-04 00:00:00+00:00  7.604326e+07  0.000160  1.213578   617451
+2018 - 06 - 01 00: 00: 00 + 00: 00  7.736268e+07  0.000165  1.234635   852857
+2018 - 06 - 02 00: 00: 00 + 00: 00  7.864724e+07  0.000165  1.255135  1242520
+2018 - 06 - 03 00: 00: 00 + 00: 00  7.844339e+07  0.000163  1.251882  1032910
+2018 - 06 - 04 00: 00: 00 + 00: 00  7.604326e+07  0.000160  1.213578   617451
 
                               marketcap  priceBtc    priceUsd      volume
 datetime
-2018-06-01 00:00:00+00:00  5.756716e+10  0.077083  576.825315  1945890000
-2018-06-02 00:00:00+00:00  5.875660e+10  0.077475  588.620775  1880390000
-2018-06-03 00:00:00+00:00  6.097134e+10  0.079460  610.682490  1832550000
-2018-06-04 00:00:00+00:00  6.015676e+10  0.079466  602.399792  1903430000
+2018 - 06 - 01 00: 00: 00 + 00: 00  5.756716e+10  0.077083  576.825315  1945890000
+2018 - 06 - 02 00: 00: 00 + 00: 00  5.875660e+10  0.077475  588.620775  1880390000
+2018 - 06 - 03 00: 00: 00 + 00: 00  6.097134e+10  0.079460  610.682490  1832550000
+2018 - 06 - 04 00: 00: 00 + 00: 00  6.015676e+10  0.079466  602.399792  1903430000
 ```
 
-### Open, High, Close, Low Prices, Volume, Marketcap
+# Open, High, Close, Low Prices, Volume, Marketcap
 
 Note: this query cannot be batched!
 
@@ -664,18 +664,18 @@ Example result:
 ```
                            openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume     marketcap
 datetime
-2018-06-01 00:00:00+00:00       1.24380        1.27668       1.26599      1.19099   852857  7.736268e+07
-2018-06-02 00:00:00+00:00       1.26136        1.30779       1.27612      1.20958  1242520  7.864724e+07
-2018-06-03 00:00:00+00:00       1.28270        1.28357       1.24625      1.21872  1032910  7.844339e+07
-2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528      1.18010   617451  7.604326e+07
+2018 - 06 - 01 00: 00: 00 + 00: 00       1.24380        1.27668       1.26599      1.19099   852857  7.736268e+07
+2018 - 06 - 02 00: 00: 00 + 00: 00       1.26136        1.30779       1.27612      1.20958  1242520  7.864724e+07
+2018 - 06 - 03 00: 00: 00 + 00: 00       1.28270        1.28357       1.24625      1.21872  1032910  7.844339e+07
+2018 - 06 - 04 00: 00: 00 + 00: 00       1.23276        1.24910       1.18528      1.18010   617451  7.604326e+07
 ```
 
-### Exchange Funds Flow
+# Exchange Funds Flow
 
 Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn
 from an exchange for a given slug in the selected time period.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -691,14 +691,14 @@ Example result:
 ```
                          inOutDifference
 datetime
-2018-04-16 10:02:19+00:00    -208.797310
-2018-04-17 00:00:00+00:00     164.006467
-2018-04-18 00:00:00+00:00       0.000000
-2018-04-19 00:00:00+00:00  -45213.112849
-2018-04-20 00:00:00+00:00 -135364.839572
+2018 - 04 - 16 10: 02: 19 + 00: 00 - 208.797310
+2018 - 04 - 17 00: 00: 00 + 00: 00     164.006467
+2018 - 04 - 18 00: 00: 00 + 00: 00       0.000000
+2018 - 04 - 19 00: 00: 00 + 00: 00 - 45213.112849
+2018 - 04 - 20 00: 00: 00 + 00: 00 - 135364.839572
 ```
 
-### Social Volume Projects
+# Social Volume Projects
 
 Fetch a list of slugs for which there is social volume data.
 
@@ -711,13 +711,13 @@ Example result:
 ```
                    0
 0            cardano
-1       bitcoin-cash
+1       bitcoin - cash
 2            bitcoin
 3        dragonchain
 4                eos
-5   ethereum-classic
+5   ethereum - classic
 6           ethereum
-7      kyber-network
+7      kyber - network
 8           litecoin
 9               iota
 10          ontology
@@ -729,22 +729,22 @@ Example result:
 16                0x
 ```
 
-### Social Volume
+# Social Volume
 
 Fetch a list of mentions count for a given project and time interval.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 Arguments description:
 
-- `endpoint` - social_volume/project_slug
+- `endpoint` - social_volume / project_slug
 - `interval` - an integer followed by one of: `m`, `h`, `d`, `w`
 - `from_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 - `to_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
 - `social_volume_type` - the source of mention counts, one of the following:
   * "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
-  * "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
-  * "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat (if there is one)
+  * "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat(if there is one)
+  * "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat(if there is one)
   * "DISCORD_DISCUSSION_OVERVIEW" - shows how many times the given project has been mentioned in the discord channels
 
 ```python
@@ -762,21 +762,21 @@ Example result:
 ```
                            mentionsCount
 datetime
-2018-04-17 00:00:00+00:00              4
-2018-04-18 00:00:00+00:00              8
-2018-04-19 00:00:00+00:00              7
-2018-04-20 00:00:00+00:00              1
-2018-04-21 00:00:00+00:00              3
-2018-04-22 00:00:00+00:00              2
-2018-04-23 00:00:00+00:00              1
+2018 - 04 - 17 00: 00: 00 + 00: 00              4
+2018 - 04 - 18 00: 00: 00 + 00: 00              8
+2018 - 04 - 19 00: 00: 00 + 00: 00              7
+2018 - 04 - 20 00: 00: 00 + 00: 00              1
+2018 - 04 - 21 00: 00: 00 + 00: 00              3
+2018 - 04 - 22 00: 00: 00 + 00: 00              2
+2018 - 04 - 23 00: 00: 00 + 00: 00              1
 ```
 
-### Topic search
+# Topic search
 
 Returns lists with the mentions of the search phrase from the selected source.
 The results are in two formats - the messages themselves and the data for building graph representation of the result.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 Arguments description:
 
@@ -830,17 +830,17 @@ Example result:
 
 ```
                                             chartData
-0   {'mentionsCount': 224, 'datetime': '2018-08-01...
-1   {'mentionsCount': 266, 'datetime': '2018-08-01...
-2   {'mentionsCount': 191, 'datetime': '2018-08-02...
+0   {'mentionsCount': 224, 'datetime': '2018 - 08 - 01...
+1   {'mentionsCount': 266, 'datetime': '2018 - 08 - 01...
+2   {'mentionsCount': 191, 'datetime': '2018 - 08 - 02...
 ```
 
 
-### Share of Deposits
+# Share of Deposits
 
 Returns information for the shares of deposits that a given project has during the time interval.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -856,22 +856,22 @@ Example result:
 
 ```
                            activeAddresses  activeDeposits  shareOfDeposits
-datetime                                                                   
-2019-01-01 00:00:00+00:00                5               1        20.000000
-2019-01-02 00:00:00+00:00                2               0         0.000000
-2019-01-03 00:00:00+00:00               13               2        15.384615
-2019-01-04 00:00:00+00:00                8               2        25.000000
-2019-01-05 00:00:00+00:00                7               1        14.285714
+datetime
+2019 - 01 - 01 00: 00: 00 + 00: 00                5               1        20.000000
+2019 - 01 - 02 00: 00: 00 + 00: 00                2               0         0.000000
+2019 - 01 - 03 00: 00: 00 + 00: 00               13               2        15.384615
+2019 - 01 - 04 00: 00: 00 + 00: 00                8               2        25.000000
+2019 - 01 - 05 00: 00: 00 + 00: 00                7               1        14.285714
 
 ```
 
-### Gas Used
+# Gas Used
 
 Returns used Gas by a blockchain. When you send tokens, interact with a contract or
 do anything else on the blockchain, you must pay for that computation.
 That payment is calculated in Gas. Currently only ETH is supported.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -886,18 +886,18 @@ Example result:
 
 ```
 datetime                       gasUsed
-2019-06-01 00:00:00+00:00  47405557702
-2019-06-02 00:00:00+00:00  44769162038
-2019-06-03 00:00:00+00:00  46415901420
-2019-06-04 00:00:00+00:00  46907686393
-2019-06-05 00:00:00+00:00  45925073341
+2019 - 06 - 01 00: 00: 00 + 00: 00  47405557702
+2019 - 06 - 02 00: 00: 00 + 00: 00  44769162038
+2019 - 06 - 03 00: 00: 00 + 00: 00  46415901420
+2019 - 06 - 04 00: 00: 00 + 00: 00  46907686393
+2019 - 06 - 05 00: 00: 00 + 00: 00  45925073341
 ```
 
-### Miners Balance
+# Miners Balance
 
 Returns miner balances over time. Currently only ETH is supported.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -912,18 +912,18 @@ Example result:
 
 ```
 datetime                        balance
-2019-06-01 00:00:00+00:00  1.529488e+06
-2019-06-02 00:00:00+00:00  1.533494e+06
-2019-06-03 00:00:00+00:00  1.527438e+06
-2019-06-04 00:00:00+00:00  1.525666e+06
-2019-06-05 00:00:00+00:00  1.527563e+06
+2019 - 06 - 01 00: 00: 00 + 00: 00  1.529488e+06
+2019 - 06 - 02 00: 00: 00 + 00: 00  1.533494e+06
+2019 - 06 - 03 00: 00: 00 + 00: 00  1.527438e+06
+2019 - 06 - 04 00: 00: 00 + 00: 00  1.525666e+06
+2019 - 06 - 05 00: 00: 00 + 00: 00  1.527563e+06
 ```
 
-### Mining Pools Distribution
+# Mining Pools Distribution
 
 Returns distribution of miners between mining pools. What part of the miners are using top3, top10 and all the other pools. Currently only ETH is supported.
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -938,14 +938,14 @@ Example result:
 
 ```
 datetime                      other     top10      top3
-2019-06-01 00:00:00+00:00  0.129237  0.249906  0.620857
-2019-06-02 00:00:00+00:00  0.127432  0.251903  0.620666
-2019-06-03 00:00:00+00:00  0.122058  0.249603  0.628339
-2019-06-04 00:00:00+00:00  0.127726  0.254982  0.617293
-2019-06-05 00:00:00+00:00  0.120436  0.265842  0.613722
+2019 - 06 - 01 00: 00: 00 + 00: 00  0.129237  0.249906  0.620857
+2019 - 06 - 02 00: 00: 00 + 00: 00  0.127432  0.251903  0.620666
+2019 - 06 - 03 00: 00: 00 + 00: 00  0.122058  0.249603  0.628339
+2019 - 06 - 04 00: 00: 00 + 00: 00  0.127726  0.254982  0.617293
+2019 - 06 - 05 00: 00: 00 + 00: 00  0.120436  0.265842  0.613722
 ```
 
-### Historical Balance
+# Historical Balance
 
 Historical balance for erc20 token or eth address. Returns the historical balance for a given address in the given interval.
 
@@ -963,14 +963,14 @@ Example result:
 
 ```
 datetime                     balance
-2019-04-08 00:00:00+00:00  47.658736
-2019-04-09 00:00:00+00:00  47.658736
-2019-04-10 00:00:00+00:00  47.658736
-2019-04-11 00:00:00+00:00  47.658736
-2019-04-12 00:00:00+00:00  47.658736
+2019 - 04 - 08 00: 00: 00 + 00: 00  47.658736
+2019 - 04 - 09 00: 00: 00 + 00: 00  47.658736
+2019 - 04 - 10 00: 00: 00 + 00: 00  47.658736
+2019 - 04 - 11 00: 00: 00 + 00: 00  47.658736
+2019 - 04 - 12 00: 00: 00 + 00: 00  47.658736
 ```
 
-### Social Dominance
+# Social Dominance
 
 Returns the % of the social dominance a given project has over time in a given social channel.
 
@@ -981,7 +981,7 @@ Available sources are:
 * REDDIT
 * ALL
 
-[Premium metric](#premium-metrics)
+[Premium metric](  # premium-metrics)
 
 ```python
 san.get(
@@ -996,16 +996,16 @@ san.get(
 Example result:
 
 ```
-datetime                   dominance         
-2019-04-08 00:00:00+00:00   0.043028
-2019-04-09 00:00:00+00:00   0.025337
-2019-04-10 00:00:00+00:00   0.045376
-2019-04-11 00:00:00+00:00   0.036051
-2019-04-12 00:00:00+00:00   0.035585
-2019-04-13 00:00:00+00:00   0.034957
+datetime                   dominance
+2019 - 04 - 08 00: 00: 00 + 00: 00   0.043028
+2019 - 04 - 09 00: 00: 00 + 00: 00   0.025337
+2019 - 04 - 10 00: 00: 00 + 00: 00   0.045376
+2019 - 04 - 11 00: 00: 00 + 00: 00   0.036051
+2019 - 04 - 12 00: 00: 00 + 00: 00   0.035585
+2019 - 04 - 13 00: 00: 00 + 00: 00   0.034957
 ```
 
-### Top Holders Percent Of Total Supply
+# Top Holders Percent Of Total Supply
 
 Returns the top holders' percent of total supply - in exchanges, outside exchanges and combined.
 
@@ -1021,13 +1021,13 @@ san.get(
 Example Result:
 
 ```
-datetime                   inExchanges  inTopHoldersTotal  outsideExchanges                                                
-2019-04-09 00:00:00+00:00     7.977318          13.277961          5.300643
-2019-04-10 00:00:00+00:00     7.976282          13.310953          5.334671
-2019-04-11 00:00:00+00:00     7.975260          13.296356          5.321096
+datetime                   inExchanges  inTopHoldersTotal  outsideExchanges
+2019 - 04 - 09 00: 00: 00 + 00: 00     7.977318          13.277961          5.300643
+2019 - 04 - 10 00: 00: 00 + 00: 00     7.976282          13.310953          5.334671
+2019 - 04 - 11 00: 00: 00 + 00: 00     7.975260          13.296356          5.321096
 ```
 
-### Ethereum Top Transactions
+# Ethereum Top Transactions
 
 Top ETH transactions for project's team wallets.
 
@@ -1047,23 +1047,23 @@ san.get(
 ```
 
 Example result:
-**The result is shortened for convenience**
+**The result is shortened for convenience **
 ```
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
-2019-04-29 21:33:31+00:00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
-2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
-2019-04-19 14:14:52+00:00  0x1f3df0b8390bb8...                  False  0xd69bc0585e05e...                False  0x590512e1f1fbcf...         19.48
-2019-04-19 14:09:58+00:00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
-```   
+2019 - 04 - 29 21: 33: 31 + 00: 00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
+2019 - 04 - 29 21: 21: 18 + 00: 00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
+2019 - 04 - 19 14: 14: 52 + 00: 00  0x1f3df0b8390bb8...                  False  0xd69bc0585e05e...                False  0x590512e1f1fbcf...         19.48
+2019 - 04 - 19 14: 09: 58 + 00: 00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
+```
 
-## Running tests
+# Running tests
 
 ```
 python setup.py test
 ```
 
-## Running integration tests
+# Running integration tests
 
 ```
-python setup.py nosetests -a integration
+python setup.py nosetests - a integration
 ```

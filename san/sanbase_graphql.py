@@ -15,7 +15,7 @@ QUERY_MAPPING = {
         'query': 'dailyActiveAddresses',
         'return_fields': ['datetime', 'activeAddresses']
     },
-    'burn_rate': { # to be removed
+    'burn_rate': {  # to be removed
         'query': 'burnRate',
         'return_fields': ['datetime', 'burnRate']
     },
@@ -79,31 +79,31 @@ QUERY_MAPPING = {
         'query': 'dailyActiveDeposits',
         'return_fields': ['datetime', 'activeDeposits']
     },
-    'share_of_deposits':{
+    'share_of_deposits': {
         'query': 'shareOfDeposits',
-        'return_fields': ['activeAddresses','activeDeposits','datetime', 'shareOfDeposits']
+        'return_fields': ['activeAddresses', 'activeDeposits', 'datetime', 'shareOfDeposits']
     },
-    'gas_used':{
+    'gas_used': {
         'query': 'gasUsed',
         'return_fields': ['datetime', 'gasUsed']
     },
-    'miners_balance':{
+    'miners_balance': {
         'query': 'minersBalance',
         'return_fields': ['balance', 'datetime']
     },
-    'mining_pools_distribution':{
+    'mining_pools_distribution': {
         'query': 'miningPoolsDistribution',
         'return_fields': ['datetime', 'other', 'top10', 'top3']
     },
-    'historical_balance':{
+    'historical_balance': {
         'query': 'historicalBalance',
         'return_fields': ['balance', 'datetime']
     },
-    'social_dominance':{
+    'social_dominance': {
         'query': 'socialDominance',
         'return_fields': ['datetime', 'dominance']
     },
-    'top_holders_percent_of_total_supply':{
+    'top_holders_percent_of_total_supply': {
         'query': 'topHoldersPercentOfTotalSupply',
         'return_fields': ['datetime', 'inExchanges', 'inTopHoldersTotal', 'outsideExchanges']
     }
@@ -117,23 +117,29 @@ def daily_active_addresses(idx, slug, **kwargs):
     return query_str
 
 # to be removed
+
+
 def burn_rate(idx, slug, **kwargs):
     query_str = _create_query_str('burn_rate', idx, slug, **kwargs)
 
     return query_str
+
 
 def transaction_volume(idx, slug, **kwargs):
     query_str = _create_query_str('transaction_volume', idx, slug, **kwargs)
 
     return query_str
 
+
 def token_age_consumed(idx, slug, **kwargs):
     query_str = _create_query_str('token_age_consumed', idx, slug, **kwargs)
 
     return query_str
 
+
 def average_token_age_consumed_in_days(idx, slug, **kwargs):
-    query_str = _create_query_str('average_token_age_consumed_in_days', idx, slug, **kwargs)
+    query_str = _create_query_str(
+        'average_token_age_consumed_in_days', idx, slug, **kwargs)
 
     return query_str
 
@@ -143,75 +149,91 @@ def github_activity(idx, slug, **kwargs):
 
     return query_str
 
+
 def dev_activity(idx, slug, **kwargs):
     query_str = _create_query_str('dev_activity', idx, slug, **kwargs)
 
     return query_str
+
 
 def network_growth(idx, slug, **kwargs):
     query_str = _create_query_str('network_growth', idx, slug, **kwargs)
 
     return query_str
 
+
 def prices(idx, slug, **kwargs):
     query_str = _create_query_str('prices', idx, slug, **kwargs)
 
     return query_str
+
 
 def token_velocity(idx, slug, **kwargs):
     query_str = _create_query_str('token_velocity', idx, slug, **kwargs)
 
     return query_str
 
+
 def token_circulation(idx, slug, **kwargs):
     query_str = _create_query_str('token_circulation', idx, slug, **kwargs)
 
     return query_str
+
 
 def realized_value(idx, slug, **kwargs):
     query_str = _create_query_str('realized_value', idx, slug, **kwargs)
 
     return query_str
 
+
 def mvrv_ratio(idx, slug, **kwargs):
     query_str = _create_query_str('mvrv_ratio', idx, slug, **kwargs)
 
     return query_str
+
 
 def nvt_ratio(idx, slug, **kwargs):
     query_str = _create_query_str('nvt_ratio', idx, slug, **kwargs)
 
     return query_str
 
+
 def daily_active_deposits(idx, slug, **kwargs):
     query_str = _create_query_str('daily_active_deposits', idx, slug, **kwargs)
 
     return query_str
+
 
 def share_of_deposits(idx, slug, **kwargs):
     query_str = _create_query_str('share_of_deposits', idx, slug, **kwargs)
 
     return query_str
 
+
 def ohlc(idx, slug, **kwargs):
     query_str = _create_query_str('ohlc', idx, slug, **kwargs)
 
     return query_str
+
 
 def gas_used(idx, slug, **kwargs):
     query_str = _create_query_str('gas_used', idx, slug, **kwargs)
 
     return query_str
 
+
 def miners_balance(idx, slug, **kwargs):
     query_str = _create_query_str('miners_balance', idx, slug, **kwargs)
 
     return query_str
 
+
 def mining_pools_distribution(idx, slug, **kwargs):
-    query_str = _create_query_str('mining_pools_distribution', idx, slug, **kwargs)
+    query_str = _create_query_str(
+        'mining_pools_distribution', idx, slug, **kwargs)
 
     return query_str
+
 
 def historical_balance(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
@@ -235,6 +257,7 @@ def historical_balance(idx, slug, **kwargs):
 
     return query_str
 
+
 def social_dominance(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
 
@@ -256,6 +279,7 @@ def social_dominance(idx, slug, **kwargs):
     )
 
     return query_str
+
 
 def top_holders_percent_of_total_supply(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
@@ -279,6 +303,7 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
     )
 
     return query_str
+
 
 def eth_top_transactions(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
@@ -312,8 +337,15 @@ def eth_top_transactions(idx, slug, **kwargs):
 
     return query_str
 
+
 def ohlcv(idx, slug, **kwargs):
-    return_fields = ['openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd', 'volume', 'marketcap']
+    return_fields = [
+        'openPriceUsd',
+        'closePriceUsd',
+        'highPriceUsd',
+        'lowPriceUsd',
+        'volume',
+        'marketcap']
 
     batch = Batch()
     batch.get(
@@ -328,6 +360,7 @@ def ohlcv(idx, slug, **kwargs):
     merged = merge(price_df, ohlc_df)
     return merged[return_fields]
 
+
 def projects(idx, slug, **kwargs):
     if (slug == "erc20"):
         return erc20_projects(idx, **kwargs)
@@ -335,6 +368,7 @@ def projects(idx, slug, **kwargs):
         return all_projects(idx, **kwargs)
 
     raise SanError("Unknown project group: {}".format(slug))
+
 
 def all_projects(idx, **kwargs):
     query_str = """
@@ -349,6 +383,7 @@ def all_projects(idx, **kwargs):
     """.format(idx=idx)
 
     return query_str
+
 
 def erc20_projects(idx, **kwargs):
     query_str = """
@@ -494,9 +529,11 @@ def _format_from_date(datetime_obj_or_str):
 
     return iso8601.parse_date(datetime_obj_or_str).isoformat()
 
+
 def _format_to_date(datetime_obj_or_str):
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
-    dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
+    dt = iso8601.parse_date(datetime_obj_or_str) + \
+        datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
