@@ -8,7 +8,7 @@ from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
 from san.graphql import execute_gql
 from san.tests.utils import TestResponse
-from san.query import transform_query
+from san.transform import transform_query_result
 
 
 @patch('san.graphql.requests.post')
@@ -113,7 +113,7 @@ def test_get_without_transform(mock):
         to_date="2018-06-05",
         interval="1d"
     )
-    df = transform_query(0, 'daily_active_addresses', expected)
+    df = transform_query_result(0, 'daily_active_addresses', expected)
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
@@ -154,7 +154,7 @@ def test_get_with_transform(mock):
         transaction_type="ALL"
     )
 
-    df = transform_query(0, 'eth_top_transactions', expected)
+    df = transform_query_result(0, 'eth_top_transactions', expected)
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
@@ -207,7 +207,7 @@ def test_batch_only_with_nontransform_queries(mock):
 
     queries = ['daily_active_addresses', 'daily_active_addresses']
     for idx, query in enumerate(queries):
-        df = transform_query(idx, query, expected)
+        df = transform_query_result(idx, query, expected)
         expected_result.append(df)
 
     assert len(result) == len(expected_result)
@@ -296,7 +296,7 @@ def test_batch_only_with_transform_queries(mock):
     queries = ['eth_top_transactions', 'eth_top_transactions']
 
     for idx, query in enumerate(queries):
-        df = transform_query(idx, query, expected)
+        df = transform_query_result(idx, query, expected)
         expected_result.append(df)
 
     assert len(result) == len(expected_result)
@@ -363,7 +363,7 @@ def test_batch_with_mixed_queries(mock):
     queries = ['daily_active_addresses', 'eth_top_transactions']
 
     for idx, query in enumerate(queries):
-        df = transform_query(idx, query, expected)
+        df = transform_query_result(idx, query, expected)
         print(df)
         expected_result.append(df)
 

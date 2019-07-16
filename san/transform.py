@@ -1,4 +1,5 @@
 import operator
+from san.query import convert_to_datetime_idx_df
 from functools import reduce
 
 QUERY_PATH_MAP = {
@@ -11,15 +12,13 @@ def path_to_data(idx, query, data):
     With this function we jump straight onto the key from the dataframe, that we want and start from there
     """
 
-def add_transform(function):
-    def decorator(idx, query, data):
-        if query+'_transform' in globals():
-            result = path_to_data(idx, query, data)
-            globals()[query+'_transform'](result)
-        else:
-            result = data['query_'+str(idx)]
-        return function(idx, query, result)
-    return decorator
+def transform_query_result(idx, query, data):
+    if query+'_transform' in globals():
+        result = path_to_data(idx, query, data)
+        globals()[query+'_transform'](result)
+    else:
+        result = data['query_'+str(idx)]
+    return convert_to_datetime_idx_df(result)
 
 def eth_top_transactions_transform(data):
     for column in data:

@@ -1,7 +1,8 @@
 import san.sanbase_graphql
 from san.graphql import execute_gql
 from san.pandas_utils import convert_to_datetime_idx_df
-from san.query import get_gql_query, parse_dataset, transform_query
+from san.query import get_gql_query, parse_dataset
+from san.transform import transform_query_result
 
 CUSTOM_QUERIES = {
     'ohlcv': 'get_ohlcv',
@@ -17,4 +18,4 @@ def get(dataset, **kwargs):
     gql_query = "{\n" + gql_query + "\n}"
     res = execute_gql(gql_query)
 
-    return transform_query(0, query, res)
+    return transform_query_result(0, query, res)
