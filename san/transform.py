@@ -3,8 +3,8 @@ In order to have metrics, which require different order, we need to have transfo
  functions, which reorder or make different dictionaries in general.
 """
 import operator
-from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
+from san.pandas_utils import convert_to_datetime_idx_df
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
