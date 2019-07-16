@@ -57,3 +57,15 @@ def news_transform(data):
         'sourceName': column['sourceName'],
         'url': column['url']
     }, data))
+
+
+def token_top_transactions_transform(data):
+    return list(map(lambda column: {
+        'datetime': column['datetime'],
+        'fromAddress': column['fromAddress']['address'],
+        'fromAddressIsExchange': column['fromAddress']['isExchange'],
+        'toAddress': column['toAddress']['address'],
+        'toAddressIsExchange': column['toAddress']['isExchange'],
+        'trxHash': column['trxHash'],
+        'trxValue': column['trxValue']
+    }, data))
