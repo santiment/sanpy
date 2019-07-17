@@ -1,7 +1,5 @@
 import san.sanbase_graphql
 from san.error import SanError
-from san.transform import add_transform
-from san.pandas_utils import convert_to_datetime_idx_df
 
 
 def get_gql_query(idx, dataset, **kwargs):
@@ -17,9 +15,6 @@ def parse_dataset(dataset):
     left, _separator, right = dataset.partition("/")
     return [left, right]
 
-@add_transform
-def transform_query(idx, query, result):
-    return convert_to_datetime_idx_df(result)
 
 def not_found(query):
     raise SanError(query + ' not found')

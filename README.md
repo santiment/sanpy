@@ -1179,7 +1179,7 @@ san.get(
     "token_top_transactions/santiment",
     from_date="2019-04-18",
     to_date="2019-04-30",
-    limit=5,
+    limit=5
 )
 ```
 

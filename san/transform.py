@@ -8,7 +8,8 @@ from functools import reduce
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
-    'eth_spent_over_time': ['ethSpentOverTime']
+    'eth_spent_over_time': ['ethSpentOverTime'],
+    'token_top_transactions':['tokenTopTransactions']
 }
 
 
