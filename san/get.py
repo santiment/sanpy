@@ -1,6 +1,5 @@
 import san.sanbase_graphql
 from san.graphql import execute_gql
-from san.pandas_utils import convert_to_datetime_idx_df
 from san.query import get_gql_query, parse_dataset
 from san.transform import transform_query_result
 

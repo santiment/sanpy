@@ -847,7 +847,7 @@ Returns information for the shares of deposits that a given project has during t
 san.get(
     "share_of_deposits/santiment",
     from_date="2019-01-01T00:00:00Z",
-    to_date="2019-05-01T00:00:00Z",
+    to_date="2019-01-05T00:00:00Z",
     interval="1d"
 )
 ```
@@ -1100,6 +1100,7 @@ san.get(
 ```
 
 Example result:
+
 **The result is shortened for convenience**
 ```
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
