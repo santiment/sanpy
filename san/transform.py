@@ -10,7 +10,6 @@ QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions']
 }
 
-
 def path_to_data(idx, query, data):
     """
     With this function we jump straight onto the key from the dataframe, that we want and start from there. We use our future starting points from the QUERY_PATH_MAP.
@@ -45,4 +44,14 @@ def eth_top_transactions_transform(data):
         'toAddressIsExchange': column['toAddress']['isExchange'],
         'trxHash': column['trxHash'],
         'trxValue': column['trxValue']
+    }, data))
+
+
+def news_transform(data):
+    return list(map(lambda column: {
+        'datetime': column['datetime'],
+        'title': column['title'],
+        'description': column['description'],
+        'sourceName': column['sourceName'],
+        'url': column['url']
     }, data))

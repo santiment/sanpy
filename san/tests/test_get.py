@@ -1,15 +1,14 @@
 import san
 import pandas as pd
-from san.batch import Batch
-from copy import deepcopy
+import pandas.testing as pdt
 from san.error import SanError
 from nose.tools import assert_raises
 from unittest.mock import Mock, patch
 from san.pandas_utils import convert_to_datetime_idx_df
-import pandas.testing as pdt
 from san.graphql import execute_gql
 from san.tests.utils import TestResponse
-from san.transform import transform_query_result
+from copy import deepcopy
+from san.batch import Batch
 
 
 @patch('san.graphql.requests.post')
@@ -22,9 +21,6 @@ def test_get(mock):
              {'datetime': '2018-06-04T00:00:00Z', 'activeAddresses': 6},
              {'datetime': '2018-06-05T00:00:00Z', 'activeAddresses': 14}]
     }
-
-    # The value is passed by refference, that's why deepcopy is used for
-    # expected
     mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
@@ -64,8 +60,6 @@ def test_prices(mock):
                 }
             ]
     }
-    # The value is passed by refference, that's why deepcopy is used for
-    # expected
     mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
@@ -75,16 +69,12 @@ def test_prices(mock):
         interval="1d"
     )
 
-    expected_df = convert_to_datetime_idx_df(api_call_result['query_0'])
-    pdt.assert_frame_equal(res, expected_df, check_dtype=False)
-
+    df = convert_to_datetime_idx_df(api_call_result['query_0'])
+    pdt.assert_frame_equal(res, df, check_dtype=False)
 
 @patch('san.graphql.requests.post')
 def test_error_response(mock):
-    mock.return_value = TestResponse(
-        status_code=500, data={
-            'errors': {
-                'detail': 'Internal server error'}})
+    mock.return_value = TestResponse(status_code=500, data={'errors': {'detail': 'Internal server error'}})
     with assert_raises(SanError):
         san.get(
             "prices/santiment_usd",
