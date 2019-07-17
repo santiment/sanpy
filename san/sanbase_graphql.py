@@ -101,6 +101,7 @@ QUERY_MAPPING = {
     }
 }
 
+
 def daily_active_addresses(idx, slug, **kwargs):
     query_str = _create_query_str(
         'daily_active_addresses', idx, slug, **kwargs)
@@ -291,7 +292,7 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
         idx=idx,
         slug=slug,
         **kwargs
-)
+    )
 
     return query_str
 
@@ -326,27 +327,6 @@ def price_volume_difference(idx, slug, **kwargs):
 
     return query_str
 
-def eth_spent_over_time(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
-
-    query_str = """
-    query_{idx}: projectBySlug (slug: \"{slug}\"){{
-            ethSpentOverTime(
-                from: \"{from_date}\",
-                to: \"{to_date}\",
-                interval: \"{interval}\"
-            ){{
-        datetime,
-        ethSpent
-        }}
-    }}
-    """.format(
-        idx=idx,
-        slug=slug,
-        **kwargs
-    )
-
-    return query_str
 
 def eth_top_transactions(idx, slug, **kwargs):
     kwargs = _transform_query_args(**kwargs)
@@ -400,6 +380,29 @@ def news(idx, tag, **kwargs):
     """.format(
         idx=idx,
         tag=tag,
+        **kwargs
+    )
+
+    return query_str
+
+
+def eth_spent_over_time(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: projectBySlug (slug: \"{slug}\"){{
+            ethSpentOverTime(
+                from: \"{from_date}\",
+                to: \"{to_date}\",
+                interval: \"{interval}\"
+            ){{
+        datetime,
+        ethSpent
+        }}
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
         **kwargs
     )
 
