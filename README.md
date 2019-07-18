@@ -847,7 +847,7 @@ Returns information for the shares of deposits that a given project has during t
 san.get(
     "share_of_deposits/santiment",
     from_date="2019-01-01T00:00:00Z",
-    to_date="2019-05-01T00:00:00Z",
+    to_date="2019-01-05T00:00:00Z",
     interval="1d"
 )
 ```
@@ -1078,6 +1078,36 @@ datetime                   priceChange  priceVolumeDiff  volumeChange
 2019-04-20 00:00:00+00:00     0.009062         0.004169 -24550.100411
 2019-04-21 00:00:00+00:00     0.002573         0.001035 -19307.845911
 2019-04-22 00:00:00+00:00     0.001527         0.000703 -20317.934666
+```
+
+### Ethereum Top Transactions
+
+Top ETH transactions for project's team wallets.
+
+Available transaction types:
+* ALL
+* IN
+* OUT
+
+```python
+san.get(
+    "eth_top_transactions/santiment",
+    from_date="2019-04-18",
+    to_date="2019-04-30",
+    limit=5,
+    transaction_type="ALL"
+)
+```
+
+Example result:
+
+**The result is shortened for convenience**
+```
+datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
+2019-04-29 21:33:31+00:00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
+2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
+2019-04-19 14:14:52+00:00  0x1f3df0b8390bb8...                  False  0xd69bc0585e05e...                False  0x590512e1f1fbcf...         19.48
+2019-04-19 14:09:58+00:00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
 ```
 
 ## Running tests

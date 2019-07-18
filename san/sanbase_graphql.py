@@ -95,18 +95,6 @@ QUERY_MAPPING = {
         'query': 'miningPoolsDistribution',
         'return_fields': ['datetime', 'other', 'top10', 'top3']
     },
-    'historical_balance': {
-        'query': 'historicalBalance',
-        'return_fields': ['balance', 'datetime']
-    },
-    'social_dominance': {
-        'query': 'socialDominance',
-        'return_fields': ['datetime', 'dominance']
-    },
-    'top_holders_percent_of_total_supply': {
-        'query': 'topHoldersPercentOfTotalSupply',
-        'return_fields': ['datetime', 'inExchanges', 'inTopHoldersTotal', 'outsideExchanges']
-    },
     'history_twitter_data': {
         'query': 'historyTwitterData',
         'return_fields': ['datetime', 'followers_count']
@@ -306,6 +294,7 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
         **kwargs
     )
 
+    return query_str
 
 def history_twitter_data(idx, slug, **kwargs):
     query_str = _create_query_str('history_twitter_data', idx, slug, **kwargs)
@@ -328,6 +317,39 @@ def price_volume_difference(idx, slug, **kwargs):
         priceChange,
         priceVolumeDiff,
         volumeChange
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+
+def eth_top_transactions(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: projectBySlug (slug: \"{slug}\"){{
+            ethTopTransactions (
+                from: \"{from_date}\",
+                to: \"{to_date}\",
+                limit: {limit},
+                transactionType: {transaction_type}
+            ){{
+        datetime,
+        fromAddress{{
+            address,
+            isExchange
+        }},
+        toAddress{{
+            address,
+            isExchange
+        }},
+        trxHash,
+        trxValue
+        }}
     }}
     """.format(
         idx=idx,
