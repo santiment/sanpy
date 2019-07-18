@@ -159,20 +159,20 @@ def test_get_with_transform(mock):
     )
     expected = [{'datetime': '2019-04-19T14:14:52.000000Z',
                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
-                 'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
-                 'trxValue': 19.48,
                  'fromAddressIsExchange': False,
-                 'toAddressIsExchange': False},
+                 'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
+                 'toAddressIsExchange': False,
+                 'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
+                 'trxValue': 19.48},
                 {'datetime': '2019-04-19T14:09:58.000000Z',
                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
-                 'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
-                 'trxValue': 15.15,
                  'fromAddressIsExchange': False,
-                 'toAddressIsExchange': False}]
+                 'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
+                 'toAddressIsExchange': False,
+                 'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
+                 'trxValue': 15.15}]
 
-    expected_df = pd.DataFrame(expected)
+    expected_df = pd.DataFrame(expected, columns=expected[0].keys())
     if 'datetime' in expected_df.columns:
         expected_df['datetime'] = pd.to_datetime(expected_df['datetime'], utc=True)
         expected_df.set_index('datetime', inplace=True)
@@ -321,38 +321,38 @@ def test_batch_only_with_transform_queries(mock):
 
     expected = [[{'datetime': '2019-04-19T14:14:52.000000Z',
                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
-                 'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
-                 'trxValue': 19.48,
                  'fromAddressIsExchange': False,
-                 'toAddressIsExchange': False},
+                 'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
+                 'toAddressIsExchange': False,
+                 'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
+                 'trxValue': 19.48},
                 {'datetime': '2019-04-19T14:09:58.000000Z',
                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
-                 'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
-                 'trxValue': 15.15,
                  'fromAddressIsExchange': False,
-                 'toAddressIsExchange': False}],
+                 'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
+                 'toAddressIsExchange': False,
+                 'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
+                 'trxValue': 15.15}],
             [{'datetime': '2019-04-29T21:33:31.000000Z',
               'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-              'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
-              'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
-              'trxValue': 100.0,
               'fromAddressIsExchange': False,
-              'toAddressIsExchange': False},
+              'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
+              'toAddressIsExchange': False,
+              'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
+              'trxValue': 100.0},
              {'datetime': '2019-04-29T21:21:18.000000Z',
               'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-              'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
-              'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
-              'trxValue': 40.95,
               'fromAddressIsExchange': False,
-              'toAddressIsExchange': False}]]
+              'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
+              'toAddressIsExchange': False,
+              'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
+              'trxValue': 40.95}]]
 
     expected_result = []
 
     queries = ['eth_top_transactions', 'eth_top_transactions']
     for idx, query in enumerate(queries):
-        df = pd.DataFrame(expected[idx])
+        df = pd.DataFrame(expected[idx], columns=expected[idx][0].keys())
 
         if 'datetime' in df.columns:
             df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
@@ -419,18 +419,18 @@ def test_batch_with_mixed_queries(mock):
                  'datetime': '2018-06-10T00:00:00Z'}],
                  [{'datetime': '2019-04-29T21:33:31.000000Z',
                   'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-                  'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
-                  'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
-                  'trxValue': 100.0,
                   'fromAddressIsExchange': False,
-                  'toAddressIsExchange': False},
+                  'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
+                  'toAddressIsExchange': False,
+                  'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
+                  'trxValue': 100.0},
                  {'datetime': '2019-04-29T21:21:18.000000Z',
                   'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-                  'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
-                  'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
-                  'trxValue': 40.95,
                   'fromAddressIsExchange': False,
-                  'toAddressIsExchange': False}]]
+                  'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
+                  'toAddressIsExchange': False,
+                  'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
+                  'trxValue': 40.95}]]
 
     batch = Batch()
 
@@ -455,12 +455,11 @@ def test_batch_with_mixed_queries(mock):
 
     queries = ['daily_active_addresses', 'eth_top_transactions']
     for idx, query in enumerate(queries):
-        df = pd.DataFrame(expected[idx])
+        df = pd.DataFrame(expected[idx], columns=expected[idx][0].keys())
         if 'datetime' in df.columns:
             df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
             df.set_index('datetime', inplace=True)
-        print(df)
-        print(result[idx])
+
         expected_result.append(df)
 
     assert len(result) == len(expected_result)
