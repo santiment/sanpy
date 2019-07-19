@@ -2,9 +2,8 @@ import san
 from san import Batch
 from san import sanbase_graphql
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
-
-import datetime
 from nose.plugins.attrib import attr
+
 
 params = {
     "project_slug":  "santiment",
@@ -15,6 +14,8 @@ params = {
 }
 
 METRICS_USING_ETHEREUM = ["gas_used", "miners_balance", "mining_pools_distribution"]
+
+
 
 def ordinary_function_maker(query, slug=params['project_slug']):
     result = san.get(query+'/'+slug,
@@ -95,8 +96,8 @@ def test_erc20_projects():
 def test_ordinary_ethereum_queries():
     for query in METRICS_USING_ETHEREUM:
         result = ordinary_function_maker(query, "ethereum")
-
         assert len(result.index) >= 1
+        assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_token_age_consumed():
@@ -105,6 +106,7 @@ def test_token_age_consumed():
     for row in result['tokenAgeConsumed']:
         assert row >= 0
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_average_token_age_consumed_in_days():
@@ -113,6 +115,7 @@ def test_average_token_age_consumed_in_days():
     for row in result['tokenAge']:
         assert row >= 0
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_transaction_volume():
@@ -121,6 +124,7 @@ def test_transaction_volume():
     for row in result['transactionVolume']:
         assert row >= 0
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_github_activity():
@@ -137,20 +141,22 @@ def test_dev_activity():
     for row in result['activity']:
         assert row >= 0
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_network_growth():
     result = ordinary_function_maker('network_growth')
-
     for row in result['newAddresses']:
-        assert row >= 0
+        assert int(row) >= 0
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_prices():
     result = ordinary_function_maker('prices')
 
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_historical_balance():
@@ -161,6 +167,7 @@ def test_historical_balance():
         interval=params['interval']
         )
     assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_ohlcv():
@@ -172,3 +179,4 @@ def test_ohlcv():
     )
 
     assert len(ohlcv_df.index) >= 1
+    assert 'DatetimeIndex' in str(type(ohlcv_df.index))
