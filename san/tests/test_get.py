@@ -72,9 +72,13 @@ def test_prices(mock):
     df = convert_to_datetime_idx_df(api_call_result['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
+
 @patch('san.graphql.requests.post')
 def test_error_response(mock):
-    mock.return_value = TestResponse(status_code=500, data={'errors': {'detail': 'Internal server error'}})
+    mock.return_value = TestResponse(
+        status_code=500, data={
+            'errors': {
+                'detail': 'Internal server error'}})
     with assert_raises(SanError):
         san.get(
             "prices/santiment_usd",

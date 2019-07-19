@@ -4,6 +4,7 @@ from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
 from san.tests.utils import TestResponse
 
+
 @patch('san.graphql.requests.post')
 def test_batch(mock):
     expected = {

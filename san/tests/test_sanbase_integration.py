@@ -6,24 +6,29 @@ from nose.plugins.attrib import attr
 
 
 params = {
-    "project_slug":  "santiment",
+    "project_slug": "santiment",
     "from_date": month_ago(),
     "to_date": two_days_ago(),
     "interval": "1d",
     "address": "0x1f3df0b8390bb8e9e322972c5e75583e87608ec2"
 }
 
-METRICS_USING_ETHEREUM = ["gas_used", "miners_balance", "mining_pools_distribution"]
+METRICS_USING_ETHEREUM = [
+    "gas_used",
+    "miners_balance",
+    "mining_pools_distribution"]
 
 
+def _test_ordinary_function(query, graphiql_query, slug=params['project_slug']):
+    result = san.get(query + '/' + slug,
+                     from_date=params['from_date'],
+                     to_date=params['to_date'],
+                     interval=params['interval']
+                     )
+    assert result.empty == False
+    assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
 
-def ordinary_function_maker(query, slug=params['project_slug']):
-    result = san.get(query+'/'+slug,
-        from_date=params['from_date'],
-        to_date=params['to_date'],
-        interval=params['interval']
-        )
-    return result
 
 @attr('integration')
 def test_batched_queries_equal_format():
@@ -49,6 +54,7 @@ def test_batched_queries_equal_format():
 
     for df in result:
         assert len(df.index) >= 1
+
 
 @attr('integration')
 def test_batched_queries_different_format():
@@ -85,89 +91,128 @@ def test_batched_queries_different_format():
     for df in result:
         assert len(df.index) >= 1
 
+
 @attr('integration')
 def test_erc20_projects():
     result = san.get("projects/erc20")
 
-    assert len(result) > 0
+    assert result.empty == False
     assert len(result[result.slug == "bitcoin"]) == 0
 
+
 @attr('integration')
-def test_ordinary_ethereum_queries():
-    for query in METRICS_USING_ETHEREUM:
-        result = ordinary_function_maker(query, "ethereum")
-        assert len(result.index) >= 1
-        assert 'DatetimeIndex' in str(type(result.index))
+def test_gas_used():
+    _test_ordinary_function('gas_used', 'gasUsed', 'ethereum')
+
 
 @attr('integration')
 def test_token_age_consumed():
-    result = ordinary_function_maker('token_age_consumed')
+    _test_ordinary_function('token_age_consumed', 'tokenAgeConsumed')
 
-    for row in result['tokenAgeConsumed']:
-        assert row >= 0
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_average_token_age_consumed_in_days():
-    result = ordinary_function_maker('average_token_age_consumed_in_days')
+    _test_ordinary_function(
+        'average_token_age_consumed_in_days',
+        'averageTokenAgeConsumedInDays')
 
-    for row in result['tokenAge']:
-        assert row >= 0
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_transaction_volume():
-    result = ordinary_function_maker('transaction_volume')
+    _test_ordinary_function('transaction_volume', 'transactionVolume')
 
-    for row in result['transactionVolume']:
-        assert row >= 0
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_github_activity():
-    result = ordinary_function_maker('github_activity')
+    result = _test_ordinary_function('github_activity', 'githubActivity')
 
-    for row in result['activity']:
-        assert row >= 0
-    assert len(result.index) >= 1
 
 @attr('integration')
 def test_dev_activity():
-    result = ordinary_function_maker('dev_activity')
+    result = _test_ordinary_function('dev_activity', 'devActivity')
 
-    for row in result['activity']:
-        assert row >= 0
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
 
 @attr('integration')
 def test_network_growth():
-    result = ordinary_function_maker('network_growth')
-    for row in result['newAddresses']:
-        assert int(row) >= 0
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
+    result = _test_ordinary_function('network_growth', 'networkGrowth')
+
 
 @attr('integration')
 def test_prices():
-    result = ordinary_function_maker('prices')
+    _test_ordinary_function('prices', 'prices')
 
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
+
+@attr('integration')
+def test_ohlc():
+    _test_ordinary_function('ohlc', 'ohlc')
+
+
+@attr('integration')
+def test_exchange_funds_flow():
+    _test_ordinary_function('exchange_funds_flow', 'exchangeFundsFlow')
+
+
+@attr('integration')
+def test_token_velocity():
+    _test_ordinary_function('token_velocity', 'tokenVelocity')
+
+
+@attr('integration')
+def test_token_circulation():
+    _test_ordinary_function('token_circulation', 'tokenCirculation')
+
+
+@attr('integration')
+def test_realized_value():
+    _test_ordinary_function('realized_value', 'realizedValue')
+
+
+@attr('integration')
+def test_mvrv_ratio():
+    _test_ordinary_function('mvrv_ratio', 'mvrvRatio')
+
+
+@attr('integration')
+def test_nvt_ratio():
+    _test_ordinary_function('nvt_ratio', 'nvtRatio')
+
+
+@attr('integration')
+def test_daily_active_deposits():
+    _test_ordinary_function('daily_active_deposits', 'dailyActiveDeposits')
+
+
+@attr('integration')
+def test_share_of_deposits():
+    _test_ordinary_function('share_of_deposits', 'shareOfDeposits')
+
+
+@attr('integration')
+def test_miners_balance():
+    _test_ordinary_function('miners_balance', 'minersBalance', 'ethereum')
+
+
+@attr('integration')
+def test_mining_pools_distribution():
+    _test_ordinary_function('mining_pools_distribution', 'miningPoolsDistribution', 'ethereum')
+
+
+@attr('integration')
+def test_history_twitter_data():
+    _test_ordinary_function('history_twitter_data', 'historyTwitterData')
+
 
 @attr('integration')
 def test_historical_balance():
-    result = san.get('historical_balance/'+params['project_slug'],
-        address=params['address'],
-        from_date=params['from_date'],
-        to_date=params['to_date'],
-        interval=params['interval']
-        )
+    result = san.get('historical_balance/' + params['project_slug'],
+                     address=params['address'],
+                     from_date=params['from_date'],
+                     to_date=params['to_date'],
+                     interval=params['interval']
+                     )
     assert len(result.index) >= 1
     assert 'DatetimeIndex' in str(type(result.index))
+    assert result.empty == False
 
 @attr('integration')
 def test_ohlcv():
@@ -180,3 +225,4 @@ def test_ohlcv():
 
     assert len(ohlcv_df.index) >= 1
     assert 'DatetimeIndex' in str(type(ohlcv_df.index))
+    assert ohlcv_df.empty == False
