@@ -45,6 +45,7 @@ Santiment API python client.
     - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [News](#news)
+    - [Ethereum Spent Over Time](#ethereum-spent-over-time)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1071,7 +1072,7 @@ san.get(
 
 Example result:
 
-```                           
+```
 datetime                   priceChange  priceVolumeDiff  volumeChange
 2019-04-18 00:00:00+00:00     0.017779         0.013606 -39908.007476
 2019-04-19 00:00:00+00:00     0.012587         0.007332 -31195.568878
@@ -1136,14 +1137,36 @@ Example result:
 
 **The result is shortened for convenience**
 ```
-
 datetime                                                               title                                        description       sourceName                                                                                                       url                                                                                                                                
 2019-04-26 18:39:00+00:00  Crypto Markets Slump, Oil Prices Report Losses...  Crypto Markets Slump, Oil Prices Report Losses...    Cointelegraph                              https://cointelegraph.com/news/crypto-markets-slump-oil-prices-report-losses
 2019-05-17 09:02:07+00:00  Debt-Ridden Crypto Exchange Cryptopia Suckers ...  Debt-Ridden Crypto Exchange Cryptopia Suckers ...              CCN                  https://www.ccn.com/debt-ridden-crypto-exchange-cryptopia-suckers-hacked-customers-again
 2019-05-27 18:56:15+00:00  Institutions Could Push Crypto Past A ‘Point O...  Institutions Could Push Crypto Past A ‘Point O...  Crypto Briefing                                          https://cryptobriefing.com/institutional-crypto-point-no-return/
 2019-06-22 14:31:00+00:00  ETH Hits 10-Month High as Crypto Markets See S...  ETH Hits 10-Month High as Crypto Markets See S...    Cointelegraph                   https://cointelegraph.com/news/eth-hits-10-month-high-as-crypto-markets-see-solid-green
 2019-07-06 18:42:00+00:00  Iranian Official Says US Congress is Working t...  Iranian Official Says US Congress is Working t...    Cointelegraph  https://cointelegraph.com/news/iranian-official-says-us-congress-is-working-to-block-irans-crypto-mining
+```
 
+### Ethereum Spent Over Time
+
+ETH spent for each interval from the project's team wallet and time period
+
+```python
+san.get(
+    "eth_spent_over_time/santiment",
+    from_date="2019-04-18",
+    to_date="2019-04-23",
+    interval="1d"
+)
+```
+
+Example result:
+
+```
+datetime                    ethSpent
+2019-04-18 00:00:00+00:00   0.000000
+2019-04-19 00:00:00+00:00  34.630284
+2019-04-20 00:00:00+00:00   0.000000
+2019-04-21 00:00:00+00:00   0.000158
+2019-04-22 00:00:00+00:00   0.000000
 ```
 
 ## Running tests

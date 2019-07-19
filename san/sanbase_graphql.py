@@ -386,6 +386,29 @@ def news(idx, tag, **kwargs):
     return query_str
 
 
+def eth_spent_over_time(idx, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: projectBySlug (slug: \"{slug}\"){{
+            ethSpentOverTime(
+                from: \"{from_date}\",
+                to: \"{to_date}\",
+                interval: \"{interval}\"
+            ){{
+        datetime,
+        ethSpent
+        }}
+    }}
+    """.format(
+        idx=idx,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+
 def ohlcv(idx, slug, **kwargs):
     return_fields = [
         'openPriceUsd',
