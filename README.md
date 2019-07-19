@@ -43,6 +43,7 @@ Santiment API python client.
     - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
     - [History Twitter Data](#history-twitter-data)
     - [Price Volume Difference](#price-volume-difference)
+    - [Ethereum Top Transactions](#ethereum-top-transactions)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 

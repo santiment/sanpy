@@ -296,6 +296,7 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
 
     return query_str
 
+
 def history_twitter_data(idx, slug, **kwargs):
     query_str = _create_query_str('history_twitter_data', idx, slug, **kwargs)
 

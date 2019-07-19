@@ -1,3 +1,7 @@
+"""
+In order to have metrics, which require different order, we need to have transform
+ functions, which reorder or make different dictionaries in general.
+"""
 import operator
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
@@ -9,7 +13,7 @@ QUERY_PATH_MAP = {
 
 def path_to_data(idx, query, data):
     """
-    With this function we jump straight onto the key from the dataframe, that we want and start from there
+    With this function we jump straight onto the key from the dataframe, that we want and start from there. We use our future starting points from the QUERY_PATH_MAP.
     """
     return reduce(
         operator.getitem, [
@@ -21,18 +25,24 @@ def transform_query_result(idx, query, data):
     If there is a transforming function for this query, then the result is
     passed for it for another transformation
     """
-    if query + '_transform' in globals():
+    if query in QUERY_PATH_MAP:
         result = path_to_data(idx, query, data)
-        globals()[query + '_transform'](result)
     else:
         result = data['query_' + str(idx)]
+
+    if query + '_transform' in globals():
+        result = globals()[query + '_transform'](result)
+
     return convert_to_datetime_idx_df(result)
 
 
 def eth_top_transactions_transform(data):
-    for column in data:
-        column['fromAddressIsExchange'] = column['fromAddress']['isExchange']
-        column['toAddressIsExchange'] = column['toAddress']['isExchange']
-        column['fromAddress'] = column['fromAddress']['address']
-        column['toAddress'] = column['toAddress']['address']
-    return data
+    return list(map(lambda column: {
+        'datetime': column['datetime'],
+        'fromAddress': column['fromAddress']['address'],
+        'fromAddressIsExchange': column['fromAddress']['isExchange'],
+        'toAddress': column['toAddress']['address'],
+        'toAddressIsExchange': column['toAddress']['isExchange'],
+        'trxHash': column['trxHash'],
+        'trxValue': column['trxValue']
+    }, data))
