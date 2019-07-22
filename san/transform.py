@@ -8,7 +8,8 @@ from functools import reduce
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
-    'eth_spent_over_time': ['ethSpentOverTime']
+    'eth_spent_over_time': ['ethSpentOverTime'],
+    'token_top_transactions':['tokenTopTransactions']
 }
 
 
@@ -56,4 +57,16 @@ def news_transform(data):
         'description': column['description'],
         'sourceName': column['sourceName'],
         'url': column['url']
+    }, data))
+
+
+def token_top_transactions_transform(data):
+    return list(map(lambda column: {
+        'datetime': column['datetime'],
+        'fromAddress': column['fromAddress']['address'],
+        'fromAddressIsExchange': column['fromAddress']['isExchange'],
+        'toAddress': column['toAddress']['address'],
+        'toAddressIsExchange': column['toAddress']['isExchange'],
+        'trxHash': column['trxHash'],
+        'trxValue': column['trxValue']
     }, data))

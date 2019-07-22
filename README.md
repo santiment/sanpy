@@ -46,6 +46,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [News](#news)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
+    - [Token Top Transactions](#token-top-transactions)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1167,6 +1168,31 @@ datetime                    ethSpent
 2019-04-20 00:00:00+00:00   0.000000
 2019-04-21 00:00:00+00:00   0.000158
 2019-04-22 00:00:00+00:00   0.000000
+```
+
+### Token Top Transactions
+
+Top transactions for the token of a given project
+
+```python
+san.get(
+    "token_top_transactions/santiment",
+    from_date="2019-04-18",
+    to_date="2019-04-30",
+    limit=5
+)
+```
+
+Example result:
+
+**The result is shortened for convenience**
+```
+datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
+2019-04-21 13:51:59+00:00  0x1f3df0b8390bb8...                  False  0x5eaae5e949952...                False  0xdbced935b09dd0...  166674.00000
+2019-04-28 07:43:38+00:00  0x0a920bfdf7f977...                  False  0x868074aab18ea...                False  0x5f2214d34bcdc3...   33181.82279
+2019-04-28 07:53:32+00:00  0x868074aab18ea3...                  False  0x876eabf441b2e...                 True  0x90bd286da38a2b...   33181.82279
+2019-04-26 14:38:45+00:00  0x876eabf441b2ee...                   True  0x76af586d041d6...                False  0xe45b86f415e930...   28999.64023
+2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
 ## Running tests
