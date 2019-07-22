@@ -3,6 +3,7 @@ In order to have metrics, which require different order, we need to have transfo
  functions, which reorder or make different dictionaries in general.
 """
 import operator
+import pandas as pd
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 
@@ -51,13 +52,17 @@ def eth_top_transactions_transform(data):
 
 
 def news_transform(data):
-    return list(map(lambda column: {
+    result = list(map(lambda column: {
         'datetime': column['datetime'],
         'title': column['title'],
         'description': column['description'],
         'sourceName': column['sourceName'],
         'url': column['url']
     }, data))
+
+    df = pd.DataFrame(result, columns = result[0].keys())
+
+    return df
 
 
 def token_top_transactions_transform(data):
