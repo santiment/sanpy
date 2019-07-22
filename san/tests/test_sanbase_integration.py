@@ -214,6 +214,132 @@ def test_historical_balance():
     assert 'DatetimeIndex' in str(type(result.index))
     assert result.empty == False
 
+
+@attr('integration')
+def test_social_dominance():
+    sources = ["ALL", "REDDIT", "TELEGRAM", "DISCORD", "PROFESSIONAL_TRADERS_CHAT"]
+    for item in sources:
+        result = san.get('social_dominance/' + params['project_slug'],
+                         from_date=params['from_date'],
+                         to_date=params['to_date'],
+                         interval=params['interval'],
+                         source=item
+                         )
+        assert len(result.index) >= 1
+        assert 'DatetimeIndex' in str(type(result.index))
+        assert result.empty == False
+
+
+@attr('integration')
+def test_top_holders_percent_of_total_supply():
+    result = san.get('top_holders_percent_of_total_supply/' + params['project_slug'],
+                     number_of_holders=10,
+                     from_date=params['from_date'],
+                     to_date=params['to_date']
+                     )
+    assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
+    assert result.empty == False
+
+
+@attr('integration')
+def test_price_volume_difference():
+    currencies = ["USD", "BTC"]
+    for item in currencies:
+        result = san.get('price_volume_difference/' + params['project_slug'],
+                         from_date=params['from_date'],
+                         to_date=params['to_date'],
+                         interval=params['interval'],
+                         currency=item
+                         )
+        assert len(result.index) >= 1
+        assert 'DatetimeIndex' in str(type(result.index))
+        assert result.empty == False
+
+@attr('integration')
+def test_eth_top_transactions():
+    transaction_types = ["ALL", "IN", "OUT"]
+    for item in transaction_types:
+        result = san.get('eth_top_transactions/' + params['project_slug'],
+                         from_date="2019-06-11",
+                         to_date="2019-07-11",
+                         limit=5,
+                         transaction_type=item
+                         )
+        assert len(result.index) >= 1
+        assert 'DatetimeIndex' in str(type(result.index))
+        assert result.empty == False
+
+
+@attr('integration')
+def test_news():
+    result = san.get('news/' + params['project_slug'],
+                     from_date="2019-04-18",
+                     to_date="2019-07-11",
+                     size=5
+                     )
+    assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
+    assert result.empty == False
+
+
+@attr('integration')
+def test_eth_spent_over_time():
+    result = san.get('eth_spent_over_time/' + params['project_slug'],
+                     from_date=params['from_date'],
+                     to_date=params['to_date'],
+                     interval=params['interval']
+                     )
+    assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
+    assert result.empty == False
+
+
+@attr('integration')
+def test_token_top_transactions():
+    result = san.get('token_top_transactions/' + params['project_slug'],
+                     from_date="2019-06-18",
+                     to_date="2019-07-11",
+                     limit=5
+                     )
+    assert len(result.index) >= 1
+    assert 'DatetimeIndex' in str(type(result.index))
+    assert result.empty == False
+
+
+@attr('integration')
+def test_all_projects():
+    result = san.get('projects/all')
+
+    assert len(result.index) >= 1
+    assert result.empty == False
+
+
+@attr('integration')
+def test_social_volume_projects():
+    result = san.get('social_volume_projects')
+
+    assert len(result.index) >= 1
+    assert result.empty == False
+
+
+@attr('integration')
+def test_social_volume():
+    social_volume_types = ["PROFESSIONAL_TRADERS_CHAT_OVERVIEW", "TELEGRAM_CHATS_OVERVIEW", "TELEGRAM_DISCUSSION_OVERVIEW", "DISCORD_DISCUSSION_OVERVIEW"]
+    for item in social_volume_types:
+        result = san.get('social_volume/' + params['project_slug'],
+                         from_date=params['from_date'],
+                         to_date=params['to_date'],
+                         interval=params['interval'],
+                         social_volume_type=item
+                         )
+        assert len(result.index) >= 1
+        assert 'DatetimeIndex' in str(type(result.index))
+        assert result.empty == False
+
+
+
+
 @attr('integration')
 def test_ohlcv():
     ohlcv_df = san.get(
