@@ -60,9 +60,9 @@ def news_transform(data):
         'url': column['url']
     }, data))
 
-    df = pd.DataFrame(result, columns = result[0].keys())
-
-    return df
+    if result:
+        df = pd.DataFrame(result, columns = result[0].keys())
+        return df
 
 
 def token_top_transactions_transform(data):
