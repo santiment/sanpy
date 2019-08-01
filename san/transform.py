@@ -6,6 +6,7 @@ import operator
 import pandas as pd
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
+from collections import OrderedDict
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
@@ -52,18 +53,16 @@ def eth_top_transactions_transform(data):
 
 
 def news_transform(data):
-    result = list(map(lambda column: {
+    result = list(map(lambda column: OrderedDict({
         'datetime': column['datetime'],
         'title': column['title'],
         'description': column['description'],
         'sourceName': column['sourceName'],
         'url': column['url']
-    }, data))
+    }), data))
 
-    if result:
-        df = pd.DataFrame(result, columns = result[0].keys())
-        return df
 
+    return result
 
 def token_top_transactions_transform(data):
     return list(map(lambda column: {
