@@ -19,7 +19,10 @@ METRICS_USING_ETHEREUM = [
     "mining_pools_distribution"]
 
 
-def _test_ordinary_function(query, graphiql_query, slug=params['project_slug']):
+def _test_ordinary_function(
+        query,
+        graphiql_query,
+        slug=params['project_slug']):
     result = san.get(query + '/' + slug,
                      from_date=params['from_date'],
                      to_date=params['to_date'],
@@ -194,7 +197,10 @@ def test_miners_balance():
 
 @attr('integration')
 def test_mining_pools_distribution():
-    _test_ordinary_function('mining_pools_distribution', 'miningPoolsDistribution', 'ethereum')
+    _test_ordinary_function(
+        'mining_pools_distribution',
+        'miningPoolsDistribution',
+        'ethereum')
 
 
 @attr('integration')
@@ -217,7 +223,12 @@ def test_historical_balance():
 
 @attr('integration')
 def test_social_dominance():
-    sources = ["ALL", "REDDIT", "TELEGRAM", "DISCORD", "PROFESSIONAL_TRADERS_CHAT"]
+    sources = [
+        "ALL",
+        "REDDIT",
+        "TELEGRAM",
+        "DISCORD",
+        "PROFESSIONAL_TRADERS_CHAT"]
     for item in sources:
         result = san.get('social_dominance/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -232,11 +243,12 @@ def test_social_dominance():
 
 @attr('integration')
 def test_top_holders_percent_of_total_supply():
-    result = san.get('top_holders_percent_of_total_supply/' + params['project_slug'],
-                     number_of_holders=10,
-                     from_date=params['from_date'],
-                     to_date=params['to_date']
-                     )
+    result = san.get(
+        'top_holders_percent_of_total_supply/' +
+        params['project_slug'],
+        number_of_holders=10,
+        from_date=params['from_date'],
+        to_date=params['to_date'])
     assert len(result.index) >= 1
     assert 'DatetimeIndex' in str(type(result.index))
     assert result.empty == False
@@ -255,6 +267,7 @@ def test_price_volume_difference():
         assert len(result.index) >= 1
         assert 'DatetimeIndex' in str(type(result.index))
         assert result.empty == False
+
 
 @attr('integration')
 def test_eth_top_transactions():
@@ -325,7 +338,11 @@ def test_social_volume_projects():
 
 @attr('integration')
 def test_social_volume():
-    social_volume_types = ["PROFESSIONAL_TRADERS_CHAT_OVERVIEW", "TELEGRAM_CHATS_OVERVIEW", "TELEGRAM_DISCUSSION_OVERVIEW", "DISCORD_DISCUSSION_OVERVIEW"]
+    social_volume_types = [
+        "PROFESSIONAL_TRADERS_CHAT_OVERVIEW",
+        "TELEGRAM_CHATS_OVERVIEW",
+        "TELEGRAM_DISCUSSION_OVERVIEW",
+        "DISCORD_DISCUSSION_OVERVIEW"]
     for item in social_volume_types:
         result = san.get('social_volume/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -336,8 +353,6 @@ def test_social_volume():
         assert len(result.index) >= 1
         assert 'DatetimeIndex' in str(type(result.index))
         assert result.empty == False
-
-
 
 
 @attr('integration')

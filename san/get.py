@@ -2,6 +2,7 @@ import san.sanbase_graphql
 from san.graphql import execute_gql
 from san.query import get_gql_query, parse_dataset
 from san.transform import transform_query_result
+from san.v2_metrics_list import V2_METRIC_QUERIES
 
 CUSTOM_QUERIES = {
     'ohlcv': 'get_ohlcv',
@@ -12,9 +13,10 @@ def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
-
-    gql_query = get_gql_query(0, dataset, **kwargs)
-    gql_query = "{\n" + gql_query + "\n}"
+    if query in V2_METRIC_QUERIES:
+        gql_query = "{" + san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + "}"
+    else:
+        gql_query = "{" + get_gql_query(0, dataset, **kwargs) + "}"
     res = execute_gql(gql_query)
 
     return transform_query_result(0, query, res)
