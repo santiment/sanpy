@@ -13,7 +13,11 @@ class Batch:
         self.queries.append([dataset, kwargs])
 
     def execute(self):
-        result = []
+        graphql_string = self.__create_batched_query_string()
+        result = execute_gql(graphql_string)
+        return self.__transform_batch_result(result)
+
+    def __create_batched_query_string(self):
         batched_queries = []
 
         for idx, query in enumerate(self.queries):
@@ -24,14 +28,16 @@ class Batch:
                         idx, metric, slug, **query[1]))
             else:
                 batched_queries.append(get_gql_query(idx, query[0], **query[1]))
+        self.__batch_gql_queries(batched_queries)
+        return self.__batch_gql_queries(batched_queries)
 
-        gql_string = self.__batch_gql_queries(batched_queries)
-        res = execute_gql(gql_string)
+    def __transform_batch_result(self, graphql_result):
+        result = []
 
-        idxs = sorted([int(k.split('_')[1]) for k in res.keys()])
+        idxs = sorted([int(k.split('_')[1]) for k in graphql_result.keys()])
         for idx in idxs:
             query = self.queries[idx][0].split("/")[0]
-            df = transform_query_result(idx, query, res)
+            df = transform_query_result(idx, query, graphql_result)
             result.append(df)
 
         return result
