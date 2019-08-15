@@ -47,6 +47,7 @@ Santiment API python client.
     - [News](#news)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
+    - [Get Metric](#get-metric)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1193,6 +1194,33 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-28 07:53:32+00:00  0x868074aab18ea3...                  False  0x876eabf441b2e...                 True  0x90bd286da38a2b...   33181.82279
 2019-04-26 14:38:45+00:00  0x876eabf441b2ee...                   True  0x76af586d041d6...                False  0xe45b86f415e930...   28999.64023
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
+```
+
+### Other metrics
+
+All of the following metrics have accept the same parameters and have the same response structure
+
+Returns data for a given metric. The input, that is needed, is the string 'metric/slug', a 'from' date, a 'to' date, a string for the interval and an aggregation, which is optional (When not given, the aggregation is determined automatically by the API).
+
+The available metrics can be seen [here](./V2_METRICS.md):
+
+```python
+san.get(
+   "daily_active_addresses/santiment",
+   from_date="2019-08-31",
+   to_date="2019-09-03",
+   interval="2d",
+   aggregation="AVG"
+)
+```
+
+Example result:
+
+```
+datetime                      value     
+2019-08-30 00:00:00+00:00    4.0
+2019-09-01 00:00:00+00:00    5.5
+2019-09-03 00:00:00+00:00    9.0
 ```
 
 ## Running tests

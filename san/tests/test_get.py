@@ -5,7 +5,6 @@ from san.error import SanError
 from nose.tools import assert_raises
 from unittest.mock import Mock, patch
 from san.pandas_utils import convert_to_datetime_idx_df
-from san.graphql import execute_gql
 from san.tests.utils import TestResponse
 from copy import deepcopy
 from san.batch import Batch

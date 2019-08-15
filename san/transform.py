@@ -7,6 +7,7 @@ import pandas as pd
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 from collections import OrderedDict
+from san.graphql import execute_gql
 from san.v2_metrics_list import V2_METRIC_QUERIES
 
 QUERY_PATH_MAP = {
