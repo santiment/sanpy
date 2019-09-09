@@ -4,7 +4,6 @@ from san.pandas_utils import merge
 from san.batch import Batch
 from san.error import SanError
 
-
 DEFAULT_INTERVAL = '1d'
 DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
 DEFAULT_SOURCE = 'TELEGRAM'
@@ -120,6 +119,16 @@ QUERY_MAPPING = {
             'datetime',
             ('chartData', ['mentionsCount']),
             ('messages', ['text'])
+        ]
+    },
+    'eth_top_transactions': {
+        'query': 'ethTopTransactions',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address', 'isExchange']),
+            ('toAddress', ['address', 'isExchange']),
+            'trxHash',
+            'trxValue'
         ]
     }
 }
@@ -251,7 +260,7 @@ def mining_pools_distribution(idx, slug, **kwargs):
 
 
 def historical_balance(idx, slug, **kwargs):
-    kwargs = _transform_query_args("historical_balance", **kwargs)
+    kwargs = _transform_query_args('historical_balance', **kwargs)
 
     query_str = ("""
     query_{idx}: historicalBalance (
@@ -271,7 +280,7 @@ def historical_balance(idx, slug, **kwargs):
 
 
 def social_dominance(idx, slug, **kwargs):
-    kwargs = _transform_query_args("social_dominance", **kwargs)
+    kwargs = _transform_query_args('social_dominance', **kwargs)
 
     query_str = ("""
     query_{idx}: socialDominance (
@@ -338,7 +347,7 @@ def price_volume_difference(idx, slug, **kwargs):
 def eth_top_transactions(idx, slug, **kwargs):
     kwargs = _transform_query_args('eth_top_transactions', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
             ethTopTransactions (
                 from: \"{from_date}\",
@@ -346,20 +355,7 @@ def eth_top_transactions(idx, slug, **kwargs):
                 limit: {limit},
                 transactionType: {transaction_type}
             ){{
-        datetime,
-        fromAddress{{
-            address,
-            isExchange
-        }},
-        toAddress{{
-            address,
-            isExchange
-        }},
-        trxHash,
-        trxValue
-        }}
-    }}
-    """.format(
+            """ + ' '.join(kwargs['return_fields']) + '}}}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -632,6 +628,11 @@ def _transform_query_args(query, **kwargs):
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])
 
+    if 'return_fields' in kwargs:
+        kwargs['return_fields'] = _format_return_fields(kwargs['return_fields'])
+    else:
+        kwargs['return_fields'] = _format_return_fields(QUERY_MAPPING[query]['return_fields'])
+    
     return kwargs
 
 
@@ -661,3 +662,8 @@ def _format_to_date(datetime_obj_or_str):
     dt = iso8601.parse_date(datetime_obj_or_str) + \
         datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
+
+def _format_return_fields(fields):
+    return list(map(
+        lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
+    , fields))
