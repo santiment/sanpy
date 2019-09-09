@@ -48,6 +48,7 @@ Santiment API python client.
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
     - [Get Metric](#get-metric)
+    - [Emerging Trends](#emerging-trends)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1231,6 +1232,36 @@ datetime                      value
 2019-08-30 00:00:00+00:00    4.0
 2019-09-01 00:00:00+00:00    5.5
 2019-09-03 00:00:00+00:00    9.0
+```
+
+### Emerging Trends
+
+Emerging trends for a given period of time
+
+```python
+san.get(
+    "emerging_trends",
+    from_date="2019-07-01",
+    to_date="2019-07-02",
+    interval="1d",
+    size=5
+)
+```
+
+Example result:
+
+```
+datetime                        score    word
+2019-07-01 00:00:00+00:00  375.160034    lnbc
+2019-07-01 00:00:00+00:00  355.323281    dent
+2019-07-01 00:00:00+00:00  268.653820    link
+2019-07-01 00:00:00+00:00  231.721809  shorts
+2019-07-01 00:00:00+00:00  206.812798     btt
+2019-07-02 00:00:00+00:00  209.343752  bounce
+2019-07-02 00:00:00+00:00  135.412811    vidt
+2019-07-02 00:00:00+00:00  116.842801     bat
+2019-07-02 00:00:00+00:00   98.517600  bottom
+2019-07-02 00:00:00+00:00   89.309975   haiku
 ```
 
 ## Running tests

@@ -80,7 +80,7 @@ def token_top_transactions_transform(data):
     }, data))
 
 
-def trending_words_transform(data):
+def emerging_trends_transform(data):
     result = []
     for column in data:
         for i in range(0, len(column['topWords'])):

@@ -440,30 +440,30 @@ def token_top_transactions(idx, slug, **kwargs):
 
     return query_str
 
-def trending_words(idx, slug, **kwargs):
+
+def emerging_trends(idx, **kwargs):
     kwargs = _transform_query_args(**kwargs)
 
     query_str = """
-    query_{idx}: trendingWords (
-        source: {slug},
+    query_{idx}: getTrendingWords (
         from: \"{from_date}\",
         to: \"{to_date}\",
         size: {size},
-        hour: {hour}
+        interval: \"{interval}\"
     ){{
         datetime,
         topWords{{
-            score,
+            score
             word
         }}
     }}
     """.format(
         idx=idx,
-        slug=slug,
         **kwargs
     )
 
     return query_str
+
 
 def ohlcv(idx, slug, **kwargs):
     return_fields = [
