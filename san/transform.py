@@ -93,3 +93,24 @@ def emerging_trends_transform(data):
     result.sort(key=lambda elem: elem['datetime'])
 
     return result
+
+
+def top_social_gainers_losers_transform(data):
+    result = []
+    for column in data:
+        for i in range(0, len(column['projects'])):
+            result.append({
+                'datetime': column['datetime'],
+                'slug': column['projects'][i]['slug'],
+                'change': column['projects'][i]['change'],
+                'status': column['projects'][i]['status'],
+            })
+    
+    result = list(map(lambda column: OrderedDict({
+        'datetime': column['datetime'],
+        'slug': column['slug'],
+        'change': column['change'],
+        'status': column['status']
+    }), result))
+
+    return result

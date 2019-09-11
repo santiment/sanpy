@@ -47,8 +47,9 @@ Santiment API python client.
     - [News](#news)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
-    - [Get Metric](#get-metric)
+    - [Fetch single metric](#fetch-single-metric)
     - [Emerging Trends](#emerging-trends)
+    - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -781,9 +782,7 @@ The results are in two formats - the messages themselves and the data for buildi
 
 Arguments description:
 
-- `endpoint` - a string in the format "topic_search/`fields`" where `fields` is one of the following:
-  - "messages"
-  - "chart_data"
+- `endpoint` - a string in the format "topic_search" 
 - `source` - one of the following:
   - TELEGRAM
   - PROFESSIONAL_TRADERS_CHAT
@@ -796,11 +795,11 @@ Arguments description:
 
 ```python
 san.get(
-    "topic_search/messages",
+    "topic_search",
     source="TELEGRAM",
     search_text="btc moon",
-    from_date="2018-08-01T12:00:00Z",
-    to_date="2018-08-15T12:00:00Z",
+    from_date="2019-08-01T12:00:00Z",
+    to_date="2019-08-02T12:00:00Z",
     interval="6h"
 )
 ```
@@ -808,32 +807,15 @@ san.get(
 Example result:
 
 ```
-                                             messages
-0   {'text': 'Btc dominance increasing', 'datetime...
-1   {'text': 'Above the deafening noise of Sidera ...
-2   {'text': 'Neo could finosh today in the green ...
-```
-
-or
-
-```python
-san.get(
-    "topic_search/chart_data",
-    source="TELEGRAM",
-    search_text="btc moon",
-    from_date="2018-08-01T12:00:00Z",
-    to_date="2018-08-15T12:00:00Z",
-    interval="6h"
-)
-```
-
-Example result:
-
-```
-                                            chartData
-0   {'mentionsCount': 224, 'datetime': '2018-08-01...
-1   {'mentionsCount': 266, 'datetime': '2018-08-01...
-2   {'mentionsCount': 191, 'datetime': '2018-08-02...
+datetime                   mentionsCount
+2019-08-01 12:00:00+00:00            208
+2019-08-01 18:00:00+00:00            265
+2019-08-02 00:00:00+00:00            115
+2019-08-02 06:00:00+00:00            219
+2019-08-02 12:00:00+00:00            358
+2019-08-02 18:00:00+00:00            212
+2019-08-03 00:00:00+00:00            229
+2019-08-03 06:00:00+00:00            225
 ```
 
 ### Share of Deposits
@@ -1262,6 +1244,38 @@ datetime                        score    word
 2019-07-02 00:00:00+00:00  116.842801     bat
 2019-07-02 00:00:00+00:00   98.517600  bottom
 2019-07-02 00:00:00+00:00   89.309975   haiku
+```
+
+### Top Social Gainers Losers
+
+Top social gainers/losers returns the social volume changes for crypto projects.
+
+```python
+san.get(
+    "top_social_gainers_losers",
+    from_date="2019-07-18",
+    to_date="2019-07-30",
+    size=5,
+    time_window="2d",
+    status="ALL"
+)
+```
+
+Example result:
+
+**The result is shortened for convenience**
+
+```                                            
+datetime                              slug     change    status
+2019-07-28 01:00:00+00:00     libra-credit  21.000000    GAINER
+2019-07-28 01:00:00+00:00             aeon  -1.000000     LOSER
+2019-07-28 01:00:00+00:00    thunder-token   5.000000  NEWCOMER
+2019-07-28 02:00:00+00:00     libra-credit  43.000000    GAINER
+...                                    ...        ...       ...    
+2019-07-30 07:00:00+00:00            storj  12.000000  NEWCOMER
+2019-07-30 11:00:00+00:00            storj  21.000000    GAINER
+2019-07-30 11:00:00+00:00            aergo  -1.000000     LOSER
+2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
 ```
 
 ## Running tests
