@@ -464,6 +464,32 @@ def ohlcv(idx, slug, **kwargs):
     return merged[return_fields]
 
 
+def get_metric(idx, metric, slug, **kwargs):
+    kwargs = _transform_query_args(**kwargs)
+
+    query_str = """
+    query_{idx}: getMetric(metric: \"{metric}\"){{
+        timeseriesData(
+            slug: \"{slug}\"
+            from: \"{from_date}\"
+            to: \"{to_date}\"
+            interval: \"{interval}\",
+            aggregation: {aggregation}
+        ){{
+            datetime
+            value
+        }}
+    }}
+    """.format(
+        idx=idx,
+        metric=metric,
+        slug=slug,
+        **kwargs
+    )
+
+    return query_str
+
+
 def projects(idx, slug, **kwargs):
     if (slug == "erc20"):
         return erc20_projects(idx, **kwargs)
@@ -607,6 +633,7 @@ def _transform_query_args(**kwargs):
     kwargs['social_volume_type'] = kwargs['social_volume_type'] if 'social_volume_type' in kwargs else DEFAULT_SOCIAL_VOLUME_TYPE
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else DEFAULT_SEARCH_TEXT
+    kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
 
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])

@@ -5,7 +5,6 @@ from san.error import SanError
 from nose.tools import assert_raises
 from unittest.mock import Mock, patch
 from san.pandas_utils import convert_to_datetime_idx_df
-from san.graphql import execute_gql
 from san.tests.utils import TestResponse
 from copy import deepcopy
 from san.batch import Batch
@@ -13,20 +12,20 @@ from san.batch import Batch
 
 @patch('san.graphql.requests.post')
 def test_get(mock):
-    api_call_result = {
-        'query_0':
-            [{'datetime': '2018-06-01T00:00:00Z', 'activeAddresses': 2},
-             {'datetime': '2018-06-02T00:00:00Z', 'activeAddresses': 4},
-             {'datetime': '2018-06-03T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-04T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-05T00:00:00Z', 'activeAddresses': 14}]
-    }
-    mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
+    api_call_result = {'query_0': [{'balance': 212664.33000000002,
+                                    'datetime': '2019-05-23T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-24T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-25T00:00:00Z'}]}
+    mock.return_value = TestResponse(
+        status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-01",
-        to_date="2018-06-05",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-23",
+        to_date="2019-05-26",
         interval="1d"
     )
     expected_df = convert_to_datetime_idx_df(api_call_result['query_0'])
@@ -60,7 +59,8 @@ def test_prices(mock):
                 }
             ]
     }
-    mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
+    mock.return_value = TestResponse(
+        status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
         "prices/santiment_usd",
@@ -90,23 +90,23 @@ def test_error_response(mock):
 
 @patch('san.graphql.requests.post')
 def test_get_without_transform(mock):
-    api_call_result = {
-        'query_0':
-            [{'datetime': '2018-06-01T00:00:00Z', 'activeAddresses': 2},
-             {'datetime': '2018-06-02T00:00:00Z', 'activeAddresses': 4},
-             {'datetime': '2018-06-03T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-04T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-05T00:00:00Z', 'activeAddresses': 14}]
-    }
+    api_call_result = {'query_0': [{'balance': 212664.33000000002,
+                                    'datetime': '2019-05-23T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-24T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-25T00:00:00Z'}]}
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
+    mock.return_value = TestResponse(
+        status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-01",
-        to_date="2018-06-05",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-23",
+        to_date="2019-05-26",
         interval="1d"
     )
     expected_df = convert_to_datetime_idx_df(api_call_result['query_0'])
@@ -168,33 +168,30 @@ def test_get_with_transform(mock):
 
     expected_df = pd.DataFrame(expected, columns=expected[0].keys())
     if 'datetime' in expected_df.columns:
-        expected_df['datetime'] = pd.to_datetime(expected_df['datetime'], utc=True)
+        expected_df['datetime'] = pd.to_datetime(
+            expected_df['datetime'], utc=True)
         expected_df.set_index('datetime', inplace=True)
     pdt.assert_frame_equal(result, expected_df, check_dtype=False)
 
 
 @patch('san.graphql.requests.post')
 def test_batch_only_with_nontransform_queries(mock):
-    api_call_result = {'query_0': [{'activeAddresses': 2,
-                                    'datetime': '2018-06-01T00:00:00Z'},
-                                   {'activeAddresses': 4,
-                                    'datetime': '2018-06-02T00:00:00Z'},
-                                   {'activeAddresses': 6,
-                                    'datetime': '2018-06-03T00:00:00Z'},
-                                   {'activeAddresses': 6,
-                                    'datetime': '2018-06-04T00:00:00Z'},
-                                   {'activeAddresses': 14,
-                                    'datetime': '2018-06-05T00:00:00Z'}],
-                       'query_1': [{'activeAddresses': 2,
-                                    'datetime': '2018-06-06T00:00:00Z'},
-                                   {'activeAddresses': 10,
-                                    'datetime': '2018-06-07T00:00:00Z'},
-                                   {'activeAddresses': 21,
-                                    'datetime': '2018-06-08T00:00:00Z'},
-                                   {'activeAddresses': 6,
-                                    'datetime': '2018-06-09T00:00:00Z'},
-                                   {'activeAddresses': 5,
-                                    'datetime': '2018-06-10T00:00:00Z'}]}
+    api_call_result = {'query_0': [{'balance': 212664.33000000002,
+                                    'datetime': '2019-05-18T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-19T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-20T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-21T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-22T00:00:00Z'}],
+                       'query_1': [{'balance': 212664.33000000002,
+                                    'datetime': '2019-05-23T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-24T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-25T00:00:00Z'}]}
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
@@ -206,16 +203,18 @@ def test_batch_only_with_nontransform_queries(mock):
     batch = Batch()
 
     batch.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-01",
-        to_date="2018-06-05",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-18",
+        to_date="2019-05-23",
         interval="1d"
     )
 
     batch.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-06",
-        to_date="2018-06-10",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-23",
+        to_date="2019-05-26",
         interval="1d"
     )
 
@@ -223,7 +222,7 @@ def test_batch_only_with_nontransform_queries(mock):
 
     expected_result = []
 
-    queries = ['daily_active_addresses', 'daily_active_addresses']
+    queries = ['historical_balance', 'historical_balance']
     for idx, query in enumerate(queries):
         df = pd.DataFrame(expected['query_' + str(idx)])
         if 'datetime' in df.columns:
@@ -314,33 +313,33 @@ def test_batch_only_with_transform_queries(mock):
     result = batch.execute()
 
     expected = [[{'datetime': '2019-04-19T14:14:52.000000Z',
-                 'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'fromAddressIsExchange': False,
-                 'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
-                 'toAddressIsExchange': False,
-                 'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
-                 'trxValue': 19.48},
-                {'datetime': '2019-04-19T14:09:58.000000Z',
-                 'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
-                 'fromAddressIsExchange': False,
-                 'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
-                 'toAddressIsExchange': False,
-                 'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
-                 'trxValue': 15.15}],
-            [{'datetime': '2019-04-29T21:33:31.000000Z',
-              'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-              'fromAddressIsExchange': False,
-              'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
-              'toAddressIsExchange': False,
-              'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
-              'trxValue': 100.0},
-             {'datetime': '2019-04-29T21:21:18.000000Z',
-              'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-              'fromAddressIsExchange': False,
-              'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
-              'toAddressIsExchange': False,
-              'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
-              'trxValue': 40.95}]]
+                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
+                  'fromAddressIsExchange': False,
+                  'toAddress': '0xd69bc0585e05ea381ce3ae69626ce4e8a0629e16',
+                  'toAddressIsExchange': False,
+                  'trxHash': '0x590512e1f1fbcfd48a13d1997842777269f7c1915b7baef3c11ba83ca62495be',
+                  'trxValue': 19.48},
+                 {'datetime': '2019-04-19T14:09:58.000000Z',
+                  'fromAddress': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2',
+                  'fromAddressIsExchange': False,
+                  'toAddress': '0x723fb5c14eaff826b386052aace3b9b21999bf50',
+                  'toAddressIsExchange': False,
+                  'trxHash': '0x78e0720b9e72d1d4d44efeff8393758d7b09c16f5156d63e021655e70be29db5',
+                  'trxValue': 15.15}],
+                [{'datetime': '2019-04-29T21:33:31.000000Z',
+                  'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
+                  'fromAddressIsExchange': False,
+                  'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
+                  'toAddressIsExchange': False,
+                  'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
+                  'trxValue': 100.0},
+                 {'datetime': '2019-04-29T21:21:18.000000Z',
+                    'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
+                    'fromAddressIsExchange': False,
+                    'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
+                    'toAddressIsExchange': False,
+                    'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
+                    'trxValue': 40.95}]]
 
     expected_result = []
 
@@ -364,54 +363,47 @@ def test_batch_only_with_transform_queries(mock):
 
 @patch('san.graphql.requests.post')
 def test_batch_with_mixed_queries(mock):
-    api_call_result = { 'query_0':[{'activeAddresses': 2,
-                       'datetime': '2018-06-06T00:00:00Z'},
-                      {'activeAddresses': 10,
-                       'datetime': '2018-06-07T00:00:00Z'},
-                      {'activeAddresses': 21,
-                       'datetime': '2018-06-08T00:00:00Z'},
-                      {'activeAddresses': 6,
-                       'datetime': '2018-06-09T00:00:00Z'},
-                      {'activeAddresses': 5,
-                       'datetime': '2018-06-10T00:00:00Z'}],
-                        'query_1': {
-                            'ethTopTransactions': [
-                                {
-                                    'datetime': '2019-04-29T21:33:31.000000Z',
-                                    'fromAddress': {
-                                        'address': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-                                        'isExchange': False},
-                                    'toAddress': {
-                                        'address': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
-                                        'isExchange': False},
-                                    'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
-                                    'trxValue': 100.0},
-                                {
-                                    'datetime': '2019-04-29T21:21:18.000000Z',
-                                    'fromAddress': {
-                                        'address': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-                                        'isExchange': False},
-                                    'toAddress': {
-                                        'address': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
-                                        'isExchange': False},
-                                    'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
-                                    'trxValue': 40.95}]}}
+    api_call_result = {'query_0': [{'balance': 212664.33000000002,
+                                    'datetime': '2019-05-18T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-19T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-20T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-21T00:00:00Z'},
+                                   {'balance': 212664.33000000002,
+                                    'datetime': '2019-05-22T00:00:00Z'}],
+                       'query_1': {'ethTopTransactions': [{'datetime': '2019-04-29T21:33:31.000000Z',
+                                                           'fromAddress': {'address': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
+                                                                           'isExchange': False},
+                                                           'toAddress': {'address': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
+                                                                         'isExchange': False},
+                                                           'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
+                                                           'trxValue': 100.0},
+                                                          {'datetime': '2019-04-29T21:21:18.000000Z',
+                                                           'fromAddress': {'address': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
+                                                                           'isExchange': False},
+                                                           'toAddress': {'address': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
+                                                                         'isExchange': False},
+                                                           'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
+                                                           'trxValue': 40.95}]}}
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(status_code=200, data=deepcopy(api_call_result))
+    mock.return_value = TestResponse(
+        status_code=200, data=deepcopy(api_call_result))
 
-    expected = [[{'activeAddresses': 2,
-                 'datetime': '2018-06-06T00:00:00Z'},
-                {'activeAddresses': 10,
-                 'datetime': '2018-06-07T00:00:00Z'},
-                {'activeAddresses': 21,
-                 'datetime': '2018-06-08T00:00:00Z'},
-                {'activeAddresses': 6,
-                 'datetime': '2018-06-09T00:00:00Z'},
-                {'activeAddresses': 5,
-                 'datetime': '2018-06-10T00:00:00Z'}],
-                 [{'datetime': '2019-04-29T21:33:31.000000Z',
+    expected = [[{'balance': 212664.33000000002,
+                  'datetime': '2019-05-18T00:00:00Z'},
+                 {'balance': 212664.33000000002,
+                  'datetime': '2019-05-19T00:00:00Z'},
+                 {'balance': 212664.33000000002,
+                  'datetime': '2019-05-20T00:00:00Z'},
+                 {'balance': 212664.33000000002,
+                  'datetime': '2019-05-21T00:00:00Z'},
+                 {'balance': 212664.33000000002,
+                  'datetime': '2019-05-22T00:00:00Z'}],
+                [{'datetime': '2019-04-29T21:33:31.000000Z',
                   'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
                   'fromAddressIsExchange': False,
                   'toAddress': '0x45d6275d9496bc61b5b072a75089be4c5ab54068',
@@ -419,19 +411,20 @@ def test_batch_with_mixed_queries(mock):
                   'trxHash': '0x776cd57382456adb2f9c22bc2e06b4ddc9937b073e7f2206737933b46806f658',
                   'trxValue': 100.0},
                  {'datetime': '2019-04-29T21:21:18.000000Z',
-                  'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
-                  'fromAddressIsExchange': False,
-                  'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
-                  'toAddressIsExchange': False,
-                  'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
-                  'trxValue': 40.95}]]
+                    'fromAddress': '0xe76fe52a251c8f3a5dcd657e47a6c8d16fdf4bfa',
+                    'fromAddressIsExchange': False,
+                    'toAddress': '0x468bdccdc334f646f1acfb4f69e3e855d23440e2',
+                    'toAddressIsExchange': False,
+                    'trxHash': '0x848414fb5c382f2a9fb1856425437b60a5471ae383b884100794f8adf12227a6',
+                    'trxValue': 40.95}]]
 
     batch = Batch()
 
     batch.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-06",
-        to_date="2018-06-11",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-18",
+        to_date="2019-05-23",
         interval="1d"
     )
 
@@ -447,7 +440,7 @@ def test_batch_with_mixed_queries(mock):
 
     expected_result = []
 
-    queries = ['daily_active_addresses', 'eth_top_transactions']
+    queries = ['historical_balance', 'eth_top_transactions']
     for idx, query in enumerate(queries):
         df = pd.DataFrame(expected[idx], columns=expected[idx][0].keys())
         if 'datetime' in df.columns:

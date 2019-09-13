@@ -7,13 +7,15 @@ import pandas as pd
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 from collections import OrderedDict
+from san.graphql import execute_gql
+from san.v2_metrics_list import V2_METRIC_QUERIES
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
     'eth_spent_over_time': ['ethSpentOverTime'],
-    'token_top_transactions':['tokenTopTransactions']
+    'token_top_transactions': ['tokenTopTransactions'],
+    'get_metric': ['timeseriesData']
 }
-
 
 def path_to_data(idx, query, data):
     """
@@ -31,6 +33,8 @@ def transform_query_result(idx, query, data):
     """
     if query in QUERY_PATH_MAP:
         result = path_to_data(idx, query, data)
+    elif query in V2_METRIC_QUERIES:
+        result = path_to_data(idx, 'get_metric', data)
     else:
         result = data['query_' + str(idx)]
 
@@ -61,8 +65,8 @@ def news_transform(data):
         'url': column['url']
     }), data))
 
-
     return result
+
 
 def token_top_transactions_transform(data):
     return list(map(lambda column: {

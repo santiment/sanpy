@@ -7,33 +7,37 @@ from san.tests.utils import TestResponse
 
 @patch('san.graphql.requests.post')
 def test_batch(mock):
-    expected = {
-        'query_0':
-            [{'datetime': '2018-06-01T00:00:00Z', 'activeAddresses': 2},
-             {'datetime': '2018-06-02T00:00:00Z', 'activeAddresses': 4},
-             {'datetime': '2018-06-03T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-04T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-05T00:00:00Z', 'activeAddresses': 14}],
-        'query_1':
-            [{'datetime': '2018-06-06T00:00:00Z', 'activeAddresses': 2},
-             {'datetime': '2018-06-07T00:00:00Z', 'activeAddresses': 10},
-             {'datetime': '2018-06-08T00:00:00Z', 'activeAddresses': 21},
-             {'datetime': '2018-06-09T00:00:00Z', 'activeAddresses': 6},
-             {'datetime': '2018-06-10T00:00:00Z', 'activeAddresses': 5}]
-    }
+    expected = {'query_0': [{'balance': 212664.33000000002,
+                             'datetime': '2019-05-18T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-19T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-20T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-21T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-22T00:00:00Z'}],
+                'query_1': [{'balance': 212664.33000000002,
+                             'datetime': '2019-05-23T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-24T00:00:00Z'},
+                            {'balance': 212664.33000000002,
+                             'datetime': '2019-05-25T00:00:00Z'}]}
     mock.return_value = TestResponse(status_code=200, data=expected)
 
     batch = Batch()
     batch.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-01",
-        to_date="2018-06-05",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-18",
+        to_date="2019-05-23",
         interval="1d"
     )
     batch.get(
-        "daily_active_addresses/santiment",
-        from_date="2018-06-06",
-        to_date="2018-06-10",
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-23",
+        to_date="2019-05-26",
         interval="1d"
     )
     [res1, res2] = batch.execute()
