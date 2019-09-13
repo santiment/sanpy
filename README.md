@@ -1,5 +1,5 @@
-
 # sanpy
+
 [![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
 
 Santiment API python client.
@@ -64,6 +64,7 @@ pip install --upgrade sanpy
 ```
 
 ## Premium metrics
+
 In order to access real time data or historical data (older than 3 months),
 you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
 All premium metrics are free for "santiment" token.
@@ -297,7 +298,7 @@ Example result:
 
 ```
                                burnRate
-datetime                                   
+datetime
 2018-05-01 00:00:00+00:00      2.514926e+09
 2018-05-02 00:00:00+00:00      1.363158e+10
 2018-05-03 00:00:00+00:00      2.182971e+09
@@ -327,7 +328,7 @@ Example result:
 
 ```
                            tokenAgeConsumed
-datetime                                   
+datetime
 2018-05-01 00:00:00+00:00      2.514926e+09
 2018-05-02 00:00:00+00:00      1.363158e+10
 2018-05-03 00:00:00+00:00      2.182971e+09
@@ -342,7 +343,6 @@ average over the interval. The result is given in days instead of blocks.
 
 [Premium metric](#premium-metrics)
 
-
 ```python
 san.get(
     "average_token_age_consumed_in_days/santiment",
@@ -356,7 +356,7 @@ Example result:
 
 ```
                              tokenAge
-datetime                             
+datetime
 2018-05-01 00:00:00+00:00    6.353738
 2018-05-02 00:00:00+00:00   22.303985
 2018-05-03 00:00:00+00:00    3.873644
@@ -364,14 +364,12 @@ datetime
 2018-05-05 00:00:00+00:00   56.730010
 ```
 
-
 ### Transaction Volume
 
 Total amount of tokens for a project that were transacted on the blockchain.
 This metric includes only on-chain volume, not volume in exchanges.
 
 [Premium metric](#premium-metrics)
-
 
 ```python
 san.get(
@@ -386,7 +384,7 @@ Example result:
 
 ```
                            transactionVolume
-datetime                                    
+datetime
 2018-06-01 00:00:00+00:00          46.848943
 2018-06-02 00:00:00+00:00         666.194095
 2018-06-03 00:00:00+00:00       31326.856743
@@ -402,7 +400,6 @@ often within a set time frame.
 
 [Premium metric](#premium-metrics)
 
-
 ```python
 san.get(
     "token_velocity/santiment",
@@ -415,7 +412,7 @@ Example result:
 
 ```
                            tokenVelocity
-datetime                                
+datetime
 2018-06-01 00:00:00+00:00           1.00
 2018-06-02 00:00:00+00:00           3.00
 2018-06-03 00:00:00+00:00           1.97
@@ -430,7 +427,6 @@ each given time period. Minimum interval is '1d'.
 
 [Premium metric](#premium-metrics)
 
-
 ```python
 san.get(
     "token_circulation/santiment",
@@ -443,7 +439,7 @@ Example result:
 
 ```
                            tokenCirculation
-datetime                                   
+datetime
 2018-06-01 00:00:00+00:00         46.848943
 2018-06-02 00:00:00+00:00        222.194095
 2018-06-03 00:00:00+00:00      15933.955221
@@ -472,7 +468,7 @@ Example result:
 
 ```
                            nonExchangeRealizedValue  realizedValue
-datetime                                                          
+datetime
 2018-06-01 00:00:00+00:00              2.334917e+07   9.248495e+07
 2018-06-02 00:00:00+00:00              2.334917e+07   9.248498e+07
 2018-06-03 00:00:00+00:00              2.335106e+07   9.248275e+07
@@ -487,7 +483,6 @@ realized value of all tokens.
 
 [Premium metric](#premium-metrics)
 
-
 ```python
 san.get(
     "mvrv_ratio/santiment",
@@ -501,7 +496,7 @@ Example result:
 
 ```
                               ratio
-datetime                           
+datetime
 2018-06-01 00:00:00+00:00  0.836489
 2018-06-02 00:00:00+00:00  0.850379
 2018-06-03 00:00:00+00:00  0.848195
@@ -529,7 +524,7 @@ Example result:
 
 ```
                            nvtRatioCirculation  nvtRatioTxVolume
-datetime                                                        
+datetime
 2018-06-01 00:00:00+00:00         1.337498e+06      1.337498e+06
 2018-06-02 00:00:00+00:00         2.820074e+05      9.405723e+04
 2018-06-03 00:00:00+00:00         3.868500e+03      2.000213e+03
@@ -557,14 +552,13 @@ Example result:
 
 ```
                            activeDeposits
-datetime                                 
+datetime
 2018-06-01 00:00:00+00:00               0
 2018-06-02 00:00:00+00:00               2
 2018-06-03 00:00:00+00:00               0
 2018-06-04 00:00:00+00:00               2
 2018-06-05 00:00:00+00:00               6
 ```
-
 
 ### Github Activity
 
@@ -748,10 +742,10 @@ Arguments description:
 - `from_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 - `to_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
 - `social_volume_type` - the source of mention counts, one of the following:
-  * "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
-  * "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
-  * "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat (if there is one)
-  * "DISCORD_DISCUSSION_OVERVIEW" - shows how many times the given project has been mentioned in the discord channels
+  - "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
+  - "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
+  - "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat (if there is one)
+  - "DISCORD_DISCUSSION_OVERVIEW" - shows how many times the given project has been mentioned in the discord channels
 
 ```python
 san.get(
@@ -787,13 +781,13 @@ The results are in two formats - the messages themselves and the data for buildi
 Arguments description:
 
 - `endpoint` - a string in the format "topic_search/`fields`" where `fields` is one of the following:
-  * "messages"
-  * "chart_data"
+  - "messages"
+  - "chart_data"
 - `source` - one of the following:
-  * TELEGRAM
-  * PROFESSIONAL_TRADERS_CHAT
-  * REDDIT
-  * DISCORD
+  - TELEGRAM
+  - PROFESSIONAL_TRADERS_CHAT
+  - REDDIT
+  - DISCORD
 - `search_text` - a string containing the key words for which the sources should be searched.
 - `from_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
 - `to_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
@@ -841,7 +835,6 @@ Example result:
 2   {'mentionsCount': 191, 'datetime': '2018-08-02...
 ```
 
-
 ### Share of Deposits
 
 Returns information for the shares of deposits that a given project has during the time interval.
@@ -859,10 +852,9 @@ san.get(
 
 Example result:
 
-
 ```
                            activeAddresses  activeDeposits  shareOfDeposits
-datetime                                                                   
+datetime
 2019-01-01 00:00:00+00:00                5               1        20.000000
 2019-01-02 00:00:00+00:00                2               0         0.000000
 2019-01-03 00:00:00+00:00               13               2        15.384615
@@ -981,11 +973,12 @@ datetime                     balance
 Returns the % of the social dominance a given project has over time in a given social channel.
 
 Available sources are:
-* PROFESSIONAL_TRADERS_CHAT
-* TELEGRAM
-* DISCORD
-* REDDIT
-* ALL
+
+- PROFESSIONAL_TRADERS_CHAT
+- TELEGRAM
+- DISCORD
+- REDDIT
+- ALL
 
 [Premium metric](#premium-metrics)
 
@@ -1002,7 +995,7 @@ san.get(
 Example result:
 
 ```
-datetime                   dominance         
+datetime                   dominance
 2019-04-08 00:00:00+00:00   0.043028
 2019-04-09 00:00:00+00:00   0.025337
 2019-04-10 00:00:00+00:00   0.045376
@@ -1027,7 +1020,7 @@ san.get(
 Example Result:
 
 ```
-datetime                   inExchanges  inTopHoldersTotal  outsideExchanges                                                
+datetime                   inExchanges  inTopHoldersTotal  outsideExchanges
 2019-04-09 00:00:00+00:00     7.977318          13.277961          5.300643
 2019-04-10 00:00:00+00:00     7.976282          13.310953          5.334671
 2019-04-11 00:00:00+00:00     7.975260          13.296356          5.321096
@@ -1088,9 +1081,10 @@ datetime                   priceChange  priceVolumeDiff  volumeChange
 Top ETH transactions for project's team wallets.
 
 Available transaction types:
-* ALL
-* IN
-* OUT
+
+- ALL
+- IN
+- OUT
 
 ```python
 san.get(
@@ -1105,6 +1099,7 @@ san.get(
 Example result:
 
 **The result is shortened for convenience**
+
 ```
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-29 21:33:31+00:00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
@@ -1119,10 +1114,10 @@ Returns the news for given word.
 
 Arguments description:
 
-  *  tag - project name, ticker or other crypto related words.
-  *  from - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
-  *  to - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
-  *  size - size limit of the returned results
+- tag - project name, ticker or other crypto related words.
+- from - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+- to - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+- size - size limit of the returned results
 
 [Premium metric](#premium-metrics)
 
@@ -1138,8 +1133,9 @@ san.get(
 Example result:
 
 **The result is shortened for convenience**
+
 ```
-datetime                                                               title                                        description       sourceName                                                                                                       url                                                                                                                                
+datetime                                                               title                                        description       sourceName                                                                                                       url
 2019-04-26 18:39:00+00:00  Crypto Markets Slump, Oil Prices Report Losses...  Crypto Markets Slump, Oil Prices Report Losses...    Cointelegraph                              https://cointelegraph.com/news/crypto-markets-slump-oil-prices-report-losses
 2019-05-17 09:02:07+00:00  Debt-Ridden Crypto Exchange Cryptopia Suckers ...  Debt-Ridden Crypto Exchange Cryptopia Suckers ...              CCN                  https://www.ccn.com/debt-ridden-crypto-exchange-cryptopia-suckers-hacked-customers-again
 2019-05-27 18:56:15+00:00  Institutions Could Push Crypto Past A ‘Point O...  Institutions Could Push Crypto Past A ‘Point O...  Crypto Briefing                                          https://cryptobriefing.com/institutional-crypto-point-no-return/
@@ -1187,6 +1183,7 @@ san.get(
 Example result:
 
 **The result is shortened for convenience**
+
 ```
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-21 13:51:59+00:00  0x1f3df0b8390bb8...                  False  0x5eaae5e949952...                False  0xdbced935b09dd0...  166674.00000
@@ -1196,13 +1193,26 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
-### Other metrics
+### Full list of on-chain metrics
+
+This list includes:
+
+- MVRV
+- Age Destroyed
+- Transaction Volume
+- Circulation
+- NVT
+- Realized Value
+- Realized Price
+- Velocity
+- Mean Age
+- Exchange Metrics
 
 All of the following metrics have accept the same parameters and have the same response structure
 
 Returns data for a given metric. The input, that is needed, is the string 'metric/slug', a 'from' date, a 'to' date, a string for the interval and an aggregation, which is optional (When not given, the aggregation is determined automatically by the API).
 
-The available metrics can be seen [here](./V2_METRICS.md):
+The available metrics can be seen [here](./on-chain-metrics.md):
 
 ```python
 san.get(
@@ -1217,7 +1227,7 @@ san.get(
 Example result:
 
 ```
-datetime                      value     
+datetime                      value
 2019-08-30 00:00:00+00:00    4.0
 2019-09-01 00:00:00+00:00    5.5
 2019-09-03 00:00:00+00:00    9.0
