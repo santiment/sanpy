@@ -102,6 +102,14 @@ QUERY_MAPPING = {
         'query': 'historicalBalance',
         'return_fields': ['datetime', 'balance']
     },
+    'social_dominance': {
+        'query': 'socialDominance',
+        'return_fields': ['datetime', 'dominance']
+    },
+    'top_holders_percent_of_total_supply': {
+        'query': 'topHoldersPercentOfTotalSupply',
+        'return_fields': ['datetime', 'inExchanges', 'outsideExchanges', 'inTopHoldersTotal']
+    },
     'projects': {
         'query': 'allProjects',
         'return_fields': ['name', 'slug', 'ticker', 'totalSupply', 'marketSegment']
@@ -116,9 +124,7 @@ QUERY_MAPPING = {
     'topic_search': {
         'query': 'topicSearch',
         'return_fields': [
-            'datetime',
-            ('chartData', ['mentionsCount']),
-            ('messages', ['text'])
+            ('chartData', ['datetime, ''mentionsCount'])
         ]
     },
     'eth_top_transactions': {
@@ -129,6 +135,49 @@ QUERY_MAPPING = {
             ('toAddress', ['address', 'isExchange']),
             'trxHash',
             'trxValue'
+        ]
+    },
+    'token_top_transactions': {
+        'query': 'tokenTopTransactions',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address', 'isExchange']),
+            ('toAddress', ['address', 'isExchange']),
+            'trxHash',
+            'trxValue'
+        ]
+    },
+    'eth_spent_over_time': {
+        'query': 'ethSpentOverTime',
+        'return_fields': [
+            'datetime',
+            'ethSpent'
+        ]
+    },
+    'news': {
+        'query': 'news',
+        'return_fields': [
+            'datetime',
+            'title',
+            'sourceName',
+            'url',
+            'description'
+        ]
+    },
+    'price_volume_difference': {
+        'query': 'priceVolumeDiff',
+        'return_fields': [
+            'datetime',
+            'priceChange',
+            'priceVolumeDiff',
+            'volumeChange'
+        ]
+    },
+    'social_volume': {
+        'query': 'socialVolume',
+        'return_fields': [
+            'datetime',
+            'mentionsCount'
         ]
     }
 }
@@ -545,7 +594,7 @@ def exchange_funds_flow(idx, slug, **kwargs):
     return query_str
 
 
-def social_volume_projects(idx, _slug, **kwargs):
+def social_volume_projects(idx, **kwargs):
     query_str = """
     query_{idx}: socialVolumeProjects
     """.format(idx=idx)
@@ -575,7 +624,6 @@ def social_volume(idx, slug, **kwargs):
 
 def topic_search(idx, **kwargs):
     kwargs = _transform_query_args('topic_search', **kwargs)
-
     query_str = ("""
     query_{idx}: topicSearch (
         source: {source},
@@ -623,16 +671,15 @@ def _transform_query_args(query, **kwargs):
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else DEFAULT_SEARCH_TEXT
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
-    kwargs['return_fields'] = kwargs['return_fields'] if 'return_fields' in kwargs else QUERY_MAPPING[query]['return_fields']
 
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])
 
     if 'return_fields' in kwargs:
-        kwargs['return_fields'] = _format_return_fields(kwargs['return_fields'])
+        kwargs['return_fields'] = _format_all_return_fields(kwargs['return_fields'])
     else:
-        kwargs['return_fields'] = _format_return_fields(QUERY_MAPPING[query]['return_fields'])
-    
+        kwargs['return_fields'] = _format_all_return_fields(QUERY_MAPPING[query]['return_fields'])
+
     return kwargs
 
 
@@ -662,6 +709,13 @@ def _format_to_date(datetime_obj_or_str):
     dt = iso8601.parse_date(datetime_obj_or_str) + \
         datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
+
+def _format_all_return_fields(fields):
+    while any(isinstance(x, tuple) for x in fields):
+        fields = list(map(
+        lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
+        , fields))
+    return fields
 
 def _format_return_fields(fields):
     return list(map(
