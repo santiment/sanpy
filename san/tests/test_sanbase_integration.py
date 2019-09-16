@@ -117,6 +117,16 @@ def test_erc20_projects():
 
 
 @attr('integration')
+def test_daily_active_addresses():
+    _test_ordinary_function('daily_active_addresses', 'dailyActiveAddresses')
+
+
+@attr('integration')
+def test_burn_rate():
+    _test_ordinary_function('burn_rate', 'burnRate')
+
+
+@attr('integration')
 def test_gas_used():
     _test_ordinary_function('gas_used', 'gasUsed', 'ethereum')
 
@@ -140,17 +150,17 @@ def test_transaction_volume():
 
 @attr('integration')
 def test_github_activity():
-    result = _test_ordinary_function('github_activity', 'githubActivity')
+    _test_ordinary_function('github_activity', 'githubActivity')
 
 
 @attr('integration')
 def test_dev_activity():
-    result = _test_ordinary_function('dev_activity', 'devActivity')
+    _test_ordinary_function('dev_activity', 'devActivity')
 
 
 @attr('integration')
 def test_network_growth():
-    result = _test_ordinary_function('network_growth', 'networkGrowth')
+    _test_ordinary_function('network_growth', 'networkGrowth')
 
 
 @attr('integration')
@@ -380,3 +390,48 @@ def test_ohlcv():
     assert len(ohlcv_df.index) >= 1
     assert 'DatetimeIndex' in str(type(ohlcv_df.index))
     assert ohlcv_df.empty == False
+
+
+@attr('integration')
+def test_top_social_gainers_losers():
+    tsgl_df = san.get(
+        'top_social_gainers_losers',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        size=5,
+        time_window='2d',
+        status='ALL'
+    )
+
+    assert len(tsgl_df) >= 1
+    assert 'DatetimeIndex' in str(type(tsgl_df.index))
+    assert tsgl_df.empty == False
+
+
+@attr('integration')
+def test_get_metric():
+    get_metric_df = san.get(
+        'daily_active_addresses/' + params['project_slug'],
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='2d',
+        aggregation='AVG'
+    )
+
+    assert len(get_metric_df) >= 1
+    assert 'DatetimeIndex' in str(type(get_metric_df.index))
+    assert get_metric_df.empty == False
+
+@attr('integration')
+def test_emerging_trends():
+    get_metric_df = san.get(
+        'emerging_trends',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d',
+        size=5
+    )
+
+    assert len(get_metric_df) >= 1
+    assert 'DatetimeIndex' in str(type(get_metric_df.index))
+    assert get_metric_df.empty == False    
