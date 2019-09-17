@@ -2,8 +2,18 @@ import san.sanbase_graphql
 from san.error import SanError
 
 
-def get_gql_query(idx, dataset, **kwargs):
-    query, slug = parse_dataset(dataset)
+def get_gql_query(idx, identifier, **kwargs):
+  query, separator, slug = identifier.partition("/")
+
+  if slug == '' and separator != '':
+    raise SanError('Invalid metric!')
+  elif slug == '':
+    return getattr(
+        san.sanbase_graphql,
+        query,
+        lambda *args, **kwargs: not_found(query)
+    )(idx, **kwargs)
+  else:
     return getattr(
         san.sanbase_graphql,
         query,

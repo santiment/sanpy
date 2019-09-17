@@ -78,3 +78,17 @@ def token_top_transactions_transform(data):
         'trxHash': column['trxHash'],
         'trxValue': column['trxValue']
     }, data))
+
+
+def emerging_trends_transform(data):
+    result = []
+    for column in data:
+        for i in range(0, len(column['topWords'])):
+            result.append({
+                'datetime': column['datetime'],
+                'score': column['topWords'][i]['score'],
+                'word': column['topWords'][i]['word']
+            })
+    result.sort(key=lambda elem: elem['datetime'])
+
+    return result
