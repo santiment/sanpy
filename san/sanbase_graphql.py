@@ -179,7 +179,21 @@ QUERY_MAPPING = {
             'datetime',
             'mentionsCount'
         ]
-    }
+    },
+    'top_social_gainers_losers': {
+        'query': 'topSocialGainersLosers',
+        'return_fields': [
+            'datetime',
+            ('projects', ['change', 'slug', 'status'])
+        ]
+    },
+    'emerging_trends': {
+        'query': 'getTrendingWords',
+        'return_fields': [
+            'datetime',
+            ('topWords', ['score', 'word'])
+        ]
+    }     
 }
 
 
@@ -488,22 +502,38 @@ def token_top_transactions(idx, slug, **kwargs):
 
 
 def emerging_trends(idx, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('emerging_trends', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: getTrendingWords (
         from: \"{from_date}\",
         to: \"{to_date}\",
         size: {size},
         interval: \"{interval}\"
-    ){{
-        datetime,
-        topWords{{
-            score
-            word
-        }}
+    ){{""" + ' '.join(kwargs['return_fields']) + """
     }}
-    """.format(
+    """).format(
+        idx=idx,
+        **kwargs
+    )
+
+    return query_str
+
+
+def top_social_gainers_losers(idx, **kwargs):
+    kwargs = _transform_query_args('top_social_gainers_losers', **kwargs)
+
+    query_str = ("""
+    query_{idx}: topSocialGainersLosers(
+                    from: \"{from_date}\",
+                    to: \"{to_date}\",
+                    status: {status},
+                    size: {size},
+                    timeWindow: \"{time_window}\"
+                ){{
+    """ + ' '.join(kwargs['return_fields']) + """
+    }}
+    """).format(
         idx=idx,
         **kwargs
     )
@@ -691,10 +721,6 @@ def _default_from_date():
     return datetime.datetime.now() - datetime.timedelta(days=365)
 
 
-def _format_return_fields(return_fields):
-    return ",\n".join(return_fields)
-
-
 def _format_from_date(datetime_obj_or_str):
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
@@ -712,9 +738,7 @@ def _format_to_date(datetime_obj_or_str):
 
 def _format_all_return_fields(fields):
     while any(isinstance(x, tuple) for x in fields):
-        fields = list(map(
-        lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
-        , fields))
+        fields = _format_return_fields(fields)
     return fields
 
 def _format_return_fields(fields):
