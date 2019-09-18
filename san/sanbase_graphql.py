@@ -4,7 +4,6 @@ from san.pandas_utils import merge
 from san.batch import Batch
 from san.error import SanError
 
-
 DEFAULT_INTERVAL = '1d'
 DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
 DEFAULT_SOURCE = 'TELEGRAM'
@@ -98,6 +97,88 @@ QUERY_MAPPING = {
     'history_twitter_data': {
         'query': 'historyTwitterData',
         'return_fields': ['datetime', 'followers_count']
+    },
+    'historical_balance': {
+        'query': 'historicalBalance',
+        'return_fields': ['datetime', 'balance']
+    },
+    'social_dominance': {
+        'query': 'socialDominance',
+        'return_fields': ['datetime', 'dominance']
+    },
+    'top_holders_percent_of_total_supply': {
+        'query': 'topHoldersPercentOfTotalSupply',
+        'return_fields': ['datetime', 'inExchanges', 'outsideExchanges', 'inTopHoldersTotal']
+    },
+    'projects': {
+        'query': 'allProjects',
+        'return_fields': ['name', 'slug', 'ticker', 'totalSupply', 'marketSegment']
+    },
+    'get_metric': {
+        'query': 'getMetric',
+        'return_fields': [
+            'datetime',
+            'value'
+        ]
+    },
+    'topic_search': {
+        'query': 'topicSearch',
+        'return_fields': [
+            ('chartData', ['datetime, ''mentionsCount'])
+        ]
+    },
+    'eth_top_transactions': {
+        'query': 'ethTopTransactions',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address', 'isExchange']),
+            ('toAddress', ['address', 'isExchange']),
+            'trxHash',
+            'trxValue'
+        ]
+    },
+    'token_top_transactions': {
+        'query': 'tokenTopTransactions',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address', 'isExchange']),
+            ('toAddress', ['address', 'isExchange']),
+            'trxHash',
+            'trxValue'
+        ]
+    },
+    'eth_spent_over_time': {
+        'query': 'ethSpentOverTime',
+        'return_fields': [
+            'datetime',
+            'ethSpent'
+        ]
+    },
+    'news': {
+        'query': 'news',
+        'return_fields': [
+            'datetime',
+            'title',
+            'sourceName',
+            'url',
+            'description'
+        ]
+    },
+    'price_volume_difference': {
+        'query': 'priceVolumeDiff',
+        'return_fields': [
+            'datetime',
+            'priceChange',
+            'priceVolumeDiff',
+            'volumeChange'
+        ]
+    },
+    'social_volume': {
+        'query': 'socialVolume',
+        'return_fields': [
+            'datetime',
+            'mentionsCount'
+        ]
     }
 }
 
@@ -228,9 +309,9 @@ def mining_pools_distribution(idx, slug, **kwargs):
 
 
 def historical_balance(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('historical_balance', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: historicalBalance (
         address: \"{address}\",
         slug: \"{slug}\",
@@ -238,10 +319,7 @@ def historical_balance(idx, slug, **kwargs):
         to: \"{to_date}\",
         interval: \"{interval}\"
     ){{
-        balance,
-        datetime
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -251,9 +329,9 @@ def historical_balance(idx, slug, **kwargs):
 
 
 def social_dominance(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('social_dominance', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: socialDominance (
         slug: \"{slug}\",
         from: \"{from_date}\",
@@ -261,10 +339,7 @@ def social_dominance(idx, slug, **kwargs):
         interval: \"{interval}\",
         source: {source}
     ){{
-        datetime,
-        dominance
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -274,21 +349,16 @@ def social_dominance(idx, slug, **kwargs):
 
 
 def top_holders_percent_of_total_supply(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('top_holders_percent_of_total_supply', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: topHoldersPercentOfTotalSupply(
         slug: \"{slug}\",
         numberOfHolders: {number_of_holders},
         from: \"{from_date}\",
         to: \"{to_date}\"
     ){{
-        datetime,
-        inExchanges,
-        inTopHoldersTotal,
-        outsideExchanges
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -304,9 +374,9 @@ def history_twitter_data(idx, slug, **kwargs):
 
 
 def price_volume_difference(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('price_volume_difference', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: priceVolumeDiff (
         slug: \"{slug}\",
         from: \"{from_date}\",
@@ -314,12 +384,7 @@ def price_volume_difference(idx, slug, **kwargs):
         interval: \"{interval}\",
         currency: \"{currency}\"
     ){{
-        datetime,
-        priceChange,
-        priceVolumeDiff,
-        volumeChange
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -329,9 +394,9 @@ def price_volume_difference(idx, slug, **kwargs):
 
 
 def eth_top_transactions(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('eth_top_transactions', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
             ethTopTransactions (
                 from: \"{from_date}\",
@@ -339,20 +404,7 @@ def eth_top_transactions(idx, slug, **kwargs):
                 limit: {limit},
                 transactionType: {transaction_type}
             ){{
-        datetime,
-        fromAddress{{
-            address,
-            isExchange
-        }},
-        toAddress{{
-            address,
-            isExchange
-        }},
-        trxHash,
-        trxValue
-        }}
-    }}
-    """.format(
+            """ + ' '.join(kwargs['return_fields']) + '}}}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -362,22 +414,16 @@ def eth_top_transactions(idx, slug, **kwargs):
 
 
 def news(idx, tag, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('news', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: news(
         tag: \"{tag}\",
         from: \"{from_date}\",
         to: \"{to_date}\",
         size: {size}
     ){{
-        datetime,
-        title,
-        description,
-        sourceName,
-        url
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         tag=tag,
         **kwargs
@@ -387,7 +433,7 @@ def news(idx, tag, **kwargs):
 
 
 def eth_spent_over_time(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('eth_spent_over_time', **kwargs)
 
     query_str = """
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
@@ -410,7 +456,7 @@ def eth_spent_over_time(idx, slug, **kwargs):
 
 
 def token_top_transactions(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('token_top_transactions', **kwargs)
 
     query_str = """
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
@@ -489,9 +535,9 @@ def ohlcv(idx, slug, **kwargs):
 
 
 def get_metric(idx, metric, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('get_metric', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: getMetric(metric: \"{metric}\"){{
         timeseriesData(
             slug: \"{slug}\"
@@ -500,11 +546,10 @@ def get_metric(idx, metric, slug, **kwargs):
             interval: \"{interval}\",
             aggregation: {aggregation}
         ){{
-            datetime
-            value
+        """ + ' '.join(kwargs['return_fields']) + """
         }}
     }}
-    """.format(
+    """).format(
         idx=idx,
         metric=metric,
         slug=slug,
@@ -524,31 +569,21 @@ def projects(idx, slug, **kwargs):
 
 
 def all_projects(idx, **kwargs):
-    query_str = """
+    kwargs = _transform_query_args('projects', **kwargs)
+    query_str = ("""
     query_{idx}: allProjects
     {{
-        name,
-        slug,
-        ticker,
-        totalSupply,
-        marketSegment
-    }}
-    """.format(idx=idx)
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
 
     return query_str
 
 
 def erc20_projects(idx, **kwargs):
-    query_str = """
+    kwargs = _transform_query_args('projects', **kwargs)
+    query_str = ("""
     query_{idx}: allErc20Projects
     {{
-        name,
-        slug,
-        ticker,
-        totalSupply,
-        marketSegment
-    }}
-    """.format(idx=idx)
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
 
     return query_str
 
@@ -559,7 +594,7 @@ def exchange_funds_flow(idx, slug, **kwargs):
     return query_str
 
 
-def social_volume_projects(idx, _slug, **kwargs):
+def social_volume_projects(idx, **kwargs):
     query_str = """
     query_{idx}: socialVolumeProjects
     """.format(idx=idx)
@@ -568,9 +603,9 @@ def social_volume_projects(idx, _slug, **kwargs):
 
 
 def social_volume(idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args('social_volume', **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: socialVolume (
         slug: \"{slug}\",
         from: \"{from_date}\",
@@ -578,10 +613,7 @@ def social_volume(idx, slug, **kwargs):
         interval: \"{interval}\",
         socialVolumeType: {social_volume_type}
     ){{
-        mentionsCount,
-        datetime
-    }}
-    """.format(
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
         slug=slug,
         **kwargs
@@ -590,24 +622,9 @@ def social_volume(idx, slug, **kwargs):
     return query_str
 
 
-def topic_search(idx, field, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
-    return_fields = {
-        'messages': """
-        messages {
-            datetime
-            text
-        }
-        """,
-        'chart_data': """
-        chartData {
-            mentionsCount
-            datetime
-        }
-        """
-    }
-
-    query_str = """
+def topic_search(idx, **kwargs):
+    kwargs = _transform_query_args('topic_search', **kwargs)
+    query_str = ("""
     query_{idx}: topicSearch (
         source: {source},
         searchText: \"{search_text}\",
@@ -615,11 +632,10 @@ def topic_search(idx, field, **kwargs):
         to: \"{to_date}\",
         interval: \"{interval}\"
     ){{
-        {return_fields}
+    """ + ' '.join(kwargs['return_fields']) + """
     }}
-    """.format(
+    """).format(
         idx=idx,
-        return_fields=return_fields[field],
         **kwargs
     )
 
@@ -627,30 +643,27 @@ def topic_search(idx, field, **kwargs):
 
 
 def _create_query_str(query, idx, slug, **kwargs):
-    kwargs = _transform_query_args(**kwargs)
+    kwargs = _transform_query_args(query, **kwargs)
 
-    query_str = """
+    query_str = ("""
     query_{idx}: {query}(
         slug: \"{slug}\",
         from: \"{from_date}\",
         to: \"{to_date}\",
         interval: \"{interval}\"
     ){{
-        {return_fields}
-    }}
-    """.format(
+    """ +  ' '.join(kwargs['return_fields']) + '}}'
+    ).format(
         query=QUERY_MAPPING[query]['query'],
         idx=idx,
         slug=slug,
-        return_fields=_format_return_fields(
-            QUERY_MAPPING[query]['return_fields']),
         **kwargs
     )
 
     return query_str
 
 
-def _transform_query_args(**kwargs):
+def _transform_query_args(query, **kwargs):
     kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else _default_from_date()
     kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else _default_to_date()
     kwargs['interval'] = kwargs['interval'] if 'interval' in kwargs else DEFAULT_INTERVAL
@@ -661,6 +674,11 @@ def _transform_query_args(**kwargs):
 
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])
+
+    if 'return_fields' in kwargs:
+        kwargs['return_fields'] = _format_all_return_fields(kwargs['return_fields'])
+    else:
+        kwargs['return_fields'] = _format_all_return_fields(QUERY_MAPPING[query]['return_fields'])
 
     return kwargs
 
@@ -691,3 +709,15 @@ def _format_to_date(datetime_obj_or_str):
     dt = iso8601.parse_date(datetime_obj_or_str) + \
         datetime.timedelta(hours=23, minutes=59, seconds=59)
     return dt.isoformat()
+
+def _format_all_return_fields(fields):
+    while any(isinstance(x, tuple) for x in fields):
+        fields = list(map(
+        lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
+        , fields))
+    return fields
+
+def _format_return_fields(fields):
+    return list(map(
+        lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
+    , fields))

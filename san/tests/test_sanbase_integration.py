@@ -13,10 +13,34 @@ params = {
     "address": "0x1f3df0b8390bb8e9e322972c5e75583e87608ec2"
 }
 
+# Metrics, which are made with _create_query_string, excluding the ones using ETHEREUM
+METRICS_EQUAL_FORMAT = [
+    "daily_active_addresses",
+    "burn_rate",
+    "transaction_volume",
+    "token_age_consumed",
+    "average_token_age_consumed_in_days",
+    "github_activity",
+    "dev_activity",
+    "network_growth",
+    "prices",
+    "token_velocity",
+    "token_circulation",
+    "realized_value",
+    "mvrv_ratio",
+    "nvt_ratio",
+    "daily_active_deposits",
+    "share_of_deposits",
+    "ohlc",
+    "history_twitter_data",
+    "exchange_funds_flow",
+]
+# Metrics, which are made with _create_query_string, using ETHEREUM
 METRICS_USING_ETHEREUM = [
     "gas_used",
     "miners_balance",
-    "mining_pools_distribution"]
+    "mining_pools_distribution"
+]
 
 
 def _test_ordinary_function(
@@ -35,10 +59,8 @@ def _test_ordinary_function(
 
 @attr('integration')
 def test_batched_queries_equal_format():
-    queries = sanbase_graphql.QUERY_MAPPING.keys() - METRICS_USING_ETHEREUM
-
     batch = Batch()
-    for query in queries:
+    for query in METRICS_EQUAL_FORMAT:
         batch.get(
             "{}/{}".format(query, params["project_slug"]),
             from_date=params["from_date"],
@@ -73,16 +95,7 @@ def test_batched_queries_different_format():
         social_volume_type="PROFESSIONAL_TRADERS_CHAT_OVERVIEW"
     )
     batch.get(
-        "topic_search/messages",
-        source="TELEGRAM",
-        search_text="btc",
-        from_date=month_ago(),
-        to_date=params["to_date"],
-        interval=params["interval"]
-    )
-
-    batch.get(
-        "topic_search/chart_data",
+        "topic_search",
         source="TELEGRAM",
         search_text="btc",
         from_date=month_ago(),
