@@ -1,12 +1,7 @@
 import datetime
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-plt.style.use("fivethirtyeight")
-from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 import san
-san.ApiConfig.api_key = ''
 
 class Backtest:
 
@@ -65,14 +60,6 @@ class Backtest:
         var = np.percentile(sorted_rets, percentile)
         return round(var * 100, 2)
 
-
-    def plot_backtest(self):
-        plt.figure(figsize=(15,8))
-        plt.plot(self.performance,label="performance")
-        plt.plot(self.benchmark,label="holding")
-        plt.legend()
-        plt.show()
-
     def get_nr_trades(self):
         return self.nr_trades
 
@@ -98,27 +85,6 @@ class Backtest:
         print("Annualized Returns in Percent: ", self.get_annualized_return())
         print("Annualized Sharpe Raito: ", self.get_sharpe_ratio())
         print("Number of Trades: ", self.get_nr_trades())
-
-
-
-    def monte_carlo_simulation(self, simulation_number, simulation_range):
-        mu = self.strategy_returns.mean()
-        sd = self.strategy_returns.std()
-
-        plt.figure(figsize=(15,8))
-        plt.hist(self.strategy_returns, 15)
-
-        simulation_data = pd.DataFrame()
-        plt.figure(figsize=(15,8))
-        for simulation in range(simulation_number):
-            simulation_data[str(simulation)] = np.random.normal(mu, sd, simulation_range)
-
-        simulation_data = (simulation_data + 1).cumprod() - 1
-        plt.plot(simulation_data, color="grey")
-        plt.show()
-        print("Max: ", round(simulation_data.iloc[-1].max() * 100, 2), "%")
-        print("Min: ", round(simulation_data.iloc[-1].min() * 100, 2), "%")
-
 
 class Portfolio:
 
@@ -169,19 +135,6 @@ class Portfolio:
     def show_portfolio(self):
         return self.portfolio
 
-
-    def plot_portfolio(self):
-        perf = (self.portfolio.mean(axis=1, skipna=True) + 1).cumprod() - 1
-        plt.figure(figsize=(15,8))
-        plt.plot(perf, label="Portfolio")
-        plt.plot((self.benchmark + 1).cumprod() - 1, label="Benchmark (BTC)")
-        plt.legend()
-        plt.show()
-
-
-    def portfolio_summary(self):
-        #  Bunch of metrics here #####
-        self.plot_portfolio()
 
 def backtest(asset):
     data = san.get("ohlcv/"+asset)

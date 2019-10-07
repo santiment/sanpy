@@ -22,7 +22,6 @@ setuptools.setup(
         'numpy',
         'requests',
         'iso8601',
-        'setuptools',
-        'matplotlib'
+        'setuptools'
     ]
 )
