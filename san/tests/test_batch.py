@@ -5,7 +5,7 @@ import pandas.testing as pdt
 from san.tests.utils import TestResponse
 
 
-@patch('san.graphql.requests.post')
+@patch('san.graphql.httpx.post')
 def test_batch(mock):
     expected = {'query_0': [{'balance': 212664.33000000002,
                              'datetime': '2019-05-18T00:00:00Z'},

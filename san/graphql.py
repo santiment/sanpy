@@ -1,4 +1,4 @@
-import requests
+import httpx
 from san.api_config import ApiConfig
 from san.env_vars import SANBASE_GQL_HOST
 from san.error import SanError
@@ -9,7 +9,7 @@ def execute_gql(gql_query_str):
     if ApiConfig.api_key:
         headers = {'authorization': "Apikey {}".format(ApiConfig.api_key)}
 
-    response = requests.post(
+    response = httpx.post(
         SANBASE_GQL_HOST,
         json={'query': gql_query_str},
         headers=headers)

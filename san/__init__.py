@@ -4,7 +4,7 @@ from .available_metrics import available_metrics
 from .batch import Batch
 from .api_config import ApiConfig
 import pkg_resources
-import requests
+import httpx
 import json
 from warnings import warn
 
@@ -14,9 +14,9 @@ PROJECT = 'sanpy'
 def get_latest():
     url = 'https://pypi.python.org/pypi/%s/json' % (PROJECT)
     try:
-        response = requests.get(url).text
+        response = httpx.get(url).text
         return json.loads(response)['info']['version']
-    except requests.exceptions.RequestException as e:
+    except httpx.exceptions.HTTPError as e:
         return pkg_resources.get_distribution(PROJECT).version
 
 
