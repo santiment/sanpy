@@ -134,16 +134,3 @@ class Portfolio:
 
     def show_portfolio(self):
         return self.portfolio
-
-
-def backtest(asset):
-    data = san.get("ohlcv/"+asset)
-    data["returns"]= data.closePriceUsd.pct_change()
-    data["ma50"] = data.closePriceUsd.rolling(50).mean()
-    data["ma200"] = data.closePriceUsd.rolling(200).mean()
-    data = data.dropna()
-
-    trades = data["ma50"] > data["ma200"]
-
-    bt = Backtest(data.returns.dropna(),trades, percent_invested_per_trade=0.8)
-    bt.summary()
