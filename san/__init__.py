@@ -1,4 +1,5 @@
 from .get import get
+from .available_metrics import available_metrics
 from .batch import Batch
 from .api_config import ApiConfig
 import pkg_resources

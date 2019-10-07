@@ -193,7 +193,8 @@ QUERY_MAPPING = {
             'datetime',
             ('topWords', ['score', 'word'])
         ]
-    }     
+    },
+    'social_projects': {}
 }
 
 
@@ -670,6 +671,10 @@ def topic_search(idx, **kwargs):
     )
 
     return query_str
+
+
+def available_metrics():
+    return list(QUERY_MAPPING.keys())
 
 
 def _create_query_str(query, idx, slug, **kwargs):
