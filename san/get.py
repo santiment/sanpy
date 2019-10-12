@@ -1,3 +1,4 @@
+import asyncio
 import san.sanbase_graphql
 from san.graphql import execute_gql
 from san.query import get_gql_query, parse_dataset
@@ -21,6 +22,12 @@ DEPRECATED_QUERIES = {
 
 
 def get(dataset, **kwargs):
+    try:
+        return asyncio.run(get_async(dataset, **kwargs))
+    except RuntimeError:
+        return asyncio.get_event_loop().create_task(get_async(dataset, **kwargs))
+
+async def get_async(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in DEPRECATED_QUERIES:
         print(
@@ -36,6 +43,6 @@ def get(dataset, **kwargs):
             raise SanError('Invalid metric!')
     else:
         gql_query = "{" + get_gql_query(0, dataset, **kwargs) + "}"
-    res = execute_gql(gql_query)
+    res = await execute_gql(gql_query)
 
     return transform_query_result(0, query, res)

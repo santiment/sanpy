@@ -10,7 +10,7 @@ from copy import deepcopy
 from san.batch import Batch
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_get(mock):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-23T00:00:00Z'},
@@ -32,7 +32,7 @@ def test_get(mock):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_prices(mock):
     api_call_result = {
         'query_0':
@@ -73,7 +73,7 @@ def test_prices(mock):
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_error_response(mock):
     mock.return_value = TestResponse(
         status_code=500, data={
@@ -88,7 +88,7 @@ def test_error_response(mock):
         )
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_get_without_transform(mock):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-23T00:00:00Z'},
@@ -113,7 +113,7 @@ def test_get_without_transform(mock):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_get_with_transform(mock):
     api_call_result = {
         'query_0': {
@@ -174,7 +174,7 @@ def test_get_with_transform(mock):
     pdt.assert_frame_equal(result, expected_df, check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_batch_only_with_nontransform_queries(mock):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-18T00:00:00Z'},
@@ -239,7 +239,7 @@ def test_batch_only_with_nontransform_queries(mock):
             check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_batch_only_with_transform_queries(mock):
     api_call_result = {
         'query_0': {
@@ -361,7 +361,7 @@ def test_batch_only_with_transform_queries(mock):
             check_dtype=False)
 
 
-@patch('san.graphql.httpx.post')
+@patch('san.graphql.httpx.AsyncClient.post')
 def test_batch_with_mixed_queries(mock):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-18T00:00:00Z'},
