@@ -6,40 +6,40 @@ from nose.plugins.attrib import attr
 
 
 params = {
-    "project_slug": "santiment",
-    "from_date": month_ago(),
-    "to_date": two_days_ago(),
-    "interval": "1d",
-    "address": "0x1f3df0b8390bb8e9e322972c5e75583e87608ec2"
+    'project_slug': 'santiment',
+    'from_date': month_ago(),
+    'to_date': two_days_ago(),
+    'interval': '1d',
+    'address': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2'
 }
 
 # Metrics, which are made with _create_query_string, excluding the ones using ETHEREUM
 METRICS_EQUAL_FORMAT = [
-    "daily_active_addresses",
-    "burn_rate",
-    "transaction_volume",
-    "token_age_consumed",
-    "average_token_age_consumed_in_days",
-    "github_activity",
-    "dev_activity",
-    "network_growth",
-    "prices",
-    "token_velocity",
-    "token_circulation",
-    "realized_value",
-    "mvrv_ratio",
-    "nvt_ratio",
-    "daily_active_deposits",
-    "share_of_deposits",
-    "ohlc",
-    "history_twitter_data",
-    "exchange_funds_flow",
+    'daily_active_addresses',
+    'burn_rate',
+    'transaction_volume',
+    'token_age_consumed',
+    'average_token_age_consumed_in_days',
+    'github_activity',
+    'dev_activity',
+    'network_growth',
+    'prices',
+    'token_velocity',
+    'token_circulation',
+    'realized_value',
+    'mvrv_ratio',
+    'nvt_ratio',
+    'daily_active_deposits',
+    'share_of_deposits',
+    'ohlc',
+    'history_twitter_data',
+    'exchange_funds_flow',
 ]
 # Metrics, which are made with _create_query_string, using ETHEREUM
 METRICS_USING_ETHEREUM = [
-    "gas_used",
-    "miners_balance",
-    "mining_pools_distribution"
+    'gas_used',
+    'miners_balance',
+    'mining_pools_distribution'
 ]
 
 
@@ -62,17 +62,17 @@ def test_batched_queries_equal_format():
     batch = Batch()
     for query in METRICS_EQUAL_FORMAT:
         batch.get(
-            "{}/{}".format(query, params["project_slug"]),
-            from_date=params["from_date"],
-            to_date=params["to_date"],
-            interval=params["interval"]
+            "{}/{}".format(query, params['project_slug']),
+            from_date=params['from_date'],
+            to_date=params['to_date'],
+            interval=params['interval']
         )
     for query in METRICS_USING_ETHEREUM:
         batch.get(
             "{}/ethereum".format(query),
-            from_date=params["from_date"],
-            to_date=params["to_date"],
-            interval=params["interval"]
+            from_date=params['from_date'],
+            to_date=params['to_date'],
+            interval=params['interval']
         )
 
     result = batch.execute()
@@ -85,22 +85,22 @@ def test_batched_queries_equal_format():
 def test_batched_queries_different_format():
     batch = Batch()
 
-    batch.get("projects/all")
-    batch.get("social_volume_projects")
+    batch.get('projects/all')
+    batch.get('social_volume_projects')
     batch.get(
         "{}/{}".format('social_volume', 'ethereum'),
         from_date=month_ago(),
-        to_date=params["to_date"],
-        interval=params["interval"],
-        social_volume_type="PROFESSIONAL_TRADERS_CHAT_OVERVIEW"
+        to_date=params['to_date'],
+        interval=params['interval'],
+        social_volume_type='PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
     )
     batch.get(
-        "topic_search",
-        source="TELEGRAM",
-        search_text="btc",
+        'topic_search',
+        source='TELEGRAM',
+        search_text='btc',
         from_date=month_ago(),
-        to_date=params["to_date"],
-        interval=params["interval"]
+        to_date=params['to_date'],
+        interval=params['interval']
     )
 
     result = batch.execute()
@@ -110,10 +110,10 @@ def test_batched_queries_different_format():
 
 @attr('integration')
 def test_erc20_projects():
-    result = san.get("projects/erc20")
+    result = san.get('projects/erc20')
 
     assert result.empty == False
-    assert len(result[result.slug == "bitcoin"]) == 0
+    assert len(result[result.slug == 'bitcoin']) == 0
 
 
 @attr('integration')
@@ -247,11 +247,11 @@ def test_historical_balance():
 @attr('integration')
 def test_social_dominance():
     sources = [
-        "ALL",
-        "REDDIT",
-        "TELEGRAM",
-        "DISCORD",
-        "PROFESSIONAL_TRADERS_CHAT"]
+        'ALL',
+        'REDDIT',
+        'TELEGRAM',
+        'DISCORD',
+        'PROFESSIONAL_TRADERS_CHAT']
     for item in sources:
         result = san.get('social_dominance/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -279,7 +279,7 @@ def test_top_holders_percent_of_total_supply():
 
 @attr('integration')
 def test_price_volume_difference():
-    currencies = ["USD", "BTC"]
+    currencies = ['USD', 'BTC']
     for item in currencies:
         result = san.get('price_volume_difference/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -294,11 +294,11 @@ def test_price_volume_difference():
 
 @attr('integration')
 def test_eth_top_transactions():
-    transaction_types = ["ALL", "IN", "OUT"]
+    transaction_types = ['ALL', 'IN', 'OUT']
     for item in transaction_types:
         result = san.get('eth_top_transactions/' + params['project_slug'],
-                         from_date="2019-06-11",
-                         to_date="2019-07-11",
+                         from_date='2019-06-11',
+                         to_date='2019-07-11',
                          limit=5,
                          transaction_type=item
                          )
@@ -310,8 +310,8 @@ def test_eth_top_transactions():
 @attr('integration')
 def test_news():
     result = san.get('news/' + params['project_slug'],
-                     from_date="2019-04-18",
-                     to_date="2019-07-11",
+                     from_date='2019-04-18',
+                     to_date='2019-07-11',
                      size=5
                      )
     assert len(result.index) >= 1
@@ -334,8 +334,8 @@ def test_eth_spent_over_time():
 @attr('integration')
 def test_token_top_transactions():
     result = san.get('token_top_transactions/' + params['project_slug'],
-                     from_date="2019-06-18",
-                     to_date="2019-07-11",
+                     from_date='2019-06-18',
+                     to_date='2019-07-11',
                      limit=5
                      )
     assert len(result.index) >= 1
@@ -362,10 +362,10 @@ def test_social_volume_projects():
 @attr('integration')
 def test_social_volume():
     social_volume_types = [
-        "PROFESSIONAL_TRADERS_CHAT_OVERVIEW",
-        "TELEGRAM_CHATS_OVERVIEW",
-        "TELEGRAM_DISCUSSION_OVERVIEW",
-        "DISCORD_DISCUSSION_OVERVIEW"]
+        'PROFESSIONAL_TRADERS_CHAT_OVERVIEW',
+        'TELEGRAM_CHATS_OVERVIEW',
+        'TELEGRAM_DISCUSSION_OVERVIEW',
+        'DISCORD_DISCUSSION_OVERVIEW']
     for item in social_volume_types:
         result = san.get('social_volume/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -381,10 +381,10 @@ def test_social_volume():
 @attr('integration')
 def test_ohlcv():
     ohlcv_df = san.get(
-        "{}/{}".format('ohlcv', params["project_slug"]),
-        from_date=params["from_date"],
-        to_date=params["to_date"],
-        interval=params["interval"]
+        "{}/{}".format('ohlcv', params['project_slug']),
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval=params['interval']
     )
 
     assert len(ohlcv_df.index) >= 1
