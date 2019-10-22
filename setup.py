@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sanpy",
-    version="0.7.2",
+    version="0.7.3",
     author="Santiment",
     author_email="admin@santiment.net",
     description="Package for Santiment API access with python",
@@ -22,6 +22,7 @@ setuptools.setup(
         'numpy',
         'requests',
         'iso8601',
-        'setuptools'
+        'setuptools',
+        'matplotlib'
     ]
 )
