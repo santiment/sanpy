@@ -1,10 +1,10 @@
 import san.pandas_utils
+import san.sanbase_graphql_helper as sgh
 from san.batch import Batch
 from san.error import SanError
-from san.sanbase_graphql_helper import *
 
 def daily_active_addresses(idx, slug, **kwargs):
-    query_str = create_query_str(
+    query_str = sgh.create_query_str(
         'daily_active_addresses', idx, slug, **kwargs)
 
     return query_str
@@ -13,123 +13,123 @@ def daily_active_addresses(idx, slug, **kwargs):
 
 
 def burn_rate(idx, slug, **kwargs):
-    query_str = create_query_str('burn_rate', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('burn_rate', idx, slug, **kwargs)
 
     return query_str
 
 
 def transaction_volume(idx, slug, **kwargs):
-    query_str = create_query_str('transaction_volume', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('transaction_volume', idx, slug, **kwargs)
 
     return query_str
 
 
 def token_age_consumed(idx, slug, **kwargs):
-    query_str = create_query_str('token_age_consumed', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('token_age_consumed', idx, slug, **kwargs)
 
     return query_str
 
 
 def average_token_age_consumed_in_days(idx, slug, **kwargs):
-    query_str = create_query_str(
+    query_str = sgh.create_query_str(
         'average_token_age_consumed_in_days', idx, slug, **kwargs)
 
     return query_str
 
 
 def github_activity(idx, slug, **kwargs):
-    query_str = create_query_str('github_activity', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('github_activity', idx, slug, **kwargs)
 
     return query_str
 
 
 def dev_activity(idx, slug, **kwargs):
-    query_str = create_query_str('dev_activity', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('dev_activity', idx, slug, **kwargs)
 
     return query_str
 
 
 def network_growth(idx, slug, **kwargs):
-    query_str = create_query_str('network_growth', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('network_growth', idx, slug, **kwargs)
 
     return query_str
 
 
 def prices(idx, slug, **kwargs):
-    query_str = create_query_str('prices', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('prices', idx, slug, **kwargs)
 
     return query_str
 
 
 def token_velocity(idx, slug, **kwargs):
-    query_str = create_query_str('token_velocity', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('token_velocity', idx, slug, **kwargs)
 
     return query_str
 
 
 def token_circulation(idx, slug, **kwargs):
-    query_str = create_query_str('token_circulation', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('token_circulation', idx, slug, **kwargs)
 
     return query_str
 
 
 def realized_value(idx, slug, **kwargs):
-    query_str = create_query_str('realized_value', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('realized_value', idx, slug, **kwargs)
 
     return query_str
 
 
 def mvrv_ratio(idx, slug, **kwargs):
-    query_str = create_query_str('mvrv_ratio', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('mvrv_ratio', idx, slug, **kwargs)
 
     return query_str
 
 
 def nvt_ratio(idx, slug, **kwargs):
-    query_str = create_query_str('nvt_ratio', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('nvt_ratio', idx, slug, **kwargs)
 
     return query_str
 
 
 def daily_active_deposits(idx, slug, **kwargs):
-    query_str = create_query_str('daily_active_deposits', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('daily_active_deposits', idx, slug, **kwargs)
 
     return query_str
 
 
 def share_of_deposits(idx, slug, **kwargs):
-    query_str = create_query_str('share_of_deposits', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('share_of_deposits', idx, slug, **kwargs)
 
     return query_str
 
 
 def ohlc(idx, slug, **kwargs):
-    query_str = create_query_str('ohlc', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('ohlc', idx, slug, **kwargs)
 
     return query_str
 
 
 def gas_used(idx, slug, **kwargs):
-    query_str = create_query_str('gas_used', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('gas_used', idx, slug, **kwargs)
 
     return query_str
 
 
 def miners_balance(idx, slug, **kwargs):
-    query_str = create_query_str('miners_balance', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('miners_balance', idx, slug, **kwargs)
 
     return query_str
 
 
 def mining_pools_distribution(idx, slug, **kwargs):
-    query_str = create_query_str(
+    query_str = sgh.create_query_str(
         'mining_pools_distribution', idx, slug, **kwargs)
 
     return query_str
 
 
 def historical_balance(idx, slug, **kwargs):
-    kwargs = transform_query_args('historical_balance', **kwargs)
+    kwargs = sgh.transform_query_args('historical_balance', **kwargs)
 
     query_str = ("""
     query_{idx}: historicalBalance (
@@ -149,7 +149,7 @@ def historical_balance(idx, slug, **kwargs):
 
 
 def social_dominance(idx, slug, **kwargs):
-    kwargs = transform_query_args('social_dominance', **kwargs)
+    kwargs = sgh.transform_query_args('social_dominance', **kwargs)
 
     query_str = ("""
     query_{idx}: socialDominance (
@@ -169,7 +169,7 @@ def social_dominance(idx, slug, **kwargs):
 
 
 def top_holders_percent_of_total_supply(idx, slug, **kwargs):
-    kwargs = transform_query_args('top_holders_percent_of_total_supply', **kwargs)
+    kwargs = sgh.transform_query_args('top_holders_percent_of_total_supply', **kwargs)
 
     query_str = ("""
     query_{idx}: topHoldersPercentOfTotalSupply(
@@ -188,13 +188,13 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
 
 
 def history_twitter_data(idx, slug, **kwargs):
-    query_str = create_query_str('history_twitter_data', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('history_twitter_data', idx, slug, **kwargs)
 
     return query_str
 
 
 def price_volume_difference(idx, slug, **kwargs):
-    kwargs = transform_query_args('price_volume_difference', **kwargs)
+    kwargs = sgh.transform_query_args('price_volume_difference', **kwargs)
 
     query_str = ("""
     query_{idx}: priceVolumeDiff (
@@ -214,7 +214,7 @@ def price_volume_difference(idx, slug, **kwargs):
 
 
 def eth_top_transactions(idx, slug, **kwargs):
-    kwargs = transform_query_args('eth_top_transactions', **kwargs)
+    kwargs = sgh.transform_query_args('eth_top_transactions', **kwargs)
 
     query_str = ("""
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
@@ -234,7 +234,7 @@ def eth_top_transactions(idx, slug, **kwargs):
 
 
 def news(idx, tag, **kwargs):
-    kwargs = transform_query_args('news', **kwargs)
+    kwargs = sgh.transform_query_args('news', **kwargs)
 
     query_str = ("""
     query_{idx}: news(
@@ -253,7 +253,7 @@ def news(idx, tag, **kwargs):
 
 
 def eth_spent_over_time(idx, slug, **kwargs):
-    kwargs = transform_query_args('eth_spent_over_time', **kwargs)
+    kwargs = sgh.transform_query_args('eth_spent_over_time', **kwargs)
 
     query_str = """
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
@@ -276,7 +276,7 @@ def eth_spent_over_time(idx, slug, **kwargs):
 
 
 def token_top_transactions(idx, slug, **kwargs):
-    kwargs = transform_query_args('token_top_transactions', **kwargs)
+    kwargs = sgh.transform_query_args('token_top_transactions', **kwargs)
 
     query_str = """
     query_{idx}: projectBySlug (slug: \"{slug}\"){{
@@ -308,7 +308,7 @@ def token_top_transactions(idx, slug, **kwargs):
 
 
 def emerging_trends(idx, **kwargs):
-    kwargs = transform_query_args('emerging_trends', **kwargs)
+    kwargs = sgh.transform_query_args('emerging_trends', **kwargs)
 
     query_str = ("""
     query_{idx}: getTrendingWords (
@@ -327,7 +327,7 @@ def emerging_trends(idx, **kwargs):
 
 
 def top_social_gainers_losers(idx, **kwargs):
-    kwargs = transform_query_args('top_social_gainers_losers', **kwargs)
+    kwargs = sgh.transform_query_args('top_social_gainers_losers', **kwargs)
 
     query_str = ("""
     query_{idx}: topSocialGainersLosers(
@@ -371,7 +371,7 @@ def ohlcv(idx, slug, **kwargs):
 
 
 def get_metric(idx, metric, slug, **kwargs):
-    kwargs = transform_query_args('get_metric', **kwargs)
+    kwargs = sgh.transform_query_args('get_metric', **kwargs)
 
     query_str = ("""
     query_{idx}: getMetric(metric: \"{metric}\"){{
@@ -397,35 +397,15 @@ def get_metric(idx, metric, slug, **kwargs):
 
 def projects(idx, slug, **kwargs):
     if (slug == "erc20"):
-        return erc20_projects(idx, **kwargs)
+        return sgh.erc20_projects(idx, **kwargs)
     elif (slug == "all"):
-        return all_projects(idx, **kwargs)
+        return sgh.all_projects(idx, **kwargs)
 
     raise SanError("Unknown project group: {}".format(slug))
 
 
-def all_projects(idx, **kwargs):
-    kwargs = transform_query_args('projects', **kwargs)
-    query_str = ("""
-    query_{idx}: allProjects
-    {{
-    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
-
-    return query_str
-
-
-def erc20_projects(idx, **kwargs):
-    kwargs = transform_query_args('projects', **kwargs)
-    query_str = ("""
-    query_{idx}: allErc20Projects
-    {{
-    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
-
-    return query_str
-
-
 def exchange_funds_flow(idx, slug, **kwargs):
-    query_str = create_query_str('exchange_funds_flow', idx, slug, **kwargs)
+    query_str = sgh.create_query_str('exchange_funds_flow', idx, slug, **kwargs)
 
     return query_str
 
@@ -439,7 +419,7 @@ def social_volume_projects(idx, **kwargs):
 
 
 def social_volume(idx, slug, **kwargs):
-    kwargs = transform_query_args('social_volume', **kwargs)
+    kwargs = sgh.transform_query_args('social_volume', **kwargs)
 
     query_str = ("""
     query_{idx}: socialVolume (
@@ -459,7 +439,7 @@ def social_volume(idx, slug, **kwargs):
 
 
 def topic_search(idx, **kwargs):
-    kwargs = transform_query_args('topic_search', **kwargs)
+    kwargs = sgh.transform_query_args('topic_search', **kwargs)
     query_str = ("""
     query_{idx}: topicSearch (
         source: {source},

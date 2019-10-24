@@ -441,15 +441,12 @@ def test_emerging_trends():
 @attr('integration')
 def test_available_metrics():
     functions_list = [
-        'all_projects',
         'average_token_age_consumed_in_days',
         'burn_rate',
-        'create_query_str',
         'daily_active_addresses',
         'daily_active_deposits',
         'dev_activity',
         'emerging_trends',
-        'erc20_projects',
         'eth_spent_over_time',
         'eth_top_transactions',
         'exchange_funds_flow',
@@ -481,7 +478,6 @@ def test_available_metrics():
         'top_social_gainers_losers',
         'topic_search',
         'transaction_volume',
-        'transform_query_args',
         'daily_avg_marketcap_usd',
         'daily_avg_price_usd',
         'daily_closing_marketcap_usd',
@@ -552,6 +548,6 @@ def test_available_metrics():
         'nvt'
         ]
 
-    available_metrics = san.available_metrics()
+    assert available_metrics == san.available_metrics()
     assert len(available_metrics) >= 1
     assert available_metrics == functions_list

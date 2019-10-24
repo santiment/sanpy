@@ -193,6 +193,27 @@ _QUERY_MAPPING = {
     }
 }
 
+
+def all_projects(idx, **kwargs):
+    kwargs = transform_query_args('projects', **kwargs)
+    query_str = ("""
+    query_{idx}: allProjects
+    {{
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
+
+    return query_str
+
+
+def erc20_projects(idx, **kwargs):
+    kwargs = transform_query_args('projects', **kwargs)
+    query_str = ("""
+    query_{idx}: allErc20Projects
+    {{
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx)
+
+    return query_str
+
+
 def create_query_str(query, idx, slug, **kwargs):
     kwargs = transform_query_args(query, **kwargs)
 
