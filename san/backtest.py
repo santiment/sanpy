@@ -9,26 +9,31 @@ class Backtest:
 
     def __init__(self, returns:pd.Series, trades:pd.Series, lagged=True, transaction_cost = 0, percent_invested_per_trade = 1):
         """ Initializing Backtesting function
-            Init function generates performance of the test. The object lets you specify
-            wether you want to lag the trades to avoid overfitting, the transaction costs
+            Init function generates performance of the test and several risk metrics. The object lets
+            you specify wether you want to lag the trades to avoid overfitting, the transaction costs
             and the percentage of the portfolio to be invested per trade (50% as 0.5).
             Trade example:
                 With given prices [P1, P2, P3] and given trades [False, True, False] 
                 you buy asset when the price is P2 and sell when the price is P3.
         """
-
+        
         if lagged:
             trades = trades.shift(1)
             trades.iloc[0] = False
         self.strategy_returns = ((returns * percent_invested_per_trade) * trades)
         self.trades = trades
-        self.nr_trades = 0
+        
+        self.nr_trades = {'buy':[], 'sell': []}
         for i in range(1, len(trades)):
             if trades[i] != trades[i - 1]:
                 self.strategy_returns.iloc[i] -= transaction_cost
-                self.nr_trades += 1
+                if trades[i]:
+                    self.nr_trades['buy'].append(self.trades.index[i])
+                else:
+                    self.nr_trades['sell'].append(self.trades.index[i])
         if trades[-1]:  # include last day sell to make benchmark possible
-            self.nr_trades += 1
+            self.nr_trades['sell'].append(self.trades.index[i])
+            
         self.performance = ((self.strategy_returns * percent_invested_per_trade) * self.trades + 1).cumprod() - 1
         self.benchmark = (returns + 1).cumprod() - 1
 
@@ -42,7 +47,7 @@ class Backtest:
         return round(var * 100, 2)
 
     def get_nr_trades(self):
-        return self.nr_trades
+        return len(self.nr_trades['sell']) + len(self.nr_trades['buy'])
 
     def get_maximum_drawdown(self, decimals=2):
         running_value = np.array(self.performance)
@@ -74,13 +79,12 @@ class Backtest:
         plt.figure(figsize=(15,8))
         plt.plot(self.performance, label="performance")
         plt.plot(self.benchmark, label="holding")
+
         if viz == 'trades':
-            plt.vlines(
-                self.trades[self.trades == True].index, 
-                min(self.performance.min(), self.benchmark.min()), 
-                max(self.performance.max(), self.benchmark.max()),
-                color = '#424242'
-            )
+            min_y = min(self.performance.min(), self.benchmark.min())
+            max_y = max(self.performance.max(), self.benchmark.max())
+            plt.vlines(self.nr_trades['sell'], min_y, max_y, color = 'red')
+            plt.vlines(self.nr_trades['buy'], min_y, max_y, color = 'green')
         elif viz == 'hodl':
             hodl_periods = []
             for i in range(len(self.trades)):
@@ -93,6 +97,7 @@ class Backtest:
                 hodl_periods.append([start, self.strategy_returns.index[i]])
             for hodl_period in hodl_periods:
                 plt.axvspan(hodl_period[0], hodl_period[1], color='#aeffa8')
+
         plt.legend()
         plt.show()
 
