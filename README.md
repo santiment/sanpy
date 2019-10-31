@@ -50,6 +50,7 @@ Santiment API python client.
     - [Fetch single metric](#fetch-single-metric)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
+    - [Available metrics](#available-metrics)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -172,6 +173,12 @@ batch.get(
 ```
 
 ## Available metrics
+
+Getting all of the metrics as a list is done, using the following code:
+
+```python
+san.available_metrics()
+```
 
 Below are described some available metrics and are given examples for fetching and for the returned format.
 

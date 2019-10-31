@@ -1,6 +1,5 @@
 import san
-from san import Batch
-from san import sanbase_graphql
+from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
 from nose.plugins.attrib import attr
 
@@ -13,7 +12,8 @@ params = {
     'address': '0x1f3df0b8390bb8e9e322972c5e75583e87608ec2'
 }
 
-# Metrics, which are made with _create_query_string, excluding the ones using ETHEREUM
+# Metrics, which are made with _create_query_string, excluding the ones
+# using ETHEREUM
 METRICS_EQUAL_FORMAT = [
     'daily_active_addresses',
     'burn_rate',
@@ -422,6 +422,7 @@ def test_get_metric():
     assert 'DatetimeIndex' in str(type(get_metric_df.index))
     assert get_metric_df.empty == False
 
+
 @attr('integration')
 def test_emerging_trends():
     get_metric_df = san.get(
@@ -434,4 +435,119 @@ def test_emerging_trends():
 
     assert len(get_metric_df) >= 1
     assert 'DatetimeIndex' in str(type(get_metric_df.index))
-    assert get_metric_df.empty == False    
+    assert get_metric_df.empty == False
+
+
+@attr('integration')
+def test_available_metrics():
+    functions_list = [
+        'average_token_age_consumed_in_days',
+        'burn_rate',
+        'daily_active_addresses',
+        'daily_active_deposits',
+        'dev_activity',
+        'emerging_trends',
+        'eth_spent_over_time',
+        'eth_top_transactions',
+        'exchange_funds_flow',
+        'gas_used',
+        'github_activity',
+        'historical_balance',
+        'history_twitter_data',
+        'miners_balance',
+        'mining_pools_distribution',
+        'mvrv_ratio',
+        'network_growth',
+        'news',
+        'nvt_ratio',
+        'ohlc',
+        'ohlcv',
+        'price_volume_difference',
+        'prices',
+        'projects',
+        'realized_value',
+        'share_of_deposits',
+        'social_dominance',
+        'social_volume',
+        'social_volume_projects',
+        'token_age_consumed',
+        'token_circulation',
+        'token_top_transactions',
+        'token_velocity',
+        'top_holders_percent_of_total_supply',
+        'top_social_gainers_losers',
+        'topic_search',
+        'transaction_volume',
+        'daily_avg_marketcap_usd',
+        'daily_avg_price_usd',
+        'daily_closing_marketcap_usd',
+        'daily_closing_price_usd',
+        'daily_high_price_usd',
+        'daily_low_price_usd',
+        'daily_opening_price_usd',
+        'daily_trading_volume_usd',
+        'daily_active_addresses',
+        'mean_realized_price_usd',
+        'mean_realized_price_usd_10y',
+        'mean_realized_price_usd_5y',
+        'mean_realized_price_usd_3y',
+        'mean_realized_price_usd_2y',
+        'mean_realized_price_usd_365d',
+        'mean_realized_price_usd_180d',
+        'mean_realized_price_usd_90d',
+        'mean_realized_price_usd_60d',
+        'mean_realized_price_usd_30d',
+        'mean_realized_price_usd_7d',
+        'mean_realized_price_usd_1d',
+        'mvrv_usd_long_short_diff',
+        'mvrv_usd',
+        'mvrv_usd_10y',
+        'mvrv_usd_5y',
+        'mvrv_usd_3y',
+        'mvrv_usd_2y',
+        'mvrv_usd_365d',
+        'mvrv_usd_180d',
+        'mvrv_usd_90d',
+        'mvrv_usd_60d',
+        'mvrv_usd_30d',
+        'mvrv_usd_7d',
+        'mvrv_usd_1d',
+        'circulation',
+        'circulation_10y',
+        'circulation_5y',
+        'circulation_3y',
+        'circulation_2y',
+        'circulation_365d',
+        'circulation_180d',
+        'circulation_90d',
+        'circulation_60d',
+        'circulation_30d',
+        'circulation_7d',
+        'circulation_1d',
+        'mean_age',
+        'realized_value_usd',
+        'realized_value_usd_10y',
+        'realized_value_usd_5y',
+        'realized_value_usd_3y',
+        'realized_value_usd_2y',
+        'realized_value_usd_365d',
+        'realized_value_usd_180d',
+        'realized_value_usd_90d',
+        'realized_value_usd_60d',
+        'realized_value_usd_30d',
+        'realized_value_usd_7d',
+        'realized_value_usd_1d',
+        'velocity',
+        'transaction_volume',
+        'transaction_volume_5min',
+        'exchange_inflow',
+        'exchange_outflow',
+        'exchange_balance',
+        'age_destroyed',
+        'age_destroyed_5min',
+        'nvt'
+        ]
+
+    assert available_metrics == san.available_metrics()
+    assert len(available_metrics) >= 1
+    assert available_metrics == functions_list
