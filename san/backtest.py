@@ -7,23 +7,23 @@ import matplotlib.pyplot as plt
 
 class Backtest:
 
-    def __init__(self, returns:pd.Series, trades:pd.Series, lagged=True, transaction_cost = 0, percent_invested_per_trade = 1):
+    def __init__(self, returns: pd.Series, trades: pd.Series, lagged=True, transaction_cost=0, percent_invested_per_trade=1):
         """ Initializing Backtesting function
             Init function generates performance of the test and several risk metrics. The object lets
             you specify wether you want to lag the trades to avoid overfitting, the transaction costs
             and the percentage of the portfolio to be invested per trade (50% as 0.5).
             Trade example:
-                With given prices [P1, P2, P3] and given trades [False, True, False] 
+                With given prices [P1, P2, P3] and given trades [False, True, False]
                 you buy asset when the price is P2 and sell when the price is P3.
         """
-        
+
         if lagged:
             trades = trades.shift(1)
             trades.iloc[0] = False
         self.strategy_returns = ((returns * percent_invested_per_trade) * trades)
         self.trades = trades
-        
-        self.nr_trades = {'buy':[], 'sell': []}
+
+        self.nr_trades = {'buy': [], 'sell': []}
         for i in range(1, len(trades)):
             if trades[i] != trades[i - 1]:
                 self.strategy_returns.iloc[i] -= transaction_cost
@@ -33,7 +33,7 @@ class Backtest:
                     self.nr_trades['sell'].append(self.trades.index[i])
         if trades[-1]:  # include last day sell to make benchmark possible
             self.nr_trades['sell'].append(self.trades.index[i])
-            
+
         self.performance = ((self.strategy_returns * percent_invested_per_trade) * self.trades + 1).cumprod() - 1
         self.benchmark = (returns + 1).cumprod() - 1
 
@@ -76,19 +76,19 @@ class Backtest:
     def plot_backtest(self, viz=None):
         ''' param viz: None OR "trades" OR "hodl".
         '''
-        plt.figure(figsize=(15,8))
+        plt.figure(figsize=(15, 8))
         plt.plot(self.performance, label="performance")
         plt.plot(self.benchmark, label="holding")
 
         if viz == 'trades':
             min_y = min(self.performance.min(), self.benchmark.min())
             max_y = max(self.performance.max(), self.benchmark.max())
-            plt.vlines(self.nr_trades['sell'], min_y, max_y, color = 'red')
-            plt.vlines(self.nr_trades['buy'], min_y, max_y, color = 'green')
+            plt.vlines(self.nr_trades['sell'], min_y, max_y, color='red')
+            plt.vlines(self.nr_trades['buy'], min_y, max_y, color='green')
         elif viz == 'hodl':
             hodl_periods = []
             for i in range(len(self.trades)):
-                state = self.trades[i-1] if i > 0 else self.trades[i]
+                state = self.trades[i - 1] if i > 0 else self.trades[i]
                 if self.trades[i] and not state:
                     start = self.strategy_returns.index[i]
                 elif not self.trades[i] and state:
@@ -138,8 +138,8 @@ class Portfolio:
     def metrics(self, metric):
         metric_data = pd.DataFrame()
         for asset in self.asset_list:
-            metric_data[asset] =  san.get(metric + "/" + asset,
-                                          from_date=self.start_date, to_date=self.end_date).iloc[:,0]
+            metric_data[asset] = san.get(metric + "/" + asset,
+                                         from_date=self.start_date, to_date=self.end_date).iloc[:, 0]
 
         self.metrics[metric] = metric_data
         return metric_data
