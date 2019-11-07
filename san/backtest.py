@@ -4,16 +4,16 @@ import numpy as np
 import san
 import matplotlib.pyplot as plt
 
+
 class Backtest:
 
-    def __init__(self, returns:pd.Series, trades:pd.Series, lagged=True, transaction_cost = 0, percent_invested_per_trade = 1):
+    def __init__(self, returns: pd.Series, trades: pd.Series, lagged=True, transaction_cost=0, percent_invested_per_trade=1):
         """ Initializing Backtesting function
             Init function generates performance of the test and several risk metrics. The object lets
             you specify wether you want to lag the trades to avoid overfitting, the transaction costs
             and the percentage of the portfolio to be invested per trade (50% as 0.5).
-
             Trade example:
-                With given prices [P1, P2, P3] and given trades [False, True, False] 
+                With given prices [P1, P2, P3] and given trades [False, True, False]
                 you buy asset when the price is P2 and sell when the price is P3.
         """
 
@@ -22,29 +22,24 @@ class Backtest:
             trades.iloc[0] = False
         self.strategy_returns = ((returns * percent_invested_per_trade) * trades)
         self.trades = trades
-        
-        self.nr_trades = 0
+
+        self.nr_trades = {'buy': [], 'sell': []}
         for i in range(1, len(trades)):
             if trades[i] != trades[i - 1]:
                 self.strategy_returns.iloc[i] -= transaction_cost
-                self.nr_trades += 1
+                if trades[i]:
+                    self.nr_trades['buy'].append(self.trades.index[i])
+                else:
+                    self.nr_trades['sell'].append(self.trades.index[i])
         if trades[-1]:  # include last day sell to make benchmark possible
-            self.nr_trades += 1
+            self.nr_trades['sell'].append(self.trades.index[i])
 
-        self.performance = ((self.strategy_returns * percent_invested_per_trade) * trades + 1).cumprod() - 1
+        self.performance = ((self.strategy_returns * percent_invested_per_trade) * self.trades + 1).cumprod() - 1
         self.benchmark = (returns + 1).cumprod() - 1
-        self.sharpe_ratio = (self.strategy_returns.mean() * 365) / (self.strategy_returns.std() * np.sqrt(365))
-        
-        running_value = np.array(self.performance)
-        running_value[0] = 0
-        a = np.argmax(np.maximum.accumulate(running_value) - running_value)  # end of the period
-        b = np.argmax(running_value[:a])  # start of period
-        self.maximum_drawdown = ((running_value[a] - running_value[b]) / running_value[b]) * 100  # Maximum Drawdown
 
-
-    def get_sharpe_ratio(self):
-        return round(self.sharpe_ratio, 2)
-
+    def get_sharpe_ratio(self, decimals=2):
+        sharpe_ratio = (self.strategy_returns.mean() * 365) / (self.strategy_returns.std() * np.sqrt(365))
+        return round(sharpe_ratio, decimals)
 
     def get_value_at_risk(self, percentile=5):
         sorted_rets = sorted(self.strategy_returns)
@@ -52,10 +47,15 @@ class Backtest:
         return round(var * 100, 2)
 
     def get_nr_trades(self):
-        return self.nr_trades
+        return len(self.nr_trades['sell']) + len(self.nr_trades['buy'])
 
-    def get_maximum_drawdown(self):
-        return round(self.maximum_drawdown, 2)
+    def get_maximum_drawdown(self, decimals=2):
+        running_value = np.array(self.performance)
+        running_value[0] = 0
+        end = np.argmax(np.maximum.accumulate(running_value) - running_value)  # end of the dropdown period
+        start = np.argmax(running_value[:end])  # start of the dropdown period
+        maximum_drawdown = running_value[start] - running_value[end]
+        return round(maximum_drawdown, decimals)
 
     def get_return(self, decimals=2):
         return round(((self.performance.iloc[-1] + 1) / (self.performance.iloc[1] + 1) - 1) * 100, decimals)
@@ -76,20 +76,19 @@ class Backtest:
     def plot_backtest(self, viz=None):
         ''' param viz: None OR "trades" OR "hodl".
         '''
-        plt.figure(figsize=(15,8))
-        plt.plot(self.performance,label="performance")
-        plt.plot(self.benchmark,label="holding")
+        plt.figure(figsize=(15, 8))
+        plt.plot(self.performance, label="performance")
+        plt.plot(self.benchmark, label="holding")
+
         if viz == 'trades':
-            plt.vlines(
-                self.trades[self.trades == True].index, 
-                min(self.performance.min(), self.benchmark.min()), 
-                max(self.performance.max(), self.benchmark.max()),
-                color = '#424242'
-            )
+            min_y = min(self.performance.min(), self.benchmark.min())
+            max_y = max(self.performance.max(), self.benchmark.max())
+            plt.vlines(self.nr_trades['sell'], min_y, max_y, color='red')
+            plt.vlines(self.nr_trades['buy'], min_y, max_y, color='green')
         elif viz == 'hodl':
             hodl_periods = []
             for i in range(len(self.trades)):
-                state = self.trades[i-1] if i > 0 else self.trades[i]
+                state = self.trades[i - 1] if i > 0 else self.trades[i]
                 if self.trades[i] and not state:
                     start = self.strategy_returns.index[i]
                 elif not self.trades[i] and state:
@@ -98,6 +97,7 @@ class Backtest:
                 hodl_periods.append([start, self.strategy_returns.index[i]])
             for hodl_period in hodl_periods:
                 plt.axvspan(hodl_period[0], hodl_period[1], color='#aeffa8')
+
         plt.legend()
         plt.show()
 
@@ -138,8 +138,8 @@ class Portfolio:
     def metrics(self, metric):
         metric_data = pd.DataFrame()
         for asset in self.asset_list:
-            metric_data[asset] =  san.get(metric + "/" + asset,
-                                          from_date=self.start_date, to_date=self.end_date).iloc[:,0]
+            metric_data[asset] = san.get(metric + "/" + asset,
+                                         from_date=self.start_date, to_date=self.end_date).iloc[:, 0]
 
         self.metrics[metric] = metric_data
         return metric_data
