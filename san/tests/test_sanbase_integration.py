@@ -443,6 +443,7 @@ def test_available_metrics():
     functions_list = [
         'average_token_age_consumed_in_days',
         'burn_rate',
+        'daily_active_addresses',
         'daily_active_deposits',
         'dev_activity',
         'emerging_trends',
@@ -476,6 +477,7 @@ def test_available_metrics():
         'top_holders_percent_of_total_supply',
         'top_social_gainers_losers',
         'topic_search',
+        'transaction_volume',
         'daily_avg_marketcap_usd',
         'daily_avg_price_usd',
         'daily_closing_marketcap_usd',
@@ -546,5 +548,5 @@ def test_available_metrics():
         'nvt'
         ]
 
-    assert len(san.available_metrics()) >= 1
-    assert san.available_metrics() == functions_list
+    assert functions_list == san.available_metrics()
+    assert len(functions_list) >= 1
