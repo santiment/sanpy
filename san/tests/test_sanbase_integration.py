@@ -548,6 +548,5 @@ def test_available_metrics():
         'nvt'
         ]
 
-    assert available_metrics == san.available_metrics()
-    assert len(available_metrics) >= 1
-    assert available_metrics == functions_list
+    assert functions_list == san.available_metrics()
+    assert len(functions_list) >= 1

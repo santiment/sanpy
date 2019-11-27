@@ -9,9 +9,20 @@ CUSTOM_QUERIES = {
     'ohlcv': 'get_ohlcv'
 }
 
+DEPRECATED_QUERIES = {
+    'mvrv_ratio': 'mvrv_usd',
+    'nvt_ratio': 'nvt',
+    'realized_value': 'realized_value_usd',
+    'token_circulation': 'circulation_1d',
+    'burn_rate': 'age_destroyed',
+    'token_age_consumed': 'age_destroyed',
+    'token_velocity': 'velocity'
+}
 
 def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
+    if query in DEPRECATED_QUERIES:
+        print(f'**NOTICE**\n{query} will be deprecated in version 0.9.0, please use {DEPRECATED_QUERIES[query]} instead')
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
     if query in V2_METRIC_QUERIES:

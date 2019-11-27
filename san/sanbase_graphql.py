@@ -3,23 +3,12 @@ import san.sanbase_graphql_helper as sgh
 from san.batch import Batch
 from san.error import SanError
 
-def daily_active_addresses(idx, slug, **kwargs):
-    query_str = sgh.create_query_str(
-        'daily_active_addresses', idx, slug, **kwargs)
-
-    return query_str
 
 # to be removed
 
 
 def burn_rate(idx, slug, **kwargs):
     query_str = sgh.create_query_str('burn_rate', idx, slug, **kwargs)
-
-    return query_str
-
-
-def transaction_volume(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('transaction_volume', idx, slug, **kwargs)
 
     return query_str
 

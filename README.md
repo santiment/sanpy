@@ -250,7 +250,7 @@ san.get(
 Example result:
 
 ```
-                           activeAddresses
+                                     value
 datetime
 2018-06-01 00:00:00+00:00                2
 2018-06-02 00:00:00+00:00                4
@@ -392,7 +392,7 @@ san.get(
 Example result:
 
 ```
-                           transactionVolume
+                                       value
 datetime
 2018-06-01 00:00:00+00:00          46.848943
 2018-06-02 00:00:00+00:00         666.194095
