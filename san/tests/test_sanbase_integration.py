@@ -537,12 +537,10 @@ def test_available_metrics():
         'realized_value_usd_1d',
         'velocity',
         'transaction_volume',
-        'transaction_volume_5min',
         'exchange_inflow',
         'exchange_outflow',
         'exchange_balance',
         'age_destroyed',
-        'age_destroyed_5min',
         'nvt'
         ]
 
