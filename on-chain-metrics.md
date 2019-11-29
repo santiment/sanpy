@@ -103,7 +103,10 @@ List of with metrics with 1 day minimal resolution:
 
 - nvt
 
-List of with metrics with 5 minutes minimal resolution:
+List of metrics with 5 minutes minimal resolution:
 
-- transaction_volume_5min
-- age_destroyed_5min
+- transaction_volume
+- age_destroyed
+- exchange_inflow
+- exchange_outflow
+- exchange_balance
