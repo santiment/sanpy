@@ -50,7 +50,7 @@ class Backtest:
         return len(self.nr_trades['sell']) + len(self.nr_trades['buy'])
 
     def get_maximum_drawdown(self, decimals=2):
-        running_value = np.array(self.performance)
+        running_value = np.array(self.performance + 1)
         running_value[0] = 0
         end = np.argmax(np.maximum.accumulate(running_value) - running_value)  # end of the dropdown period
         start = np.argmax(running_value[:end])  # start of the dropdown period
