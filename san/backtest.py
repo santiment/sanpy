@@ -55,7 +55,7 @@ class Backtest:
         end = np.argmax(np.maximum.accumulate(running_value) - running_value)  # end of the dropdown period
         start = np.argmax(running_value[:end])  # start of the dropdown period
         maximum_drawdown = (running_value[end] - running_value[start]) / running_value[start]
-        return round(maximum_drawdown, decimals)
+        return round(maximum_drawdown * 100, decimals)
 
     def get_return(self, decimals=2):
         return round(((self.performance.iloc[-1] + 1) / (self.performance.iloc[1] + 1) - 1) * 100, decimals)
