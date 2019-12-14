@@ -22,7 +22,9 @@ DEPRECATED_QUERIES = {
 def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in DEPRECATED_QUERIES:
-        print(f'**NOTICE**\n{query} will be deprecated in version 0.9.0, please use {DEPRECATED_QUERIES[query]} instead')
+        print('**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
+            query, DEPRECATED_QUERIES[query]
+        ))
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
     if query in V2_METRIC_QUERIES:
