@@ -5,8 +5,8 @@ from san.transform import transform_query_result
 from san.v2_metrics_list import V2_METRIC_QUERIES
 from san.error import SanError
 
-class Batch:
 
+class Batch:
     def __init__(self):
         self.queries = []
 
@@ -25,11 +25,15 @@ class Batch:
             [metric, _separator, slug] = query[0].partition('/')
             if metric in V2_METRIC_QUERIES:
                 if slug != '':
-                    batched_queries.append(san.sanbase_graphql.get_metric(idx, metric, slug, **query[1]))
+                    batched_queries.append(
+                        san.sanbase_graphql.get_metric(
+                            idx, metric, slug, **query[1]))
                 else:
                     raise SanError('Invalid metric!')
             else:
-                batched_queries.append(get_gql_query(idx, query[0], **query[1]))
+                batched_queries.append(
+                    get_gql_query(
+                        idx, query[0], **query[1]))
         self.__batch_gql_queries(batched_queries)
         return self.__batch_gql_queries(batched_queries)
 

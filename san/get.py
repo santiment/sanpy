@@ -19,17 +19,19 @@ DEPRECATED_QUERIES = {
     'token_velocity': 'velocity'
 }
 
+
 def get(dataset, **kwargs):
     query, slug = parse_dataset(dataset)
     if query in DEPRECATED_QUERIES:
-        print('**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
-            query, DEPRECATED_QUERIES[query]
-        ))
+        print(
+            '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
+                query, DEPRECATED_QUERIES[query]))
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
     if query in V2_METRIC_QUERIES:
         if slug != '':
-            gql_query = "{" + san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + "}"
+            gql_query = "{" + \
+                san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + "}"
         else:
             raise SanError('Invalid metric!')
     else:
