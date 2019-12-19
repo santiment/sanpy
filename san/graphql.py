@@ -11,8 +11,7 @@ def execute_gql(gql_query_str):
 
     response = requests.post(
         SANBASE_GQL_HOST,
-        json={
-            'query': gql_query_str},
+        json={'query': gql_query_str},
         headers=headers)
 
     if response.status_code == 200:
@@ -25,10 +24,22 @@ def execute_gql(gql_query_str):
 
 
 def __handle_success_response__(response, gql_query_str):
-    if __exist_not_empty_result(response):
+    if __result_has_gql_errors__(response):
+        raise SanError(
+            "GraphQL error occured running query {} \n errors: {}".format(
+                gql_query_str,
+                response.json()['errors']))
+    elif __exist_not_empty_result(response):
         return response.json()['data']
     else:
-        __handle_graphql_error_response(response, gql_query_str)
+        raise SanError(
+            "Error running query. Status code: {}.\n {}" .format(
+                response.status_code,
+                gql_query_str))
+
+
+def __result_has_gql_errors__(response):
+    return 'errors' in response.json().keys()
 
 
 def __exist_not_empty_result(response):
@@ -37,15 +48,3 @@ def __exist_not_empty_result(response):
             filter(
                 lambda x: x is not None,
                 response.json()['data'].values()))) > 0
-
-
-def __handle_graphql_error_response(response, query):
-    if 'errors' in response.json().keys():
-        raise SanError(
-            "GraphQL error occured running query {} \n errors: {}".format(
-                query,
-                response.json()['errors']))
-    else:
-        raise SanError(
-            "Error running query. query: {}\n" .format(
-                query))
