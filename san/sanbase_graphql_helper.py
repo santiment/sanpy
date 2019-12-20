@@ -272,14 +272,13 @@ def _format_from_date(datetime_obj_or_str):
 
 
 def _format_to_date(datetime_obj_or_str):
-    if isinstance(datetime_obj_or_str, datetime.datetime):
-        datetime_obj_or_str = datetime_obj_or_str.isoformat()
-    else:
-        if _validate_iso8601(datetime_obj_or_str):
-            dt = iso8601.parse_date(datetime_obj_or_str)
-        else:
-            dt = iso8601.parse_date(datetime_obj_or_str) + \
-                datetime.timedelta(hours=23, minutes=59, seconds=59)
+    date_format = '%Y-%m-%d'
+    try:            
+        datetime.datetime.strptime(datetime_obj_or_str, date_format)
+        dt = iso8601.parse_date(datetime_obj_or_str) + \
+            datetime.timedelta(hours=23, minutes=59, seconds=59)
+    except ValueError:
+        dt = iso8601.parse_date(datetime_obj_or_str)
 
     return dt.isoformat()
 
@@ -292,13 +291,3 @@ def _format_return_fields(fields):
     return list(map(
         lambda el: el[0] + '{{' + ' '.join(el[1]) + '}}' if isinstance(el, tuple) else el
     , fields))
-
-def _validate_iso8601(str_val):
-    regex = r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
-    match_iso8601 = re.compile(regex).match
-    try:            
-        if match_iso8601( str_val ) is not None:
-            return True
-    except:
-        pass
-    return False
