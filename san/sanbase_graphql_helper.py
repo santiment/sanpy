@@ -1,6 +1,5 @@
 import iso8601
 import datetime
-import re
 
 _DEFAULT_INTERVAL = '1d'
 _DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
@@ -272,14 +271,17 @@ def _format_from_date(datetime_obj_or_str):
 
 
 def _format_to_date(datetime_obj_or_str):
-    date_format = '%Y-%m-%d'
-    try:            
-        datetime.datetime.strptime(datetime_obj_or_str, date_format)
+    if isinstance(datetime_obj_or_str, datetime.datetime):
+      return datetime_obj_or_str.isoformat()
+    
+    try:
+        # Throw if the string is not date-formated, parse as date otherwise
+        datetime.datetime.strptime(datetime_obj_or_str, '%Y-%m-%d')
         dt = iso8601.parse_date(datetime_obj_or_str) + \
             datetime.timedelta(hours=23, minutes=59, seconds=59)
-    except ValueError:
+    except:
         dt = iso8601.parse_date(datetime_obj_or_str)
-
+    
     return dt.isoformat()
 
 def _format_all_return_fields(fields):
