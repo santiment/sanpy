@@ -34,7 +34,7 @@ class Backtest:
         if trades[-1]:  # include last day sell to make benchmark possible
             self.nr_trades['sell'].append(self.trades.index[i])
 
-        self.performance = ((self.strategy_returns * percent_invested_per_trade) * self.trades + 1).cumprod() - 1
+        self.performance = (self.strategy_returns + 1).cumprod() - 1
         self.benchmark = (returns + 1).cumprod() - 1
 
     def get_sharpe_ratio(self, decimals=2):
