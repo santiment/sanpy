@@ -46,7 +46,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
-    - [Fetch single metric](#fetch-single-metric)
+    - [Onchain metrics](#full-list-of-on-chain-metrics)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
     - [Available metrics](#available-metrics)
