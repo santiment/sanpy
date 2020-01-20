@@ -44,6 +44,7 @@ Santiment API python client.
     - [History Twitter Data](#history-twitter-data)
     - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
+    - [News](#news)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
     - [Onchain metrics](#full-list-of-on-chain-metrics)
@@ -1095,6 +1096,41 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
 2019-04-19 14:14:52+00:00  0x1f3df0b8390bb8...                  False  0xd69bc0585e05e...                False  0x590512e1f1fbcf...         19.48
 2019-04-19 14:09:58+00:00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
+```
+
+### News
+
+Returns the news for given word.
+
+Arguments description:
+
+- tag - project name, ticker or other crypto related words.
+- from - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+- to - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16"
+- size - size limit of the returned results
+
+[Premium metric](#premium-metrics)
+
+```python
+san.get(
+    "news/bitcoin",
+    from_date="2019-04-18",
+    to_date="2019-07-11",
+    size=5
+)
+```
+
+Example result:
+
+**The result is shortened for convenience**
+
+```
+datetime                                                               title                                        description       sourceName                                                                                                       url
+2019-04-26 18:39:00+00:00  Crypto Markets Slump, Oil Prices Report Losses...  Crypto Markets Slump, Oil Prices Report Losses...    Cointelegraph                              https://cointelegraph.com/news/crypto-markets-slump-oil-prices-report-losses
+2019-05-17 09:02:07+00:00  Debt-Ridden Crypto Exchange Cryptopia Suckers ...  Debt-Ridden Crypto Exchange Cryptopia Suckers ...              CCN                  https://www.ccn.com/debt-ridden-crypto-exchange-cryptopia-suckers-hacked-customers-again
+2019-05-27 18:56:15+00:00  Institutions Could Push Crypto Past A ‘Point O...  Institutions Could Push Crypto Past A ‘Point O...  Crypto Briefing                                          https://cryptobriefing.com/institutional-crypto-point-no-return/
+2019-06-22 14:31:00+00:00  ETH Hits 10-Month High as Crypto Markets See S...  ETH Hits 10-Month High as Crypto Markets See S...    Cointelegraph                   https://cointelegraph.com/news/eth-hits-10-month-high-as-crypto-markets-see-solid-green
+2019-07-06 18:42:00+00:00  Iranian Official Says US Congress is Working t...  Iranian Official Says US Congress is Working t...    Cointelegraph  https://cointelegraph.com/news/iranian-official-says-us-congress-is-working-to-block-irans-crypto-mining
 ```
 
 ### Ethereum Spent Over Time
