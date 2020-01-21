@@ -223,6 +223,7 @@ def eth_top_transactions(idx, slug, **kwargs):
 
 
 def news(idx, tag, **kwargs):
+    print('WARNING! This metric is going to be removed in version 0.8.0')
     kwargs = sgh.transform_query_args('news', **kwargs)
 
     query_str = ("""
