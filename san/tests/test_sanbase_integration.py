@@ -546,3 +546,15 @@ def test_available_metrics():
 
     assert functions_list == san.available_metrics()
     assert len(san.available_metrics()) >= 1
+
+
+@attr('integration')
+def test_metadata():
+    result = san.metadata(
+        'nvt',
+        arr=['defaultAggregation', 'metric']
+    )
+
+    expecter_result = {'defaultAggregation': 'AVG', 'metric': 'nvt'}
+
+    assert result == expecter_result
