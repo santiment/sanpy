@@ -12,4 +12,4 @@ def metadata(metric, arr):
         metric=metric
     )
 
-    return execute_gql(query_str)
+    return execute_gql(query_str)['getMetric']['metadata']
