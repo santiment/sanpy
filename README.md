@@ -14,6 +14,7 @@ Santiment API python client.
     - [Fetch single metric](#fetch-single-metric)
     - [Batching multiple queries](#batching-multiple-queries)
   - [Available metrics](#available-metrics)
+    - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
     - [Daily Active Addresses](#daily-active-addresses)
@@ -46,10 +47,10 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
-    - [Fetch single metric](#fetch-single-metric)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
     - [Available metrics](#available-metrics)
+    - [Metadata](#metadata)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1147,7 +1148,7 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
-### Full list of on-chain metrics
+### Full list of on-chain metrics (including timebounded)
 
 This list includes:
 
@@ -1249,6 +1250,22 @@ datetime                              slug     change    status
 2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
 ```
 
+### Metadata
+
+Fetching the metadata for an on-chain metric.
+
+```python
+san.metadata(
+    "nvt",
+    arr=['metric', 'defaultAggregation']
+)
+```
+
+Example result:
+
+```
+{'defaultAggregation': 'AVG', 'metric': 'nvt'}
+```
 ## Running tests
 
 ```
