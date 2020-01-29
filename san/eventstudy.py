@@ -27,7 +27,7 @@ def get_close_price(data, sid, current_date, day_number):
         date_index = total_date_index_length - 1 if date_index >= total_date_index_length else date_index
         #: Use the index to return a close price that matches
         return data.iloc[date_index][sid]
-    
+
 def get_first_price(data, starting_point, sid, date):
     starting_day = date - timedelta(starting_point)
     date_index = data.index.searchsorted(starting_day)
@@ -62,17 +62,18 @@ def calc_beta(stock, benchmark, price_history):
     stock_prices = np.reshape(stock_prices,len(stock_prices))
     if len(stock_prices) == 0:
         return None
-    m, b = np.polyfit(bench_prices, stock_prices, 1) 
+    m, b = np.polyfit(bench_prices, stock_prices, 1)
     return m
 
 # Simple event study
-    
-def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zero=True):
-    
+
+def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',
+               origin_zero=True):
+
     if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
          benchmark='ethereum'
-    
-    #: Dictionaries to store calculated data in 
+
+    #: Dictionaries to store calculated data in
     all_returns = {}
     all_std_devs = {}
     total_sample_size = {}
@@ -82,7 +83,7 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
 
     #: Create our range of day_numbers that will be used to calculate returns
     #  starting_point = 30   #30
-    #: Looking from -starting_point till +starting_point which creates our timeframe band
+    #: Looking from -starting_point to +starting_point to create timeframe band
     day_numbers = [i for i in range(-starting_point, starting_point)]
 
     for day_num in day_numbers:
@@ -92,10 +93,10 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
         sample_size = 0
         abreturns = []
 
-        #: Get the return compared to t=0 
+        #: Get the return compared to t=0
         for date, row in ev_data.iterrows():
             sid = row.symbol
-        
+
      #       #: Make sure that data exists for the dates
      #       if date not in data['close_price'].index or sid not in data['close_price'].columns:
      #           continue
@@ -108,12 +109,12 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
                 #: 2 is the sid for the benchmark
             b_returns.append(get_returns(data, starting_point, benchmark, date, day_num)) #Benchmark
             sample_size += 1
-        
+
             ret = get_returns(data, starting_point, sid, date, day_num)
             ############ define benchmark
             b_ret = get_returns(data, starting_point, benchmark, date, day_num)
-        
-            ##################################################################################################
+
+            ####################################################################
             """
             Calculate beta by getting the last X days of data
             1. Create a DataFrame containing the data for the necessary sids within that time frame
@@ -125,19 +126,19 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
             beta = calc_beta(sid, benchmark, price_history)
             if beta is None:
                 continue
-        
+
             #: Calculate abnormal returns    #### check thisssss
             abnormal_return = ret - (beta*b_ret)
             abreturns.append(abnormal_return)  #####modify
-            ################################################################################################
-    
+            ####################################################################
+
         #: Drop any Nans, remove outliers, find outliers and aggregate returns and std dev
         returns = pd.Series(returns).dropna()
         returns = remove_outliers(returns, 2)
-    
+
         abreturns = pd.Series(abreturns).dropna()
         abreturns = remove_outliers(abreturns, 2)
-    
+
         all_returns[day_num] = np.average(returns)
         all_std_devs[day_num] = np.std(returns)
         total_sample_size[day_num] = sample_size
@@ -158,7 +159,7 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     xticks = [d for d in day_numbers if d%2 == 0]
     pyplot.figure(0)
     pyplot.figure(figsize=(20,7))
-    
+
     #######################################################
     if origin_zero==True:
         all_returns_shited=all_returns-all_returns.loc[0]
@@ -166,7 +167,7 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
         all_returns_shited=all_returns.copy()
     all_returns_shited.plot(xticks=xticks, label="N=%s" % N)
     #######################################################
-    
+
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Cumulative Return from Events")
     pyplot.xlabel("Window Length (t)")
@@ -181,12 +182,12 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     pyplot.figure(figsize=(20,7))
     all_returns_shited.plot(xticks=xticks, label="Cumulative Return from Events")
     benchmark_returns = pd.Series(benchmark_returns)
-    
+
     if origin_zero==True:
         benchmark_returns_shited=benchmark_returns-benchmark_returns.loc[0]
     else:
         benchmark_returns_shited=benchmark_returns.copy()
-    
+
     benchmark_returns_shited.plot(xticks=xticks, label='Benchmark: '+str(benchmark))
 
     pyplot.title("Benchmark's average returns around that time to Signals_Events")
@@ -203,18 +204,21 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     pyplot.figure()
     pyplot.figure(figsize=(20,7))
     ab_all_returns = pd.Series(ab_all_returns)
-    
+
     all_returns_shited.plot(xticks=xticks, label="Average Cumulative Returns")
-######################################################################################
+################################################################################
     if origin_zero==True:
         ab_all_returns_shited=ab_all_returns-ab_all_returns.loc[0]
     else:
         ab_all_returns_shited=ab_all_returns.copy()
-######################################################################################
-    ab_all_returns_shited.plot(xticks=xticks, label="Abnormal Average Cumulative Returns")
+################################################################################
+    ab_all_returns_shited.plot(xticks=xticks,
+                               label="Abnormal Average Cumulative Returns")
 
-    pyplot.axhline(y=ab_all_returns_shited.loc[0], linestyle='--', color='black', alpha=.3, label='Drift')
-    pyplot.axhline(y=ab_all_returns_shited.max(), linestyle='--', color='black', alpha=.3)
+    pyplot.axhline(y=ab_all_returns_shited.loc[0], linestyle='--',
+                   color='black', alpha=.3, label='Drift')
+    pyplot.axhline(y=ab_all_returns_shited.max(), linestyle='--', color='black',
+                   alpha=.3)
     pyplot.title("Cumulative Abnormal Returns versus Cumulative Returns")
     pyplot.ylabel("% Cumulative Return")
     pyplot.xlabel("Time Window")
@@ -227,16 +231,17 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     pyplot.figure()
     pyplot.figure(figsize=(20,7))
     all_std_devs.loc[:-1] = 0
-    
-    ######################################################################################
+
+    ############################################################################
     if origin_zero==True:
         all_std_devs_shited=all_std_devs-all_std_devs.loc[0]
         all_std_devs_shited.loc[:-1] = 0
     else:
         all_std_devs_shited=all_std_devs.copy()
-    ######################################################################################
-    
-    pyplot.errorbar(all_returns_shited.index, all_returns_shited, xerr=0, yerr=all_std_devs, label="N=%s" % N)
+    ############################################################################
+
+    pyplot.errorbar(all_returns_shited.index, all_returns_shited, xerr=0,
+                    yerr=all_std_devs, label="N=%s" % N)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
@@ -253,16 +258,17 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     ab_volatility = pd.Series(ab_volatility)
     ab_all_returns = pd.Series(ab_all_returns)
     ab_volatility.loc[:-1] = 0
-    
-    ######################################################################################
+
+    ############################################################################
     if origin_zero==True:
         ab_volatility_shited=ab_volatility-ab_volatility.loc[0]
         ab_volatility_shited.loc[:-1] = 0
     else:
         ab_volatility_shited=ab_volatility.copy()
-    ######################################################################################
-    
-    pyplot.errorbar(ab_all_returns_shited.index, ab_all_returns_shited, xerr=0, yerr=ab_volatility, label="N=%s" % N)
+    ############################################################################
+
+    pyplot.errorbar(ab_all_returns_shited.index, ab_all_returns_shited, xerr=0,
+                    yerr=ab_volatility, label="N=%s" % N)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Abnormal Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
