@@ -4,8 +4,13 @@ import seaborn as sns
 import matplotlib.pyplot as pyplot
 from datetime import timedelta
 
-"""
+""" Event study to  evaluate events or signals.
 
+The main parameters the event study function accepts are a
+pandas dataframe containing the price data of the observed
+projects and the benchmark (data) and dataframe containing
+the events(ev_data)that contains the data of occurance in
+the index and the name of the project for every date.
 """
 
 def get_close_price(data, sid, current_date, day_number):
@@ -67,7 +72,7 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',origin_zer
     if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
          benchmark='ethereum'
     
-    #: Dictionaries that I'm going to be storing calculated data in 
+    #: Dictionaries to store calculated data in 
     all_returns = {}
     all_std_devs = {}
     total_sample_size = {}
