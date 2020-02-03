@@ -272,7 +272,7 @@ def _format_from_date(datetime_obj_or_str):
 
 def _format_to_date(datetime_obj_or_str):
     if isinstance(datetime_obj_or_str, datetime.datetime):
-      return datetime_obj_or_str.isoformat()
+      return iso8601.parse_date(datetime_obj_or_str.isoformat())
     
     try:
         # Throw if the string is not date-formated, parse as date otherwise
