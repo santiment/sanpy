@@ -53,6 +53,7 @@ Santiment API python client.
     - [Metadata](#metadata)
   - [Extras](#extras)
     - [Backtest](#backtest)
+  - [Development](#development)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -1283,6 +1284,28 @@ Example result:
 ### Backtest
 
 TBD
+
+## Development
+
+It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing your local environment.
+
+Setup project:
+
+```
+pipenv install
+```
+
+Install main dependencies:
+
+```
+pipenv run pip install -e .
+```
+
+Install extra dependencies:
+
+```
+pipenv run pip install -e '.[extras]'
+```
 
 ## Running tests
 
