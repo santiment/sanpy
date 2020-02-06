@@ -8,3 +8,4 @@ dist
 build
 .vscode/
 .tool-versions
+**/.ipynb_checkpoints

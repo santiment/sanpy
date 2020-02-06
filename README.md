@@ -52,7 +52,6 @@ Santiment API python client.
     - [Available metrics](#available-metrics)
     - [Metadata](#metadata)
   - [Extras](#extras)
-    - [Backtest](#backtest)
   - [Development](#development)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
@@ -1281,9 +1280,7 @@ Example result:
 
 ## Extras
 
-### Backtest
-
-TBD
+Take a look at the [examples](/examples/extras) folder.
 
 ## Development
 
