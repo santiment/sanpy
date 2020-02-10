@@ -51,6 +51,8 @@ Santiment API python client.
     - [Top Social Gainers Losers](#top-social-gainers-losers)
     - [Available metrics](#available-metrics)
     - [Metadata](#metadata)
+  - [Extras](#extras)
+  - [Development](#development)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
 
@@ -64,6 +66,14 @@ pip install sanpy
 
 ```
 pip install --upgrade sanpy
+```
+
+## Install extra packages
+
+There are few scripts under [extras](/san/extras) directory. To install their dependencies use:
+
+```
+pip install sanpy[extras]
 ```
 
 ## Premium metrics
@@ -789,7 +799,7 @@ The results are in two formats - the messages themselves and the data for buildi
 
 Arguments description:
 
-- `endpoint` - a string in the format "topic_search" 
+- `endpoint` - a string in the format "topic_search"
 - `source` - one of the following:
   - TELEGRAM
   - PROFESSIONAL_TRADERS_CHAT
@@ -1237,13 +1247,13 @@ Example result:
 
 **The result is shortened for convenience**
 
-```                                            
+```
 datetime                              slug     change    status
 2019-07-28 01:00:00+00:00     libra-credit  21.000000    GAINER
 2019-07-28 01:00:00+00:00             aeon  -1.000000     LOSER
 2019-07-28 01:00:00+00:00    thunder-token   5.000000  NEWCOMER
 2019-07-28 02:00:00+00:00     libra-credit  43.000000    GAINER
-...                                    ...        ...       ...    
+...                                    ...        ...       ...
 2019-07-30 07:00:00+00:00            storj  12.000000  NEWCOMER
 2019-07-30 11:00:00+00:00            storj  21.000000    GAINER
 2019-07-30 11:00:00+00:00            aergo  -1.000000     LOSER
@@ -1265,7 +1275,35 @@ Example result:
 
 ```
 {'defaultAggregation': 'AVG', 'metric': 'nvt'}
+
 ```
+
+## Extras
+
+Take a look at the [examples](/examples/extras) folder.
+
+## Development
+
+It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing your local environment.
+
+Setup project:
+
+```
+pipenv install
+```
+
+Install main dependencies:
+
+```
+pipenv run pip install -e .
+```
+
+Install extra dependencies:
+
+```
+pipenv run pip install -e '.[extras]'
+```
+
 ## Running tests
 
 ```

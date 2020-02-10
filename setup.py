@@ -19,10 +19,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'pandas',
-        'numpy',
         'requests',
         'iso8601',
-        'setuptools',
-        'matplotlib'
-    ]
+        'setuptools'
+    ],
+    extras_require={
+        "extras":  ["numpy", "matplotlib"]
+    }
 )
