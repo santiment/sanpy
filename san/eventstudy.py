@@ -62,12 +62,12 @@ def calc_beta(stock, benchmark, price_history):
     stock_prices = np.reshape(stock_prices,len(stock_prices))
     if len(stock_prices) == 0:
         return None
-    m, b = np.polyfit(bench_prices, stock_prices, 1)
-    return m
+    market_beta, benchmark_beta = np.polyfit(bench_prices, stock_prices, 1)
+    return market_beta
 
 # Simple event study
 
-def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',
+def event_study(data, ev_data,starting_point = 30, benchmark='bitcoin',
                origin_zero=True):
 
     if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
