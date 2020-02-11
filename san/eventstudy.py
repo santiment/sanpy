@@ -275,3 +275,18 @@ def eventstudy(data, ev_data,starting_point = 30, benchmark='bitcoin',
     pyplot.ylabel("Cumulative Return (r)")
     pyplot.legend()
     pyplot.show()
+
+# Helper function to get signals in the right format for the event eventstudy:
+
+def signals_format(signals,project):
+    """ Returns signals in the needed format
+
+    Accepts a column with the signals as boolean values
+    and the projects name as a string
+    """
+    sign = pd.DataFrame(signals).tz_convert(None)
+    sign.columns= ['symbol']
+    sign=sign.replace(True, project)
+    events=sign[sign["symbol"] == project]
+
+    return events
