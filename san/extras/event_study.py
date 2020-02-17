@@ -1,0 +1,286 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as pyplot
+from datetime import timedelta
+
+"""
+Event study to  evaluate events or signals.
+The main parameters the event study function accepts are a pandas dataframe containing the price data
+of the observed projects and the benchmark (data) and dataframe containing the events(ev_data)
+that contains the data of occurance in the index and the name of the project for every date.
+"""
+
+FIGURE_WIDTH = 20
+FIGURE_HEIGHT = 7
+FIGURE_SIZE = [FIGURE_WIDTH, FIGURE_HEIGHT]
+
+def get_close_price(data, sid, current_date, day_number):
+    # If we're looking at day 0 just return the indexed date
+    if day_number == 0:
+        return data.loc[current_date][sid]
+    # Find the close price day_number away from the current_date
+    else:
+        # If the close price is too far ahead, just get the last available
+        total_date_index_length = len(data.index)
+        # Find the closest date to the target date
+        date_index = data.index.searchsorted(current_date + timedelta(day_number))
+        # If the closest date is too far ahead, reset to the latest date possible
+        date_index = total_date_index_length - 1 if date_index >= total_date_index_length else date_index
+        # Use the index to return a close price that matches
+        return data.iloc[date_index][sid]
+
+def get_first_price(data, starting_point, sid, date):
+    starting_day = date - timedelta(starting_point)
+    date_index = data.index.searchsorted(starting_day)
+
+    return data.iloc[date_index][sid]
+
+def remove_outliers(returns, num_std_devs):
+    return returns[~((returns-returns.mean()).abs()>num_std_devs*returns.std())]
+
+def get_returns(data, starting_point, sid, date, day_num):
+    first_price = get_first_price(data, starting_point, sid, date)
+    close_price = get_close_price(data, sid, date, day_num)
+
+    return (close_price - first_price) / (first_price + 0.0)
+
+def calc_beta(stock, benchmark, price_history):
+    """
+    Calculate beta amounts for each security
+    """
+    stock_prices = price_history[stock].pct_change().dropna()
+    bench_prices = price_history[benchmark].pct_change().dropna()
+    aligned_prices = bench_prices.align(stock_prices, join='inner')
+    bench_prices = aligned_prices[0]
+    stock_prices = aligned_prices[1]
+    bench_prices = np.array(bench_prices.values)
+    stock_prices = np.array(stock_prices.values)
+    bench_prices = np.reshape(bench_prices,len(bench_prices))
+    stock_prices = np.reshape(stock_prices,len(stock_prices))
+
+    if len(stock_prices) == 0:
+        return None
+
+    market_beta, benchmark_beta = np.polyfit(bench_prices, stock_prices, 1)
+    return market_beta
+
+
+def build_x_ticks(day_numbers):
+    return [d for d in day_numbers if d % 2 == 0]
+
+def plot_cumulative_returns(returns, x_ticks, sample_size):
+    pyplot.figure(figsize=FIGURE_SIZE)
+
+    returns.plot(xticks=x_ticks, label="N=%s" % sample_size)
+
+    pyplot.title("Cumulative Return from Events")
+    pyplot.xlabel("Window Length (t)")
+    pyplot.ylabel("Cumulative Return (r)")
+    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.legend()
+
+def plot_average_returns(returns, benchmark_returns, x_ticks):
+    pyplot.figure(figsize=FIGURE_SIZE)
+
+    returns.plot(xticks=x_ticks, label="Cumulative Return from Events")
+    benchmark_returns.plot(xticks=x_ticks, label='Benchmark')
+
+    pyplot.title("Benchmark's average returns around that time to Signals_Events")
+    pyplot.ylabel("% Cumulative Return")
+    pyplot.xlabel("Time Window")
+    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.legend()
+
+def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks):
+    pyplot.figure(figsize=FIGURE_SIZE)
+
+    returns.plot(xticks=x_ticks, label="Average Cumulative Returns")
+    abnormal_returns.plot(xticks=x_ticks, label="Abnormal Average Cumulative Returns")
+
+    pyplot.axhline(
+        y=abnormal_returns.loc[0],
+        linestyle='--',
+        color='black',
+        alpha=.3,
+        label='Drift'
+    )
+
+    pyplot.axhline(
+        y=abnormal_returns.max(),
+        linestyle='--',
+        color='black',
+        alpha=.3
+    )
+
+    pyplot.title("Cumulative Abnormal Returns versus Cumulative Returns")
+    pyplot.ylabel("% Cumulative Return")
+    pyplot.xlabel("Time Window")
+    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.legend()
+
+
+def plot_cumulative_return_with_errors(returns, std_devs, sample_size):
+    """
+    Plotting the same graph but with error bars
+    """
+    pyplot.figure(figsize=FIGURE_SIZE)
+
+    pyplot.errorbar(returns.index, returns, xerr=0, yerr=std_devs, label=f"N={sample_size}")
+    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.title("Cumulative Return from Events with error")
+    pyplot.xlabel("Window Length (t)")
+    pyplot.ylabel("Cumulative Return (r)")
+    pyplot.legend()
+    pyplot.show()
+
+def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_returns, sample_size):
+    """
+    Capturing volatility of abnormal returns
+    """
+    pyplot.figure(figsize=FIGURE_SIZE)
+
+    pyplot.errorbar(
+        abnormal_returns.index,
+        abnormal_returns,
+        xerr=0,
+        yerr=abnormal_volatility,
+        label=f"N={sample_size}"
+    )
+
+    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.title("Abnormal Cumulative Return from Events with error")
+    pyplot.xlabel("Window Length (t)")
+    pyplot.ylabel("Cumulative Return (r)")
+    pyplot.legend()
+    pyplot.show()
+
+def build_day_numbers(starting_point):
+    """
+    Create our range of day_numbers that will be used to calculate returns
+    Looking from -starting_point to +starting_point to create timeframe band
+    """
+    return [i for i in range(-starting_point, starting_point)]
+
+def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_zero=True):
+    if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
+         benchmark='ethereum'
+
+    all_returns = {}
+    all_std_devs = {}
+    all_benchmark_returns = {}
+    all_abnormal_returns = {}
+    abnormal_volatility = {}
+    total_sample_size = {}
+
+    day_numbers = build_day_numbers(starting_point)
+
+    for day_num in day_numbers:
+        returns = []
+        benchmark_returns = []
+        abnormal_returns = []
+        sample_size = 0
+
+        for date, row in ev_data.iterrows():
+            sid = row.symbol
+
+            if date not in data.index or sid not in data.columns:
+                continue
+
+            _return = get_returns(data, starting_point, sid, date, day_num)
+            benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
+
+            returns.append(_return)
+            benchmark_returns.append(benchmark_return)
+            sample_size += 1
+
+            """
+            Calculate beta by getting the last X days of data
+            1. Create a DataFrame containing the data for the necessary sids within that time frame
+            2. Pass that DataFrame into our calc_beta function in order to spit out a beta
+            """
+            history_index = data.index.searchsorted(date)
+            history_index_start = max([history_index - starting_point, 0])
+            price_history = data.iloc[history_index_start:history_index][[sid, benchmark]]
+            beta = calc_beta(sid, benchmark, price_history)
+
+            if beta is None:
+                continue
+
+            abnormal_return = _return - (beta * benchmark_return)
+            abnormal_returns.append(abnormal_return)
+
+        returns = pd.Series(returns).dropna()
+        returns = remove_outliers(returns, 2)
+
+        abnormal_returns = pd.Series(abnormal_returns).dropna()
+        abnormal_returns = remove_outliers(abnormal_returns, 2)
+
+        all_returns[day_num] = np.average(returns)
+        all_std_devs[day_num] = np.std(returns)
+        total_sample_size[day_num] = sample_size
+        all_benchmark_returns[day_num] = np.average(pd.Series(benchmark_returns).dropna())
+
+        abnormal_volatility[day_num] = np.std(abnormal_returns)
+        all_abnormal_returns[day_num] = np.average(abnormal_returns)
+
+    all_returns = pd.Series(all_returns)
+    all_std_devs = pd.Series(all_std_devs)
+    all_benchmark_returns = pd.Series(all_benchmark_returns)
+    all_abnormal_returns = pd.Series(all_abnormal_returns)
+    abnormal_volatility = pd.Series(abnormal_volatility)
+
+    sample_size = np.average(pd.Series(total_sample_size))
+
+    if origin_zero==True:
+        all_returns = all_returns - all_returns.loc[0]
+        all_benchmark_returns = all_benchmark_returns - all_benchmark_returns.loc[0]
+        all_abnormal_returns = all_abnormal_returns - all_abnormal_returns.loc[0]
+        all_std_devs = all_std_devs - all_std_devs.loc[0]
+        abnormal_volatility = abnormal_volatility - abnormal_volatility.loc[0]
+
+    all_std_devs.loc[:-1] = 0
+    abnormal_volatility.loc[:-1] = 0
+
+    x_ticks = build_x_ticks(day_numbers)
+
+    plot_cumulative_returns(
+        returns=all_returns,
+        x_ticks=x_ticks,
+        sample_size=sample_size
+    )
+
+    plot_average_returns(
+        returns=all_returns,
+        benchmark_returns=all_benchmark_returns,
+        x_ticks=x_ticks
+    )
+
+    plot_cumulative_abnormal_returns(
+        returns=all_returns,
+        abnormal_returns=all_abnormal_returns,
+        x_ticks=x_ticks
+    )
+    plot_cumulative_return_with_errors(
+        returns=all_returns,
+        std_devs=all_std_devs,
+        sample_size=sample_size
+    )
+
+    plot_abnormal_cumulative_return_with_errors(
+        abnormal_volatility=abnormal_volatility,
+        abnormal_returns=all_abnormal_returns,
+        sample_size=sample_size
+    )
+
+
+def signals_format(signals,project):
+    """
+    Returns signals in the needed format.
+    Accepts a column with the signals as boolean values and the projects name as a string
+    """
+    sign = pd.DataFrame(signals).tz_convert(None)
+    sign.columns = ['symbol']
+    sign = sign.replace(True, project)
+    events = sign[sign["symbol"] == project]
+
+    return events
