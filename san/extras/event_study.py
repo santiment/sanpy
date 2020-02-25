@@ -161,54 +161,57 @@ def build_day_numbers(starting_point):
     """
     return [i for i in range(-starting_point, starting_point)]
 
-def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_zero=True):
-    if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
-         benchmark='ethereum'
+def get_price_history(data,date,starting_point,sid,benchmark):
+    """
+    Create a DataFrame containing the data for the necessary sids within that time frame
+    """
 
-    all_returns = {}
-    all_std_devs = {}
-    all_benchmark_returns = {}
-    all_abnormal_returns = {}
-    abnormal_volatility = {}
-    total_sample_size = {}
+    history_index = data.index.searchsorted(date)
+    history_index_start = max([history_index - starting_point, 0])
+    return data.iloc[history_index_start:history_index][[sid, benchmark]]
 
-    day_numbers = build_day_numbers(starting_point)
 
+def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchmark,returns,benchmark_returns,abnormal_returns):
+    """
+    Computes the returns for the project, benchmark and abnormal
+    """
+    for date, row in ev_data.iterrows():
+        sid = row.symbol
+        if date not in data.index or sid not in data.columns:
+                continue
+
+        project_return = get_returns(data, starting_point, sid, date, day_num)
+        benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
+
+        returns.append(project_return)
+        benchmark_returns.append(benchmark_return)
+        sample_size += 1
+
+        beta = calc_beta(sid, benchmark, get_price_history(data,date,starting_point,sid,benchmark))
+        if beta is None:
+            continue
+        abnormal_return = project_return - (beta * benchmark_return)
+        abnormal_returns.append(abnormal_return)
+        
+        
+
+def compute_averages(ev_data,data,starting_point,day_numbers,
+                     benchmark,all_returns,all_std_devs,
+                     total_sample_size,all_benchmark_returns,
+                     abnormal_volatility,all_abnormal_returns): 
+    
+    """
+    Computes the avegare returns and standards deviation of the events
+    """
+        
     for day_num in day_numbers:
         returns = []
         benchmark_returns = []
         abnormal_returns = []
         sample_size = 0
 
-        for date, row in ev_data.iterrows():
-            sid = row.symbol
-
-            if date not in data.index or sid not in data.columns:
-                continue
-
-            _return = get_returns(data, starting_point, sid, date, day_num)
-            benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
-
-            returns.append(_return)
-            benchmark_returns.append(benchmark_return)
-            sample_size += 1
-
-            """
-            Calculate beta by getting the last X days of data
-            1. Create a DataFrame containing the data for the necessary sids within that time frame
-            2. Pass that DataFrame into our calc_beta function in order to spit out a beta
-            """
-            history_index = data.index.searchsorted(date)
-            history_index_start = max([history_index - starting_point, 0])
-            price_history = data.iloc[history_index_start:history_index][[sid, benchmark]]
-            beta = calc_beta(sid, benchmark, price_history)
-
-            if beta is None:
-                continue
-
-            abnormal_return = _return - (beta * benchmark_return)
-            abnormal_returns.append(abnormal_return)
-
+        compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchmark,returns,benchmark_returns,abnormal_returns)
+        
         returns = pd.Series(returns).dropna()
         returns = remove_outliers(returns, 2)
 
@@ -222,6 +225,44 @@ def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_ze
 
         abnormal_volatility[day_num] = np.std(abnormal_returns)
         all_abnormal_returns[day_num] = np.average(abnormal_returns)
+
+
+def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_zero=True):
+    if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
+         benchmark='ethereum'
+
+    all_returns = {}
+    all_std_devs = {}
+    all_benchmark_returns = {}
+    all_abnormal_returns = {}
+    abnormal_volatility = {}
+    total_sample_size = {}
+
+    day_numbers = build_day_numbers(starting_point)
+    compute_averages(ev_data,data,starting_point,day_numbers,
+                     benchmark,all_returns,all_std_devs,
+                     total_sample_size,all_benchmark_returns,
+                     abnormal_volatility,all_abnormal_returns)
+   
+    plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_returns,
+                    all_std_devs,abnormal_volatility,
+                    total_sample_size,origin_zero)
+
+
+def signals_format(signals,project):
+    """
+    Returns signals in the needed format.
+    Accepts a column with the signals as boolean values and the projects name as a string
+    """
+    sign = pd.DataFrame(signals).tz_convert(None)
+    sign.columns = ['symbol']
+    sign = sign.replace(True, project)
+    events = sign[sign["symbol"] == project]
+
+    return events
+
+def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_returns,all_std_devs,
+                    abnormal_volatility,total_sample_size,origin_zero):
 
     all_returns = pd.Series(all_returns)
     all_std_devs = pd.Series(all_std_devs)
@@ -240,7 +281,7 @@ def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_ze
 
     all_std_devs.loc[:-1] = 0
     abnormal_volatility.loc[:-1] = 0
-
+    
     x_ticks = build_x_ticks(day_numbers)
 
     plot_cumulative_returns(
@@ -271,16 +312,3 @@ def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_ze
         abnormal_returns=all_abnormal_returns,
         sample_size=sample_size
     )
-
-
-def signals_format(signals,project):
-    """
-    Returns signals in the needed format.
-    Accepts a column with the signals as boolean values and the projects name as a string
-    """
-    sign = pd.DataFrame(signals).tz_convert(None)
-    sign.columns = ['symbol']
-    sign = sign.replace(True, project)
-    events = sign[sign["symbol"] == project]
-
-    return events
