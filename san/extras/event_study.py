@@ -41,7 +41,8 @@ def remove_outliers(returns, num_std_devs):
 def get_returns(data, starting_point, sid, date, day_num):
     first_price = get_first_price(data, starting_point, sid, date)
     close_price = get_close_price(data, sid, date, day_num)
-
+    if first_price==0:
+        return 0
     return (close_price - first_price) / (first_price + 0.0)
 
 def calc_beta(stock, benchmark, price_history):
@@ -68,10 +69,10 @@ def calc_beta(stock, benchmark, price_history):
 def build_x_ticks(day_numbers):
     return [d for d in day_numbers if d % 2 == 0]
 
-def plot_cumulative_returns(returns, x_ticks, sample_size):
+def plot_cumulative_returns(returns, x_ticks,events):
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    returns.plot(xticks=x_ticks, label="N=%s" % sample_size)
+    returns.plot(xticks=x_ticks, label="events=%s" % events)
 
     pyplot.title("Cumulative Return from Events")
     pyplot.xlabel("Window Length (t)")
@@ -119,13 +120,13 @@ def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks):
     pyplot.legend()
 
 
-def plot_cumulative_return_with_errors(returns, std_devs, sample_size):
+def plot_cumulative_return_with_errors(returns, std_devs,events):
     """
     Plotting the same graph but with error bars
     """
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    pyplot.errorbar(returns.index, returns, xerr=0, yerr=std_devs, label=f"N={sample_size}")
+    pyplot.errorbar(returns.index, returns, xerr=0, yerr=std_devs, label="events=%s" % events)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
@@ -133,7 +134,7 @@ def plot_cumulative_return_with_errors(returns, std_devs, sample_size):
     pyplot.legend()
     pyplot.show()
 
-def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_returns, sample_size):
+def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_returns,events):
     """
     Capturing volatility of abnormal returns
     """
@@ -144,7 +145,7 @@ def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_re
         abnormal_returns,
         xerr=0,
         yerr=abnormal_volatility,
-        label=f"N={sample_size}"
+        label="events=%s" % events
     )
 
     pyplot.grid(b=None, which=u'major', axis=u'y')
@@ -180,6 +181,11 @@ def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchm
         if date not in data.index or sid not in data.columns:
                 continue
 
+        if sid=='ethereum' and benchmark=='ethereum':
+            benchmark='bitcoin'
+        elif sid=='bitcoin' and benchmark=='bitcoin':
+            benchmark='ethereum'
+
         project_return = get_returns(data, starting_point, sid, date, day_num)
         benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
 
@@ -192,26 +198,26 @@ def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchm
             continue
         abnormal_return = project_return - (beta * benchmark_return)
         abnormal_returns.append(abnormal_return)
-        
-        
+    return sample_size
+
 
 def compute_averages(ev_data,data,starting_point,day_numbers,
                      benchmark,all_returns,all_std_devs,
                      total_sample_size,all_benchmark_returns,
-                     abnormal_volatility,all_abnormal_returns): 
-    
+                     abnormal_volatility,all_abnormal_returns):
+
     """
     Computes the avegare returns and standards deviation of the events
     """
-        
+
     for day_num in day_numbers:
         returns = []
         benchmark_returns = []
         abnormal_returns = []
         sample_size = 0
 
-        compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchmark,returns,benchmark_returns,abnormal_returns)
-        
+        sample_size=compute_return_matrix(ev_data,data,sample_size,starting_point,
+                                          day_num,benchmark,returns,benchmark_returns,abnormal_returns)
         returns = pd.Series(returns).dropna()
         returns = remove_outliers(returns, 2)
 
@@ -228,8 +234,6 @@ def compute_averages(ev_data,data,starting_point,day_numbers,
 
 
 def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_zero=True):
-    if ev_data.symbol[ev_data.symbol == 'bitcoin'].count()!=0:
-         benchmark='ethereum'
 
     all_returns = {}
     all_std_devs = {}
@@ -243,7 +247,7 @@ def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_ze
                      benchmark,all_returns,all_std_devs,
                      total_sample_size,all_benchmark_returns,
                      abnormal_volatility,all_abnormal_returns)
-   
+
     plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_returns,
                     all_std_devs,abnormal_volatility,
                     total_sample_size,origin_zero)
@@ -257,9 +261,9 @@ def signals_format(signals,project):
     sign = pd.DataFrame(signals).tz_convert(None)
     sign.columns = ['symbol']
     sign = sign.replace(True, project)
-    events = sign[sign["symbol"] == project]
+    events_ = sign[sign["symbol"] == project]
 
-    return events
+    return events_
 
 def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_returns,all_std_devs,
                     abnormal_volatility,total_sample_size,origin_zero):
@@ -269,8 +273,7 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
     all_benchmark_returns = pd.Series(all_benchmark_returns)
     all_abnormal_returns = pd.Series(all_abnormal_returns)
     abnormal_volatility = pd.Series(abnormal_volatility)
-
-    sample_size = np.average(pd.Series(total_sample_size))
+    events = np.average(pd.Series(total_sample_size))
 
     if origin_zero==True:
         all_returns = all_returns - all_returns.loc[0]
@@ -281,13 +284,13 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
 
     all_std_devs.loc[:-1] = 0
     abnormal_volatility.loc[:-1] = 0
-    
+
     x_ticks = build_x_ticks(day_numbers)
 
     plot_cumulative_returns(
         returns=all_returns,
         x_ticks=x_ticks,
-        sample_size=sample_size
+        events=events
     )
 
     plot_average_returns(
@@ -304,11 +307,11 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
     plot_cumulative_return_with_errors(
         returns=all_returns,
         std_devs=all_std_devs,
-        sample_size=sample_size
+        events=events
     )
 
     plot_abnormal_cumulative_return_with_errors(
         abnormal_volatility=abnormal_volatility,
         abnormal_returns=all_abnormal_returns,
-        sample_size=sample_size
-    )
+        events=events
+	)
