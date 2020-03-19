@@ -59,13 +59,13 @@ _QUERY_MAPPING = {
         'query': 'tokenCirculation',
         'return_fields': ['datetime', 'tokenCirculation']
     },
-    'mvrv_ratio': {
-        'query': 'mvrvRatio',
-        'return_fields': ['datetime', 'ratio']
-    },
     'realized_value': {
         'query': 'realizedValue',
         'return_fields': ['datetime', 'realizedValue']
+    },
+    'mvrv_ratio': {
+        'query': 'mvrvRatio',
+        'return_fields': ['datetime', 'ratio']
     },
     'nvt_ratio': {
         'query': 'nvtRatio',
