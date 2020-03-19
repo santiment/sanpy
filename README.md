@@ -35,7 +35,6 @@ Santiment API python client.
     - [Exchange Funds Flow](#exchange-funds-flow)
     - [Social Volume Projects](#social-volume-projects)
     - [Social Volume](#social-volume)
-    - [Share of Deposits](#share-of-deposits)
     - [Gas Used](#gas-used)
     - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
@@ -833,34 +832,6 @@ datetime                   mentionsCount
 2019-08-02 18:00:00+00:00            212
 2019-08-03 00:00:00+00:00            229
 2019-08-03 06:00:00+00:00            225
-```
-
-### Share of Deposits
-
-Returns information for the shares of deposits that a given project has during the time interval.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "share_of_deposits/santiment",
-    from_date="2019-01-01T00:00:00Z",
-    to_date="2019-01-05T00:00:00Z",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           activeAddresses  activeDeposits  shareOfDeposits
-datetime
-2019-01-01 00:00:00+00:00                5               1        20.000000
-2019-01-02 00:00:00+00:00                2               0         0.000000
-2019-01-03 00:00:00+00:00               13               2        15.384615
-2019-01-04 00:00:00+00:00                8               2        25.000000
-2019-01-05 00:00:00+00:00                7               1        14.285714
-
 ```
 
 ### Gas Used

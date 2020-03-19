@@ -30,7 +30,6 @@ METRICS_EQUAL_FORMAT = [
     'mvrv_ratio',
     'nvt_ratio',
     'daily_active_deposits',
-    'share_of_deposits',
     'ohlc',
     'history_twitter_data',
     'exchange_funds_flow',
@@ -206,11 +205,6 @@ def test_nvt_ratio():
 @attr('integration')
 def test_daily_active_deposits():
     _test_ordinary_function('daily_active_deposits', 'dailyActiveDeposits')
-
-
-@attr('integration')
-def test_share_of_deposits():
-    _test_ordinary_function('share_of_deposits', 'shareOfDeposits')
 
 
 @attr('integration')
@@ -465,7 +459,6 @@ def test_available_metrics():
         'prices',
         'projects',
         'realized_value',
-        'share_of_deposits',
         'social_dominance',
         'social_volume',
         'social_volume_projects',
@@ -541,7 +534,15 @@ def test_available_metrics():
         'exchange_outflow',
         'exchange_balance',
         'age_destroyed',
-        'nvt'
+        'nvt',
+        'nvt_transaction_volume',
+        'network_growth',
+        'mean_dollar_invested_age',
+        'active_deposits',
+        'active_withdrawals',
+        'withdrawal_transactions',
+        'exchange_token_supply',
+        'percent_of_total_supply_on_exchanges'
         ]
 
     assert functions_list == san.available_metrics()
