@@ -64,6 +64,13 @@ V2_METRIC_QUERIES = [
       "exchange_outflow",
       "exchange_balance",
       "age_destroyed",
-      "nvt"
-
+      "nvt",
+      "nvt_transaction_volume",
+      "network_growth",
+      "mean_dollar_invested_age",
+      "active_deposits",
+      "active_withdrawals",
+      "withdrawal_transactions",
+      "exchange_token_supply",
+      "percent_of_total_supply_on_exchanges"
 ]

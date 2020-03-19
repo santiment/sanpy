@@ -15,6 +15,11 @@ List of with metrics with 1 day minimal resolution:
 - daily_opening_price_usd
 - daily_trading_volume_usd
 - daily_active_addresses
+- active_deposits
+- active_withdrawals
+- withdrawal_transactions
+- exchange_token_supply
+- percent_of_total_supply_on_exchanges
 
 ### Realized Price
 
@@ -102,6 +107,15 @@ List of with metrics with 1 day minimal resolution:
 ### NVT
 
 - nvt
+- nvt_transaction_volume
+
+### Network Growth
+
+- network_growth
+
+### Mean Dollar Invested Age
+
+- mean_dollar_invested_age
 
 List of metrics with 5 minutes minimal resolution:
 
