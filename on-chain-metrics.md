@@ -18,8 +18,9 @@ List of with metrics with 1 day minimal resolution:
 - active_deposits
 - active_withdrawals
 - withdrawal_transactions
-- exchange_token_supply
+- supply_on_exchanges
 - percent_of_total_supply_on_exchanges
+- amount_in_top_holders
 
 ### Realized Price
 

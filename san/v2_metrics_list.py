@@ -71,6 +71,7 @@ V2_METRIC_QUERIES = [
       "active_deposits",
       "active_withdrawals",
       "withdrawal_transactions",
-      "exchange_token_supply",
-      "percent_of_total_supply_on_exchanges"
+      "supply_on_exchanges",
+      "percent_of_total_supply_on_exchanges",
+      "amount_in_top_holders"
 ]
