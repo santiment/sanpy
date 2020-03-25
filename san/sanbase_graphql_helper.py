@@ -61,7 +61,7 @@ _QUERY_MAPPING = {
     },
     'realized_value': {
         'query': 'realizedValue',
-        'return_fields': ['datetime', 'nonExchangeRealizedValue', 'realizedValue']
+        'return_fields': ['datetime', 'realizedValue']
     },
     'mvrv_ratio': {
         'query': 'mvrvRatio',
@@ -74,10 +74,6 @@ _QUERY_MAPPING = {
     'daily_active_deposits': {
         'query': 'dailyActiveDeposits',
         'return_fields': ['datetime', 'activeDeposits']
-    },
-    'share_of_deposits': {
-        'query': 'shareOfDeposits',
-        'return_fields': ['activeAddresses', 'activeDeposits', 'datetime', 'shareOfDeposits']
     },
     'gas_used': {
         'query': 'gasUsed',

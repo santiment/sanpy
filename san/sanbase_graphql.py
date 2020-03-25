@@ -86,12 +86,6 @@ def daily_active_deposits(idx, slug, **kwargs):
     return query_str
 
 
-def share_of_deposits(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('share_of_deposits', idx, slug, **kwargs)
-
-    return query_str
-
-
 def ohlc(idx, slug, **kwargs):
     query_str = sgh.create_query_str('ohlc', idx, slug, **kwargs)
 
