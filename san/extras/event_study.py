@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as pyplot
 from datetime import timedelta
+from scipy import stats
+
 
 """
 Event study to  evaluate events or signals.
@@ -58,12 +60,11 @@ def calc_beta(stock, benchmark, price_history):
     stock_prices = np.array(stock_prices.values)
     bench_prices = np.reshape(bench_prices,len(bench_prices))
     stock_prices = np.reshape(stock_prices,len(stock_prices))
-
     if len(stock_prices) == 0:
         return None
-
-    market_beta, benchmark_beta = np.polyfit(bench_prices, stock_prices, 1)
-    return market_beta
+#    market_beta, benchmark_beta = np.polyfit(bench_prices, stock_prices, 1)
+    slope,intercept,r_value,p_value,stderr = stats.linregress(bench_prices,stock_prices)
+    return slope
 
 
 def build_x_ticks(day_numbers):
@@ -162,17 +163,24 @@ def build_day_numbers(starting_point):
     """
     return [i for i in range(-starting_point, starting_point)]
 
-def get_price_history(data,date,starting_point,sid,benchmark):
+def get_price_history(data,date,beta_window,sid,benchmark):
     """
     Create a DataFrame containing the data for the necessary sids within that time frame
     """
+    if beta_window==None:
+        history_index = data.index.searchsorted(date)
+        history_index_start = data.index.searchsorted(data[data[sid]!=0].index[0])
+        histotical_prices=data.iloc[history_index_start:history_index][[sid, benchmark]]
+    else:
+        history_index = data.index.searchsorted(date)
+        history_index_start = max([history_index - beta_window, 0])
+        histotical_prices=data.iloc[history_index_start:history_index][[sid, benchmark]]
+        histotical_prices=histotical_prices[histotical_prices[sid]!=0]
+    return histotical_prices[histotical_prices!=0].dropna()
 
-    history_index = data.index.searchsorted(date)
-    history_index_start = max([history_index - starting_point, 0])
-    return data.iloc[history_index_start:history_index][[sid, benchmark]]
 
-
-def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchmark,returns,benchmark_returns,abnormal_returns):
+def compute_return_matrix(ev_data,data,sample_size,starting_point,
+                          day_num,benchmark,returns,benchmark_returns,abnormal_returns,beta_window):
     """
     Computes the returns for the project, benchmark and abnormal
     """
@@ -180,12 +188,12 @@ def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchm
         sid = row.symbol
         if date not in data.index or sid not in data.columns:
                 continue
-
+		
         if sid=='ethereum' and benchmark=='ethereum':
             benchmark='bitcoin'
         elif sid=='bitcoin' and benchmark=='bitcoin':
             benchmark='ethereum'
-
+		
         project_return = get_returns(data, starting_point, sid, date, day_num)
         benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
 
@@ -193,23 +201,23 @@ def compute_return_matrix(ev_data,data,sample_size,starting_point,day_num,benchm
         benchmark_returns.append(benchmark_return)
         sample_size += 1
 
-        beta = calc_beta(sid, benchmark, get_price_history(data,date,starting_point,sid,benchmark))
+        beta = calc_beta(sid, benchmark, get_price_history(data,date,beta_window,sid,benchmark))
         if beta is None:
             continue
         abnormal_return = project_return - (beta * benchmark_return)
         abnormal_returns.append(abnormal_return)
-    return sample_size
-
+    return sample_size     
+        
 
 def compute_averages(ev_data,data,starting_point,day_numbers,
                      benchmark,all_returns,all_std_devs,
                      total_sample_size,all_benchmark_returns,
-                     abnormal_volatility,all_abnormal_returns):
-
+                     abnormal_volatility,all_abnormal_returns,beta_window): 
+    
     """
     Computes the avegare returns and standards deviation of the events
     """
-
+        
     for day_num in day_numbers:
         returns = []
         benchmark_returns = []
@@ -217,7 +225,7 @@ def compute_averages(ev_data,data,starting_point,day_numbers,
         sample_size = 0
 
         sample_size=compute_return_matrix(ev_data,data,sample_size,starting_point,
-                                          day_num,benchmark,returns,benchmark_returns,abnormal_returns)
+                                          day_num,benchmark,returns,benchmark_returns,abnormal_returns,beta_window)
         returns = pd.Series(returns).dropna()
         returns = remove_outliers(returns, 2)
 
@@ -231,10 +239,37 @@ def compute_averages(ev_data,data,starting_point,day_numbers,
 
         abnormal_volatility[day_num] = np.std(abnormal_returns)
         all_abnormal_returns[day_num] = np.average(abnormal_returns)
+        
+        
+def clean_data(data, events, starting_point):
+    """
+    Cleans signals that does not have enough pricing data
+    """
+    events_df=events.copy(deep=True)
+    events_df['in_pricesdf']=0
+    id=0
+    
+    for date, row in events_df.iterrows():
+        sid = row.symbol
+        if date not in data.index or sid not in data.columns:
+            events_df.iloc[id,-1]=1
+            id=id+1
+            continue
+        event_day= data.index.searchsorted(date)
+        hist_index_start = event_day - starting_point
+        hist_index_end = event_day + starting_point
+        event_window=data.iloc[hist_index_start:hist_index_end][[sid]]
+        if event_window.min()[0]==0 or len(event_window)==0:
+            events_df.iloc[id,-1]=1
+        id=id+1
+    return events_df[events_df['in_pricesdf']==0]    
+        
 
 
-def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_zero=True):
-
+def event_study(data, events, starting_point=30, benchmark='bitcoin', origin_zero=True,beta_window=None):
+    
+    ev_data=clean_data(data, events, starting_point)
+    
     all_returns = {}
     all_std_devs = {}
     all_benchmark_returns = {}
@@ -246,12 +281,11 @@ def event_study(data, ev_data, starting_point=30, benchmark='bitcoin', origin_ze
     compute_averages(ev_data,data,starting_point,day_numbers,
                      benchmark,all_returns,all_std_devs,
                      total_sample_size,all_benchmark_returns,
-                     abnormal_volatility,all_abnormal_returns)
-
+                     abnormal_volatility,all_abnormal_returns,beta_window)
+   
     plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_returns,
                     all_std_devs,abnormal_volatility,
                     total_sample_size,origin_zero)
-
 
 def signals_format(signals,project):
     """
@@ -274,7 +308,7 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
     all_abnormal_returns = pd.Series(all_abnormal_returns)
     abnormal_volatility = pd.Series(abnormal_volatility)
     events = np.average(pd.Series(total_sample_size))
-
+    
     if origin_zero==True:
         all_returns = all_returns - all_returns.loc[0]
         all_benchmark_returns = all_benchmark_returns - all_benchmark_returns.loc[0]
@@ -284,7 +318,7 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
 
     all_std_devs.loc[:-1] = 0
     abnormal_volatility.loc[:-1] = 0
-
+    
     x_ticks = build_x_ticks(day_numbers)
 
     plot_cumulative_returns(
@@ -313,5 +347,4 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
     plot_abnormal_cumulative_return_with_errors(
         abnormal_volatility=abnormal_volatility,
         abnormal_returns=all_abnormal_returns,
-        events=events
-	)
+        events=events)
