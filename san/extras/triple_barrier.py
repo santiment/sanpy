@@ -2,12 +2,6 @@ import pandas as pd
 import mlfinlab as ml
 import matplotlib.pyplot as plt
 
-def fetch_price(slugs, from_timestamp, to_timestamp, interval):
-    # sanpy? x
-    prices = lib.closing_price_many(from_timestamp, to_timestamp, slugs, interval=interval)
-    prices = prices.fillna(0)
-    return prices
-
 
 def get_labels_df(prices, signals, days, pt_sl, min_ret, lookback):
     daily_vol = ml.util.get_daily_vol(close=prices, lookback=lookback)
@@ -25,12 +19,7 @@ def get_labels_df(prices, signals, days, pt_sl, min_ret, lookback):
     return labels
 
 
-def evaluate(signals, pt_sl = [1, 2],min_ret = 0.005, num_days = 5, lookback=50, interval='1d'):
-
-    slugs = list(set(signals.slug)) + ["bitcoin"]
-    from_timestamp= signals.index[0] - pd.Timedelta(lookback, unit='d')
-    to_timestamp=signals.index[-1]
-    prices=fetch_price(slugs, from_timestamp, to_timestamp, interval=interval)
+def evaluate(prices, signals, pt_sl = [1, 2],min_ret = 0.005, num_days = 5, lookback=50, interval='1d'):
 
     labels = pd.DataFrame()
     slugs = signals.slug.unique()
@@ -67,12 +56,9 @@ def plot_rectangle(ax1, project_prices, labels, color, side, num_days, pt_sl, al
     
 
 
-def plot(labels,pt_sl = [1, 2], num_days=5, lookback=50):
+def plot(prices, labels,pt_sl = [1, 2], num_days=5, lookback=50):
     
     slug=labels['slug'][0]
-    from_timestamp= labels.index[0] - pd.Timedelta(lookback, unit='d')
-    to_timestamp=labels.index[-1]+ pd.Timedelta(num_days, unit='d')
-    prices=fetch_price([slug], from_timestamp.strftime("%Y-%m-%d"), to_timestamp.strftime("%Y-%m-%d"), interval=interval)
     project_prices = prices[slug]
     plt.rcParams["figure.figsize"] = (20,3)
     fig = plt.figure()
