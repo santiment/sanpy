@@ -24,6 +24,6 @@ setuptools.setup(
         'setuptools'
     ],
     extras_require={
-        "extras":  ["numpy", "matplotlib"]
+        "extras":  ["numpy", "matplotlib", "mlfinlab"]
     }
 )
