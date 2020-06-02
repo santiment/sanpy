@@ -25,7 +25,7 @@ def evaluate(prices, signals, pt_sl = [1, 2],min_ret = 0.005, num_days = 5, look
     slugs = signals.slug.unique()
     for slug in slugs:
         try:
-            project_signals=signals[signals['slug']==slug].index
+            project_signals=signals[signals['slug']==slug].index.tz_localize('UTC')
             project_prices = prices[slug]
             label_project= get_labels_df(project_prices, project_signals, pt_sl=pt_sl, min_ret=min_ret, days=num_days, lookback=lookback)
             label_project['slug']=slug
