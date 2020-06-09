@@ -108,7 +108,6 @@ V2_METRIC_QUERIES = [
       "bitmex_perpetual_funding_rate",
       "stock_to_flow",
       "dev_activity_change_30d",
-      "dev_activity",
       "active_addresses_24h_change_30d",
       "active_addresses_24h_change_7d",
       "active_addresses_24h_change_1d",
