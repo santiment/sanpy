@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 
@@ -18,6 +19,12 @@ def month_ago():
 
 
 class TestResponse:
+    def __await__(self, *args, **kwargs):
+        future = asyncio.Future()
+        future.set_result(self)
+        result = yield from future
+        return result
+    
     def __init__(self, **kwargs):
         self.status_code = kwargs['status_code']
         if 'errors' in kwargs['data']:

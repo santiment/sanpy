@@ -1,3 +1,4 @@
+import asyncio
 import san.sanbase_graphql
 from san.query import get_gql_query
 from san.graphql import execute_gql
@@ -14,8 +15,14 @@ class Batch:
         self.queries.append([dataset, kwargs])
 
     def execute(self):
+        try:
+            return asyncio.run(self.execute_async())
+        except RuntimeError:
+            return asyncio.get_event_loop().create_task(self.execute_async())
+
+    async def execute_async(self):
         graphql_string = self.__create_batched_query_string()
-        result = execute_gql(graphql_string)
+        result = await execute_gql(graphql_string)
         return self.__transform_batch_result(result)
 
     def __create_batched_query_string(self):

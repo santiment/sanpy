@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'pandas',
-        'requests',
+        'httpx',
         'iso8601',
         'setuptools'
     ],
