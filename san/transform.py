@@ -8,7 +8,7 @@ from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 from collections import OrderedDict
 from san.graphql import execute_gql
-from san.v2_metrics_list import V2_METRIC_QUERIES
+from san.sanbase_graphql_helper import QUERY_MAPPING
 
 QUERY_PATH_MAP = {
     'eth_top_transactions': ['ethTopTransactions'],
@@ -20,7 +20,8 @@ QUERY_PATH_MAP = {
 
 def path_to_data(idx, query, data):
     """
-    With this function we jump straight onto the key from the dataframe, that we want and start from there. We use our future starting points from the QUERY_PATH_MAP.
+    With this function we jump straight onto the key from the dataframe,
+    that we want and start from there. We use our future starting points from the QUERY_PATH_MAP.
     """
     return reduce(
         operator.getitem, [
@@ -34,10 +35,10 @@ def transform_query_result(idx, query, data):
     """
     if query in QUERY_PATH_MAP:
         result = path_to_data(idx, query, data)
-    elif query in V2_METRIC_QUERIES:
-        result = path_to_data(idx, 'get_metric', data)
-    else:
+    elif query in QUERY_MAPPING:
         result = data['query_' + str(idx)]
+    else:
+        result = path_to_data(idx, 'get_metric', data)
 
     if query + '_transform' in globals():
         result = globals()[query + '_transform'](result)

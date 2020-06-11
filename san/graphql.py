@@ -38,6 +38,14 @@ def __handle_success_response__(response, gql_query_str):
                 gql_query_str))
 
 
+def get_all_available_metrics():
+    response = requests.post(
+        SANBASE_GQL_HOST,
+        json={'query': '{ getAvailableMetrics }'})
+
+    return response.json()['data']['getAvailableMetrics']
+
+
 def __result_has_gql_errors__(response):
     return 'errors' in response.json().keys()
 
