@@ -16,7 +16,10 @@ DEPRECATED_QUERIES = {
     'token_circulation': 'circulation_1d',
     'burn_rate': 'age_destroyed',
     'token_age_consumed': 'age_destroyed',
-    'token_velocity': 'velocity'
+    'token_velocity': 'velocity',
+    'daily_active_deposits': 'active_deposits',
+    'social_volume': 'social_volume_{source}',
+    'social_dominance': 'social_dominance_{source}'
 }
 
 

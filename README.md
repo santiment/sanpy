@@ -189,6 +189,13 @@ Getting all of the metrics as a list is done, using the following code:
 san.available_metrics()
 ```
 
+Getting all of the metrics for a given slug is achieved with the following code
+
+
+```python
+san.available_metrics_for_slug('santiment')
+```
+
 Below are described some available metrics and are given examples for fetching and for the returned format.
 
 ### All Projects
@@ -284,7 +291,7 @@ san.get(
 ```
 
 ```
-                          newAddresses
+                                 value
 datetime
 2018-12-01 00:00:00+00:00            3
 2018-12-02 00:00:00+00:00            2
@@ -619,7 +626,7 @@ san.get(
 Example result:
 
 ```
-                           activity
+                              value
 datetime
 2018-05-02 00:00:00+00:00        29
 2018-05-03 00:00:00+00:00         9

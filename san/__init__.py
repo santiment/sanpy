@@ -1,7 +1,6 @@
 from .get import get
 from .metadata import metadata
-from .slug_metrics import slug_metrics
-from .available_metrics import available_metrics
+from .available_metrics import available_metrics, available_metrics_for_slug
 from .batch import Batch
 from .api_config import ApiConfig
 import pkg_resources

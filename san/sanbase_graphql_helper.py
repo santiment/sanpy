@@ -19,21 +19,6 @@ QUERY_MAPPING = {
         'query': 'averageTokenAgeConsumedInDays',
         'return_fields': ['datetime', 'tokenAge']
     },
-    'github_activity': {
-        'query': 'githubActivity',
-        'return_fields': ['datetime', 'activity']
-    },
-    # OLD
-    'dev_activity': {
-        'query': 'devActivity',
-        'return_fields': ['datetime', 'activity']
-    },
-    # OLD
-    'network_growth': {
-        'query': 'networkGrowth',
-        'return_fields': ['datetime', 'newAddresses']
-    },
-    # OLD
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']

@@ -14,13 +14,19 @@ List of with metrics with 1 day minimal resolution:
 - daily_low_price_usd
 - daily_opening_price_usd
 - daily_trading_volume_usd
+
+### Daily Active Addresses
+
 - daily_active_addresses
+
+### Exchanges
+
 - active_deposits
 - active_withdrawals
 - withdrawal_transactions
-- supply_on_exchanges
-- percent_of_total_supply_on_exchanges
-- amount_in_top_holders
+- exchange_inflow
+- exchange_outflow
+- exchange_balance
 
 ### Realized Price
 
@@ -83,12 +89,6 @@ List of with metrics with 1 day minimal resolution:
 - circulation_7d
 - circulation_1d
 
-### Exchange Metrics
-
-- exchange_inflow
-- exchange_outflow
-- exchange_balance
-
 ### Mean Age
 
 - mean_age
@@ -126,74 +126,96 @@ List of metrics with 5 minutes minimal resolution:
 - exchange_outflow
 - exchange_balance
 
+### Social Volume
+
+- social_volume_telegram
+- social_volume_reddit
+- social_volume_bitcointalk
+- social_volume_twitter
+- social_volume_discord
+- social_volume_professional_traders_chat
+- social_volume_total
+
+### Social Dominance
+
+- social_dominance_telegram
+- social_dominance_reddit
+- social_dominance_bitcointalk
+- social_dominance_twitter
+- social_dominance_discord
+- social_dominance_professional_traders_chat
+- social_dominance_total
+
 ### Sentiment
 
-- sentiment_volume_consumed_telegram,
-- sentiment_volume_consumed_reddit,
-- sentiment_volume_consumed_bitcointalk,
-- sentiment_volume_consumed_twitter,
-- sentiment_volume_consumed_discord,
-- sentiment_volume_consumed_professional_traders_chat,
-- sentiment_volume_consumed_total,
-- sentiment_positive_telegram,
-- sentiment_positive_reddit,
-- sentiment_positive_bitcointalk,
-- sentiment_positive_twitter,
-- sentiment_positive_discord,
-- sentiment_positive_professional_traders_chat,
-- sentiment_positive_total,
-- sentiment_negative_telegram,
-- sentiment_negative_reddit,
-- sentiment_negative_bitcointalk,
-- sentiment_negative_twitter,
-- sentiment_negative_discord,
-- sentiment_negative_professional_traders_chat,
-- sentiment_negative_total,
-- sentiment_balance_telegram,
-- sentiment_balance_reddit,
-- sentiment_balance_bitcointalk,
-- sentiment_balance_twitter,
-- sentiment_balance_discord,
-- sentiment_balance_professional_traders_chat,
+- sentiment_volume_consumed_telegram
+- sentiment_volume_consumed_reddit
+- sentiment_volume_consumed_bitcointalk
+- sentiment_volume_consumed_twitter
+- sentiment_volume_consumed_discord
+- sentiment_volume_consumed_professional_traders_chat
+- sentiment_volume_consumed_total
+- sentiment_positive_telegram
+- sentiment_positive_reddit
+- sentiment_positive_bitcointalk
+- sentiment_positive_twitter
+- sentiment_positive_discord
+- sentiment_positive_professional_traders_chat
+- sentiment_positive_total
+- sentiment_negative_telegram
+- sentiment_negative_reddit
+- sentiment_negative_bitcointalk
+- sentiment_negative_twitter
+- sentiment_negative_discord
+- sentiment_negative_professional_traders_chat
+- sentiment_negative_total
+- sentiment_balance_telegram
+- sentiment_balance_reddit
+- sentiment_balance_bitcointalk
+- sentiment_balance_twitter
+- sentiment_balance_discord
+- sentiment_balance_professional_traders_chat
 - sentiment_balance_total
 
-### Bitmex
+### Derivatives
 
-- bitmex_perpetual_open_value,
-- bitmex_perpetual_open_interest,
-- bitmex_perpetual_basis,
+- bitmex_perpetual_open_value
+- bitmex_perpetual_open_interest
+- bitmex_perpetual_basis
 - bitmex_perpetual_funding_rate
 
-# Change Over Time
+### Change Over Time
 
-- dev_activity_change_30d,
-- active_addresses_24h_change_30d,
-- active_addresses_24h_change_7d,
-- active_addresses_24h_change_1d,
-- price_usd_change_30d,
-- price_usd_change_7d,
-- price_usd_change_1d,
-- volume_usd_change_30d,
-- volume_usd_change_7d,
+- dev_activity_change_30d
+- active_addresses_24h_change_30d
+- active_addresses_24h_change_7d
+- active_addresses_24h_change_1d
+- price_usd_change_30d
+- price_usd_change_7d
+- price_usd_change_1d
+- volume_usd_change_30d
+- volume_usd_change_7d
 - volume_usd_change_1d
 
-### Dev Activity
+### Github/Dev Activity
 
+- github_activity
+- github_activity_contributors_count
 - dev_activity
+- dev_activity_contributors_count
+- dev_activity_change_30d
 
 ### Stock to Flow
 
 - stock_to_flow
 
-### Supply Outside Exchanges
+### Supply On/Outside Exchanges
 
 - supply_outside_exchanges
+- supply_on_exchanges
+- percent_of_total_supply_on_exchanges
 
-### Amount in Top Holders
-
-- amount_in_top_holders
-
-### Maker Dao
+### MakerDAO
 
 - mcd_locked_token
 - scd_locked_token
@@ -210,6 +232,9 @@ List of metrics with 5 minutes minimal resolution:
 
 ### Holders Metrics
 
+- amount_in_top_holders
+- amount_in_exchange_top_holders
+- amount_in_non_exchange_top_holders
 - holders_distribution_0_to_0.001
 - holders_distribution_0.001_to_0.01
 - holders_distribution_0.01_to_0.1

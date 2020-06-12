@@ -1,5 +1,5 @@
 import san
-from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics
+from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics, available_metrics_for_slug
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
 from nose.plugins.attrib import attr
 
@@ -432,6 +432,6 @@ def test_metadata():
 
 @attr('integration')
 def test_slug_metrics():
-    result = san.slug_metrics('santiment')
+    result = san.available_metrics_for_slug('santiment')
 
     assert len(result) != 0

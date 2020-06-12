@@ -26,24 +26,6 @@ def average_token_age_consumed_in_days(idx, slug, **kwargs):
     return query_str
 
 
-def github_activity(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('github_activity', idx, slug, **kwargs)
-
-    return query_str
-
-
-def dev_activity(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('dev_activity', idx, slug, **kwargs)
-
-    return query_str
-
-
-def network_growth(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('network_growth', idx, slug, **kwargs)
-
-    return query_str
-
-
 def prices(idx, slug, **kwargs):
     query_str = sgh.create_query_str('prices', idx, slug, **kwargs)
 
@@ -351,7 +333,9 @@ def ohlcv(idx, slug, **kwargs):
     )
     [price_df, ohlc_df] = batch.execute()
     merged = san.pandas_utils.merge(price_df, ohlc_df)
-    return merged[return_fields]
+    if merged.size != 0:
+        return merged[return_fields]
+    return merged
 
 
 def get_metric(idx, metric, slug, **kwargs):
