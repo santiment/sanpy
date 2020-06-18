@@ -348,3 +348,162 @@ def plotting_events(day_numbers,all_returns,all_benchmark_returns,all_abnormal_r
         abnormal_volatility=abnormal_volatility,
         abnormal_returns=all_abnormal_returns,
         events=events)
+
+def calc_beta_testing(stock, benchmark, price_history):
+    """
+    Calculate beta and alpha amounts for each security
+    """
+    #stock_prices = price_history[stock].pct_change().dropna()
+    stock_prices=np.log(1+price_history[stock].pct_change().dropna())
+    #bench_prices = price_history[benchmark].pct_change().dropna()
+    bench_prices=np.log(1+price_history[benchmark].pct_change().dropna())
+    aligned_prices = bench_prices.align(stock_prices, join='inner')
+    bench_prices = aligned_prices[0]
+    stock_prices = aligned_prices[1]
+    bench_prices = np.array(bench_prices.values)
+    stock_prices = np.array(stock_prices.values)
+    bench_prices = np.reshape(bench_prices,len(bench_prices))
+    stock_prices = np.reshape(stock_prices,len(stock_prices))
+
+    if len(stock_prices) == 0:
+        return None
+#    market_beta, benchmark_beta = np.polyfit(bench_prices, stock_prices, 1)
+    slope,intercept,r_value,p_value,stderr = stats.linregress(bench_prices,stock_prices)
+    return slope, intercept
+
+def compute_beta_alpha(data,ev_data,starting_point,benchmark):
+    """
+    Includes beta and alpha in the event dataframe
+    """
+    betas_df=ev_data.copy(deep=True)
+    betas_df['beta']=0
+    betas_df['alpha']=0
+    id=0
+    for date, row in betas_df.iterrows():
+            sid = row.symbol
+            if date not in data.index or sid not in data.columns:
+                    continue
+            if sid=='ethereum' and benchmark=='ethereum':
+                benchmark='bitcoin'
+            elif sid=='bitcoin' and benchmark=='bitcoin':
+                benchmark='ethereum'
+            beta, alpha = calc_beta_testing(sid, benchmark, get_price_history(data,date,starting_point,sid,benchmark))
+            betas_df.iloc[id,-2]=beta
+            betas_df.iloc[id,-1]=alpha
+            id=id+1 
+    return betas_df.reset_index()
+
+def calculate_ab_returns(returns_df,betas_df,intercept,benchmark):
+    """
+    Calculate abnormal returns for every project
+    """
+    ab_returns=pd.DataFrame()
+    for number, dta in betas_df.iterrows():
+        sid=dta.symbol
+        ind=number
+        alpha=dta.alpha
+        beta=dta.beta
+        if intercept==False:
+            ab_returns[ind]=returns_df[sid]-beta*returns_df[benchmark]
+        else:
+            ab_returns[ind]=returns_df[sid]-(alpha+beta*returns_df[benchmark]) 
+    return ab_returns.dropna()
+
+def ab_returns_matrix(ab_returns,betas_df,starting_point):
+    """
+    Maps the abnormal returns for every event
+    """    
+    abnormal_returns_df=ab_returns.reset_index()
+    new_sample = {}
+    for number, dta in betas_df.iterrows():
+        eventdate=dta.datetime
+        sid=number
+        # find specific event row, look where Date is equal to event_date
+        row = abnormal_returns_df.loc[abnormal_returns_df['datetime'] == eventdate]
+        # get index of row
+        index = row.index[0]
+        # select starting_point plus and starting_point minus around that row
+        my_sample = abnormal_returns_df.loc[(index - starting_point):(index + starting_point), sid].reset_index(drop=True)
+        # add to new set
+        new_sample[number] = my_sample
+    return new_sample
+
+def calculate_stats(new_sample,starting_point):
+    """
+    Calculates t statistics for AARs and CAARs
+    """    
+    ev = pd.DataFrame(new_sample)
+    ev.index = ev.index - starting_point
+
+    # Calulate CARs
+    ev_cumulative=ev.cumsum()
+
+    # Calculate t statistics for AARs
+    mean_AR = ev.mean(axis = 1)
+    std_AR = ev.std(axis = 1)
+    results = pd.DataFrame(mean_AR, columns=['AAR'])
+    #results['STD AR'] = std_AR
+    results['t-AAR'] = mean_AR / std_AR
+    results['P-Value t-AAR'] = stats.norm.cdf(results['t-AAR'])
+
+    # Calculate t statistics for CAARs
+    mean_CAR = ev_cumulative.mean(axis = 1)
+    std_CAR = ev_cumulative.std(axis = 1)
+    results['CAAR'] = mean_CAR
+    #results['STD CAR'] = std_CAR
+    results['t-CAAR'] = mean_CAR / std_CAR
+    results['P-Value t-CAAR'] = stats.norm.cdf(results['t-CAAR'])
+
+    return results
+
+def plot_ARR_CAAR(results):
+    fig,ax = pyplot.subplots(figsize=FIGURE_SIZE)
+    ax.set_title('ARS vs CARS',fontsize=20)
+    ax.plot(results.index, results['AAR'], color="red", marker="o")
+    ax.set_xlabel("Days",fontsize=14)
+    ax.set_ylabel("AAR",color="red",fontsize=14)
+    ax2=ax.twinx()
+    ax2.plot(results.index, results['CAAR'],color="blue",marker="o")
+    ax2.set_ylabel("CAAR",color="blue",fontsize=14)
+    pyplot.show()
+
+    
+def plot_CI(tstats,pvalues,CI):
+    c = stats.norm().isf((1-CI)/2)
+    fig, ax = pyplot.subplots(nrows=2,figsize=FIGURE_SIZE)
+    ax[0].set_title(tstats.name+' Statistic',fontsize=20)
+    ax[1].set_title('P-Values ',fontsize=20)
+    tstats.plot(ax=ax[0],label=tstats.name)
+    ax[0].axhline(y=c,linestyle='--',color='red',alpha=.9,label='Significance Line')
+    ax[0].axhline(y=-c,linestyle='--',color='red',alpha=.9)
+    ax[0].legend()
+    ax[1].bar(pvalues.index, pvalues,label=pvalues.name)
+    ax[1].axhline(y=(1-CI)/2,linestyle='--',color='red',alpha=.9,label='Significance Line')
+    ax[1].legend()
+    
+def get_log_returns(data):
+    # Get arithmetic returns
+    arithmetic_returns=data.pct_change()
+    # Transform to log returns
+    arithmetic_returns=1+arithmetic_returns
+    returns_array = np.log(arithmetic_returns, out=np.zeros_like(arithmetic_returns), where=(arithmetic_returns!=0))
+    return pd.DataFrame(returns_array,index=data.index,columns=data.columns).fillna(0)  
+    
+def hypothesis_test(data,ev_data,starting_point,benchmark='ethereum',intercept=True,CI=.95):
+    # Drops events with no pricing data
+    cleaned_events=clean_data(data, ev_data, starting_point)
+    # Call function to calculate betas for events
+    betas_df=compute_beta_alpha(data,cleaned_events,starting_point,benchmark)
+    # Get log returns
+    returns_df=get_log_returns(data)        
+    # Calculate abnormal returns 
+    ab_returns=calculate_ab_returns(returns_df,betas_df,intercept,benchmark)
+    # Maps the abnorml returns for every event
+    new_sample=ab_returns_matrix(ab_returns,betas_df,starting_point)
+    # Calculate Statistics
+    results=calculate_stats(new_sample,starting_point)
+    display(results)
+    # Plotting Functions
+    plot_ARR_CAAR(results)
+    plot_CI(results['t-AAR'],results['P-Value t-AAR'],CI)
+    plot_CI(results['t-CAAR'],results['P-Value t-CAAR'],CI)
