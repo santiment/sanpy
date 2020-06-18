@@ -6,11 +6,7 @@ _DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
 _DEFAULT_SOURCE = 'TELEGRAM'
 _DEFAULT_SEARCH_TEXT = ''
 
-_QUERY_MAPPING = {
-    'daily_active_addresses': {
-        'query': 'dailyActiveAddresses',
-        'return_fields': ['datetime', 'activeAddresses']
-    },
+QUERY_MAPPING = {
     'burn_rate': {  # to be removed
         'query': 'burnRate',
         'return_fields': ['datetime', 'burnRate']
@@ -22,22 +18,6 @@ _QUERY_MAPPING = {
     'average_token_age_consumed_in_days': {
         'query': 'averageTokenAgeConsumedInDays',
         'return_fields': ['datetime', 'tokenAge']
-    },
-    'transaction_volume': {
-        'query': 'transactionVolume',
-        'return_fields': ['datetime', 'transactionVolume']
-    },
-    'github_activity': {
-        'query': 'githubActivity',
-        'return_fields': ['datetime', 'activity']
-    },
-    'dev_activity': {
-        'query': 'devActivity',
-        'return_fields': ['datetime', 'activity']
-    },
-    'network_growth': {
-        'query': 'networkGrowth',
-        'return_fields': ['datetime', 'newAddresses']
     },
     'prices': {
         'query': 'historyPrice',
@@ -51,26 +31,32 @@ _QUERY_MAPPING = {
         'query': 'exchangeFundsFlow',
         'return_fields': ['datetime', 'inOutDifference']
     },
+    # OLD
     'token_velocity': {
         'query': 'tokenVelocity',
         'return_fields': ['datetime', 'tokenVelocity']
     },
+    # OLD
     'token_circulation': {
         'query': 'tokenCirculation',
         'return_fields': ['datetime', 'tokenCirculation']
     },
+    # OLD
     'realized_value': {
         'query': 'realizedValue',
         'return_fields': ['datetime', 'realizedValue']
     },
+    # OLD
     'mvrv_ratio': {
         'query': 'mvrvRatio',
         'return_fields': ['datetime', 'ratio']
     },
+    # OLD
     'nvt_ratio': {
         'query': 'nvtRatio',
         'return_fields': ['datetime', 'nvtRatioCirculation', 'nvtRatioTxVolume']
     },
+    # OLD
     'daily_active_deposits': {
         'query': 'dailyActiveDeposits',
         'return_fields': ['datetime', 'activeDeposits']
@@ -95,6 +81,7 @@ _QUERY_MAPPING = {
         'query': 'historicalBalance',
         'return_fields': ['datetime', 'balance']
     },
+    # OLD
     'social_dominance': {
         'query': 'socialDominance',
         'return_fields': ['datetime', 'dominance']
@@ -166,6 +153,7 @@ _QUERY_MAPPING = {
             'volumeChange'
         ]
     },
+    # OLD
     'social_volume': {
         'query': 'socialVolume',
         'return_fields': [
@@ -186,7 +174,8 @@ _QUERY_MAPPING = {
             'datetime',
             ('topWords', ['score', 'word'])
         ]
-    }
+    },
+    'social_volume_projects': {}
 }
 
 
@@ -222,7 +211,7 @@ def create_query_str(query, idx, slug, **kwargs):
     ){{
     """ +  ' '.join(kwargs['return_fields']) + '}}'
     ).format(
-        query=_QUERY_MAPPING[query]['query'],
+        query=QUERY_MAPPING[query]['query'],
         idx=idx,
         slug=slug,
         **kwargs
@@ -246,7 +235,7 @@ def transform_query_args(query, **kwargs):
     if 'return_fields' in kwargs:
         kwargs['return_fields'] = _format_all_return_fields(kwargs['return_fields'])
     else:
-        kwargs['return_fields'] = _format_all_return_fields(_QUERY_MAPPING[query]['return_fields'])
+        kwargs['return_fields'] = _format_all_return_fields(QUERY_MAPPING[query]['return_fields'])
 
     return kwargs
 

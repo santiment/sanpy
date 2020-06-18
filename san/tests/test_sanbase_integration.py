@@ -1,5 +1,5 @@
 import san
-from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics
+from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics, available_metrics_for_slug
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
 from nose.plugins.attrib import attr
 
@@ -37,14 +37,12 @@ METRICS_EQUAL_FORMAT = [
 # Metrics, which are made with _create_query_string, using ETHEREUM
 METRICS_USING_ETHEREUM = [
     'gas_used',
-    'miners_balance',
     'mining_pools_distribution'
 ]
 
 
 def _test_ordinary_function(
         query,
-        graphiql_query,
         slug=params['project_slug']):
     result = san.get(query + '/' + slug,
                      from_date=params['from_date'],
@@ -117,112 +115,95 @@ def test_erc20_projects():
 
 @attr('integration')
 def test_daily_active_addresses():
-    _test_ordinary_function('daily_active_addresses', 'dailyActiveAddresses')
+    _test_ordinary_function('daily_active_addresses')
 
 
 @attr('integration')
 def test_burn_rate():
-    _test_ordinary_function('burn_rate', 'burnRate')
+    _test_ordinary_function('burn_rate')
 
 
 @attr('integration')
 def test_gas_used():
-    _test_ordinary_function('gas_used', 'gasUsed', 'ethereum')
+    _test_ordinary_function('gas_used', 'ethereum')
 
 
 @attr('integration')
 def test_token_age_consumed():
-    _test_ordinary_function('token_age_consumed', 'tokenAgeConsumed')
+    _test_ordinary_function('token_age_consumed')
 
 
 @attr('integration')
 def test_average_token_age_consumed_in_days():
     _test_ordinary_function(
-        'average_token_age_consumed_in_days',
-        'averageTokenAgeConsumedInDays')
+        'average_token_age_consumed_in_days')
 
 
 @attr('integration')
 def test_transaction_volume():
-    _test_ordinary_function('transaction_volume', 'transactionVolume')
-
-
-@attr('integration')
-def test_github_activity():
-    _test_ordinary_function('github_activity', 'githubActivity')
-
-
-@attr('integration')
-def test_dev_activity():
-    _test_ordinary_function('dev_activity', 'devActivity')
+    _test_ordinary_function('transaction_volume')
 
 
 @attr('integration')
 def test_network_growth():
-    _test_ordinary_function('network_growth', 'networkGrowth')
+    _test_ordinary_function('network_growth')
 
 
 @attr('integration')
 def test_prices():
-    _test_ordinary_function('prices', 'prices')
+    _test_ordinary_function('prices')
 
 
 @attr('integration')
 def test_ohlc():
-    _test_ordinary_function('ohlc', 'ohlc')
+    _test_ordinary_function('ohlc')
 
 
 @attr('integration')
 def test_exchange_funds_flow():
-    _test_ordinary_function('exchange_funds_flow', 'exchangeFundsFlow')
+    _test_ordinary_function('exchange_funds_flow')
 
 
 @attr('integration')
 def test_token_velocity():
-    _test_ordinary_function('token_velocity', 'tokenVelocity')
+    _test_ordinary_function('token_velocity')
 
 
 @attr('integration')
 def test_token_circulation():
-    _test_ordinary_function('token_circulation', 'tokenCirculation')
+    _test_ordinary_function('token_circulation')
 
 
 @attr('integration')
 def test_realized_value():
-    _test_ordinary_function('realized_value', 'realizedValue')
+    _test_ordinary_function('realized_value')
 
 
 @attr('integration')
 def test_mvrv_ratio():
-    _test_ordinary_function('mvrv_ratio', 'mvrvRatio')
+    _test_ordinary_function('mvrv_ratio')
 
 
 @attr('integration')
 def test_nvt_ratio():
-    _test_ordinary_function('nvt_ratio', 'nvtRatio')
+    _test_ordinary_function('nvt_ratio')
 
 
 @attr('integration')
 def test_daily_active_deposits():
-    _test_ordinary_function('daily_active_deposits', 'dailyActiveDeposits')
-
-
-@attr('integration')
-def test_miners_balance():
-    _test_ordinary_function('miners_balance', 'minersBalance', 'ethereum')
+    _test_ordinary_function('daily_active_deposits')
 
 
 @attr('integration')
 def test_mining_pools_distribution():
     _test_ordinary_function(
         'mining_pools_distribution',
-        'miningPoolsDistribution',
         'ethereum')
 
 
 @attr('integration')
 def test_history_twitter_data():
-    _test_ordinary_function('history_twitter_data', 'historyTwitterData')
+    _test_ordinary_function('history_twitter_data')
 
 
 @attr('integration')
@@ -434,119 +415,6 @@ def test_emerging_trends():
 
 @attr('integration')
 def test_available_metrics():
-    functions_list = [
-        'average_token_age_consumed_in_days',
-        'burn_rate',
-        'daily_active_deposits',
-        'dev_activity',
-        'emerging_trends',
-        'eth_spent_over_time',
-        'eth_top_transactions',
-        'exchange_funds_flow',
-        'gas_used',
-        'github_activity',
-        'historical_balance',
-        'history_twitter_data',
-        'miners_balance',
-        'mining_pools_distribution',
-        'mvrv_ratio',
-        'network_growth',
-        'news',
-        'nvt_ratio',
-        'ohlc',
-        'ohlcv',
-        'price_volume_difference',
-        'prices',
-        'projects',
-        'realized_value',
-        'social_dominance',
-        'social_volume',
-        'social_volume_projects',
-        'token_age_consumed',
-        'token_circulation',
-        'token_top_transactions',
-        'token_velocity',
-        'top_holders_percent_of_total_supply',
-        'top_social_gainers_losers',
-        'topic_search',
-        'daily_avg_marketcap_usd',
-        'daily_avg_price_usd',
-        'daily_closing_marketcap_usd',
-        'daily_closing_price_usd',
-        'daily_high_price_usd',
-        'daily_low_price_usd',
-        'daily_opening_price_usd',
-        'daily_trading_volume_usd',
-        'daily_active_addresses',
-        'mean_realized_price_usd',
-        'mean_realized_price_usd_10y',
-        'mean_realized_price_usd_5y',
-        'mean_realized_price_usd_3y',
-        'mean_realized_price_usd_2y',
-        'mean_realized_price_usd_365d',
-        'mean_realized_price_usd_180d',
-        'mean_realized_price_usd_90d',
-        'mean_realized_price_usd_60d',
-        'mean_realized_price_usd_30d',
-        'mean_realized_price_usd_7d',
-        'mean_realized_price_usd_1d',
-        'mvrv_usd_long_short_diff',
-        'mvrv_usd',
-        'mvrv_usd_10y',
-        'mvrv_usd_5y',
-        'mvrv_usd_3y',
-        'mvrv_usd_2y',
-        'mvrv_usd_365d',
-        'mvrv_usd_180d',
-        'mvrv_usd_90d',
-        'mvrv_usd_60d',
-        'mvrv_usd_30d',
-        'mvrv_usd_7d',
-        'mvrv_usd_1d',
-        'circulation',
-        'circulation_10y',
-        'circulation_5y',
-        'circulation_3y',
-        'circulation_2y',
-        'circulation_365d',
-        'circulation_180d',
-        'circulation_90d',
-        'circulation_60d',
-        'circulation_30d',
-        'circulation_7d',
-        'circulation_1d',
-        'mean_age',
-        'realized_value_usd',
-        'realized_value_usd_10y',
-        'realized_value_usd_5y',
-        'realized_value_usd_3y',
-        'realized_value_usd_2y',
-        'realized_value_usd_365d',
-        'realized_value_usd_180d',
-        'realized_value_usd_90d',
-        'realized_value_usd_60d',
-        'realized_value_usd_30d',
-        'realized_value_usd_7d',
-        'realized_value_usd_1d',
-        'velocity',
-        'transaction_volume',
-        'exchange_inflow',
-        'exchange_outflow',
-        'exchange_balance',
-        'age_destroyed',
-        'nvt',
-        'nvt_transaction_volume',
-        'network_growth',
-        'mean_dollar_invested_age',
-        'active_deposits',
-        'active_withdrawals',
-        'withdrawal_transactions',
-        'supply_on_exchanges',
-        'percent_of_total_supply_on_exchanges',
-        'amount_in_top_holders'
-        ]
-
-    assert functions_list == san.available_metrics()
     assert len(san.available_metrics()) >= 1
 
 
@@ -560,3 +428,10 @@ def test_metadata():
     expecter_result = {'defaultAggregation': 'AVG', 'metric': 'nvt'}
 
     assert result == expecter_result
+
+
+@attr('integration')
+def test_slug_metrics():
+    result = san.available_metrics_for_slug('santiment')
+
+    assert len(result) != 0

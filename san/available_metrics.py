@@ -1,9 +1,22 @@
 import inspect
 import san.sanbase_graphql
-from san.v2_metrics_list import V2_METRIC_QUERIES
+from san.graphql import execute_gql
 
 def available_metrics():
     sanbase_graphql_functions = inspect.getmembers(san.sanbase_graphql, inspect.isfunction)
-    all_functions =  list(map(lambda x: x[0], sanbase_graphql_functions)) + V2_METRIC_QUERIES
+    all_functions =  list(map(lambda x: x[0], sanbase_graphql_functions)) + execute_gql('{query: getAvailableMetrics}')['query']
     all_functions.remove('get_metric')
     return all_functions
+
+
+def available_metrics_for_slug(slug):
+    query_str = ("""{{
+        projectBySlug(slug: \"{slug}\"){{
+            availableMetrics
+        }}
+    }}
+    """).format(
+        slug=slug
+    )
+
+    return execute_gql(query_str)['projectBySlug']['availableMetrics']

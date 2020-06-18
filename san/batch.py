@@ -1,8 +1,8 @@
 import san.sanbase_graphql
+from san.sanbase_graphql_helper import QUERY_MAPPING
 from san.query import get_gql_query
 from san.graphql import execute_gql
 from san.transform import transform_query_result
-from san.v2_metrics_list import V2_METRIC_QUERIES
 from san.error import SanError
 
 
@@ -23,17 +23,17 @@ class Batch:
 
         for idx, query in enumerate(self.queries):
             [metric, _separator, slug] = query[0].partition('/')
-            if metric in V2_METRIC_QUERIES:
+            if metric in QUERY_MAPPING:
+                batched_queries.append(
+                    get_gql_query(
+                        idx, query[0], **query[1]))
+            else:
                 if slug != '':
                     batched_queries.append(
                         san.sanbase_graphql.get_metric(
                             idx, metric, slug, **query[1]))
                 else:
                     raise SanError('Invalid metric!')
-            else:
-                batched_queries.append(
-                    get_gql_query(
-                        idx, query[0], **query[1]))
         self.__batch_gql_queries(batched_queries)
         return self.__batch_gql_queries(batched_queries)
 
