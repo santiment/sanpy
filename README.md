@@ -17,39 +17,18 @@ Santiment API python client.
     - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
-    - [Daily Active Addresses](#daily-active-addresses)
-    - [Network Growth](#network-growth)
-    - [Burn Rate - deprecated, replaced by 'Token Age Consumed'](#burn-rate---deprecated-replaced-by-token-age-consumed)
-    - [Token Age Consumed](#token-age-consumed)
-    - [Average Token Age Consumed in Days](#average-token-age-consumed-in-days)
-    - [Transaction volume](#transaction-volume)
-    - [Token Velocity](#token-velocity)
-    - [Token Circulation](#token-circulation)
-    - [Realized Value](#realized-value)
-    - [MVRV Ratio](#mvrv-ratio)
-    - [NVT Ratio](#nvt-ratio)
-    - [Daily Active Deposits](#daily-active-deposits)
-    - [Github Activity](#github-activity)
-    - [Prices](#prices)
     - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
-    - [Exchange Funds Flow](#exchange-funds-flow)
-    - [Social Volume Projects](#social-volume-projects)
-    - [Social Volume](#social-volume)
     - [Gas Used](#gas-used)
     - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
-    - [Social Dominance](#social-dominance)
     - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
-    - [History Twitter Data](#history-twitter-data)
     - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
-    - [Available metrics](#available-metrics)
-    - [Metadata](#metadata)
   - [Extras](#extras)
   - [Development](#development)
   - [Running tests](#running-tests)
@@ -57,13 +36,13 @@ Santiment API python client.
 
 ## Installation
 
-```
+```bash
 pip install sanpy
 ```
 
 ## Upgrade to latest version
 
-```
+```bash
 pip install --upgrade sanpy
 ```
 
@@ -71,19 +50,21 @@ pip install --upgrade sanpy
 
 There are few scripts under [extras](/san/extras) directory. To install their dependencies use:
 
-```
+```bash
 pip install sanpy[extras]
 ```
 
-## Premium metrics
+## Restricted metrics
 
-In order to access real time data or historical data (older than 3 months),
-you'll need to set the [api key](#configuration) and have some SAN tokens in your account.
-All premium metrics are free for "santiment" token.
+In order to access real-time data or historical data for some of the metrics,
+you'll need to set the [API key](#configuration), generated from an account with
+a paid API plan.
+
+All restricted metrics are free for "santiment" token.
 
 ## Configuration
 
-Optionally you can provide an api key which gives access to some premium metrics:
+Optionally you can provide an api key which gives access to some restricted metrics:
 
 ```python
 import san
@@ -150,12 +131,44 @@ san.get(
 )
 ```
 
-Using the defaults params:
+Using the defaults params (last 1 year of data with 1 day interval):
 
 ```python
 san.get("daily_active_addresses/santiment")
 san.get("prices/santiment")
 ```
+
+### Fetching metadata for a metric
+
+Fetching the metadata for an on-chain metric.
+
+```python
+san.metadata(
+    "nvt",
+    arr=['availableSlugs', 'defaultAggregation', 'humanReadableName', 'isAccessible', 'isRestricted', 'restrictedFrom', 'restrictedTo']
+)
+```
+
+Example result:
+
+```python
+{'availableSlugs': ['0chain', '0x', '0xbtc', '0xcert', '1sg', ...],
+'defaultAggregation': 'AVG', 'humanReadableName': 'NVT (Using Circulation)', 'isAccessible': True, 'isRestricted': True, 'restrictedFrom': '2020-03-21T08:44:14Z', 'restrictedTo': '2020-06-17T08:44:14Z'}
+```
+
+- `availableSlugs` - A list of all slugs available for this metric.
+- `defaultAggregation` - If big interval are queried, all values that fall into
+  this interval will be aggregated with this aggregation.
+- `humanReadableName` - A name of the metric suitable for showing to users.
+- `isAccessible` - `True` if the metric is accessible. If API key is configured, c
+  hecks the API plan subscriptions. `False` if the metric is not accessbile. For example
+  `circulation_1d` requires `PRO` plan subscription in order to be accessbile at
+  all.
+- `isRestricted` - `True` if time restrictions apply to the metric and your
+  current plan (`Free` if no API key is configured). Check `restrictedFrom` and
+  `restrictedTo`.
+- `restrictedFrom` - The first datetime available of that metric for your current plan.
+- `restrictedTo` - The last datetime available of that metric and your current plan.
 
 ### Batching multiple queries
 
@@ -172,37 +185,272 @@ batch.get(
 )
 
 batch.get(
-    "daily_active_addresses/santiment",
-    from_date="2018-06-06",
-    to_date="2018-06-10",
+    "transaction_volume/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
     interval="1d"
 )
 
-[daa1, daa2] = batch.execute()
+[daa, trx_volume] = batch.execute()
 ```
 
 ## Available metrics
 
-Getting all of the metrics as a list is done, using the following code:
+Getting all of the metrics as a list is done using the following code:
 
 ```python
 san.available_metrics()
 ```
 
-Getting all of the metrics for a given slug is achieved with the following code
-
+Getting all of the metrics for a given slug is achieved with the following code:
 
 ```python
 san.available_metrics_for_slug('santiment')
 ```
 
-Below are described some available metrics and are given examples for fetching and for the returned format.
+Below are described the available metrics and are given examples for fetching them.
 
-### All Projects
+### Full list of metrics for a single project
+
+> NOTE: When a new metric is added to the API, `san.available_metrics()` will
+> automatically pick it up and it will be accessible with sanpy, but it might
+> take some time to be added to this documentation. The list below might not be
+> full at times.
+
+The suffixes `_<number>y` and `_<number>d` means that the metric is calculated
+only by taken into account the tokens and coins that have moved in the past
+number of years or days.
+
+All these metrics are returned as a Pandas dataframe with two columns - `datetime`
+and float `value`.
+
+All metrics that do not follow the same format are explicitly listed after that.
+
+#### Holder Metrics
+
+- amount_in_top_holders
+- amount_in_exchange_top_holders
+- amount_in_non_exchange_top_holders
+- holders_distribution_combined_balance_100k_to_1M
+- holders_distribution_0.1_to_1
+- holders_distribution_0_to_0.001
+- holders_distribution_1_to_10
+- holders_distribution_1k_to_10k
+- holders_distribution_combined_balance_0.01_to_0.1
+- holders_distribution_combined_balance_0.1_to_1
+- holders_distribution_combined_balance_1k_to_10k
+- holders_distribution_100_to_1k
+- holders_distribution_combined_balance_10k_to_100k
+- holders_distribution_10_to_100
+- holders_distribution_10k_to_100k
+- holders_distribution_total
+- holders_distribution_combined_balance_1M_to_10M
+- holders_distribution_combined_balance_10_to_100
+- holders_distribution_1M_to_10M
+- holders_distribution_0.01_to_0.1
+- holders_distribution_0.001_to_0.01
+- holders_distribution_combined_balance_1_to_10
+- holders_distribution_combined_balance_100_to_1k
+- holders_distribution_combined_balance_0_to_0.001
+- holders_distribution_combined_balance_0.001_to_0.01
+- holders_distribution_combined_balance_10M_to_inf
+- holders_distribution_100k_to_1M
+- holders_distribution_10M_to_inf
+- percent_of_total_supply_on_exchanges
+- supply_on_exchanges
+- supply_outside_exchanges
+
+#### Social Metrics
+
+- twitter_followers
+- social_dominance_telegram
+- social_dominance_discord
+- social_dominance_reddit
+- social_dominance_professional_traders_chat
+- social_dominance_total
+- social_volume_telegram
+- social_volume_discord
+- social_volume_reddit
+- social_volume_professional_traders_chat
+- social_volume_twitter
+- social_volume_bitcointalk
+- social_volume_total
+- community_messages_count_telegram
+- community_messages_count_total
+- sentiment_positive_total
+- sentiment_positive_telegram
+- sentiment_positive_professional_traders_chat
+- sentiment_positive_reddit
+- sentiment_positive_discord
+- sentiment_positive_twitter
+- sentiment_positive_bitcointalk
+- sentiment_negative_total
+- sentiment_negative_telegram
+- sentiment_negative_professional_traders_chat
+- sentiment_negative_reddit
+- sentiment_negative_discord
+- sentiment_negative_twitter
+- sentiment_negative_bitcointalk
+- sentiment_balance_total
+- sentiment_balance_telegram
+- sentiment_balance_professional_traders_chat
+- sentiment_balance_reddit
+- sentiment_balance_discord
+- sentiment_balance_twitter
+- sentiment_balance_bitcointalk
+- sentiment_volume_consumed_total
+- sentiment_volume_consumed_telegram
+- sentiment_volume_consumed_professional_traders_chat
+- sentiment_volume_consumed_reddit
+- sentiment_volume_consumed_discord
+- sentiment_volume_consumed_twitter
+- sentiment_volume_consumed_bitcointalk
+
+#### Price Metrics
+
+- price_usd
+- price_btc
+- price_eth
+- volume_usd
+- marketcap_usd
+- daily_avg_marketcap_usd
+- daily_avg_price_usd
+- daily_closing_marketcap_usd
+- daily_closing_price_usd
+- daily_high_price_usd
+- daily_low_price_usd
+- daily_opening_price_usd
+- daily_trading_volume_usd
+- volume_usd_change_1d
+- volume_usd_change_30d
+- volume_usd_change_7d
+- price_usd_change_1d
+- price_usd_change_30d
+- price_usd_change_7d
+
+#### Development Metrics
+
+- dev_activity
+- dev_activity_change_30d
+- dev_activity_contributors_count
+- github_activity
+- github_activity_contributors_count
+
+#### Derivatives
+
+- bitmex_perpetual_basis
+- bitmex_perpetual_funding_rate
+- bitmex_perpetual_open_interest
+- bitmex_perpetual_open_value
+
+#### MakerDAO Metrics
+
+- dai_created
+- dai_repaid
+- mcd_collat_ratio
+- mcd_collat_ratio_sai
+- mcd_collat_ratio_weth
+- mcd_dsr
+- mcd_erc20_supply
+- mcd_locked_token
+- mcd_stability_fee
+- mcd_supply
+- scd_collat_ratio
+- scd_locked_token
+
+#### On-Chain Metrics
+
+- active_addresses_24h
+- active_addresses_24h_change_1d
+- active_addresses_24h_change_30d
+- active_addresses_24h_change_7d
+- active_deposits
+- active_withdrawals
+- age_destroyed
+- circulation
+- circulation_10y
+- circulation_180d
+- circulation_1d
+- circulation_2y
+- circulation_30d
+- circulation_365d
+- circulation_3y
+- circulation_5y
+- circulation_60d
+- circulation_7d
+- circulation_90d
+- daily_active_addresses
+- deposit_transactions
+- exchange_balance
+- exchange_inflow
+- exchange_outflow
+- mean_age
+- mean_dollar_invested_age
+- mean_realized_price_usd
+- mean_realized_price_usd_10y
+- mean_realized_price_usd_180d
+- mean_realized_price_usd_1d
+- mean_realized_price_usd_2y
+- mean_realized_price_usd_30d
+- mean_realized_price_usd_365d
+- mean_realized_price_usd_3y
+- mean_realized_price_usd_5y
+- mean_realized_price_usd_60d
+- mean_realized_price_usd_7d
+- mean_realized_price_usd_90d
+- mvrv_long_short_diff_usd
+- mvrv_usd
+- mvrv_usd_10y
+- mvrv_usd_180d
+- mvrv_usd_1d
+- mvrv_usd_2y
+- mvrv_usd_30d
+- mvrv_usd_365d
+- mvrv_usd_3y
+- mvrv_usd_5y
+- mvrv_usd_60d
+- mvrv_usd_7d
+- mvrv_usd_90d
+- mvrv_usd_intraday
+- mvrv_usd_intraday_10y
+- mvrv_usd_intraday_180d
+- mvrv_usd_intraday_1d
+- mvrv_usd_intraday_2y
+- mvrv_usd_intraday_30d
+- mvrv_usd_intraday_365d
+- mvrv_usd_intraday_3y
+- mvrv_usd_intraday_5y
+- mvrv_usd_intraday_60d
+- mvrv_usd_intraday_7d
+- mvrv_usd_intraday_90d
+- network_growth
+- nvt
+- nvt_transaction_volume
+- realized_value_usd
+- realized_value_usd_10y
+- realized_value_usd_180d
+- realized_value_usd_1d
+- realized_value_usd_2y
+- realized_value_usd_30d
+- realized_value_usd_365d
+- realized_value_usd_3y
+- realized_value_usd_5y
+- realized_value_usd_60d
+- realized_value_usd_7d
+- realized_value_usd_90d
+- stock_to_flow
+- transaction_volume
+- velocity
+- withdrawal_transactions
+
+### Fetching lists of projects
+
+#### All Projects
 
 Returns a DataFrame with all the projects available in the Santiment API. Not all
-metrics will be available for all the projects. The `slug` is a unique identifier
-which can be used to retrieve most of the metrics.
+metrics will be available for each of the projects.
+
+`slug` is the unique identifier of a project, used in the metrics fetching.
 
 ```python
 san.get("projects/all")
@@ -223,7 +471,7 @@ Example result:
 ...
 ```
 
-### ERC20 Projects
+#### ERC20 Projects
 
 Returns a DataFrame with all the ERC20 projects available in the Santiment API.
 Not all metrics will be available for all the projects. The `slug` is a unique
@@ -248,430 +496,9 @@ Example result:
 ...
 ```
 
-### Daily Active Addresses
+### Other Price metrics
 
-This metric includes the number of unique addresses that participated in the transfers of given token during the day.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "daily_active_addresses/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                                     value
-datetime
-2018-06-01 00:00:00+00:00                2
-2018-06-02 00:00:00+00:00                4
-2018-06-03 00:00:00+00:00                6
-2018-06-04 00:00:00+00:00                6
-2018-06-05 00:00:00+00:00               14
-```
-
-### Network Growth
-
-Network Growth shows the number of new addresses being created on the project network each day.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "network_growth/santiment",
-    from_date="2018-12-01",
-    to_date="2018-12-05",
-    interval="1d"
-)
-```
-
-```
-                                 value
-datetime
-2018-12-01 00:00:00+00:00            3
-2018-12-02 00:00:00+00:00            2
-2018-12-03 00:00:00+00:00            6
-2018-12-04 00:00:00+00:00            2
-2018-12-05 00:00:00+00:00            1
-```
-
-### Burn Rate - deprecated, replaced by 'Token Age Consumed'
-
-Each transaction has an equivalent burn rate record. The burn rate is calculated by multiplying
-the number of tokens moved by the number of blocks in which they appeared.
-Spikes in burn rate could indicate large transactions or movement of tokens that have been held for a long time.
-
-[Premium metric](#premium-metrics)
-
-Burn rate returns the same results as 'Token Age Consumed' and will be removed in the near future.
-
-```python
-san.get(
-    "burn_rate/santiment",
-    from_date="2018-05-01",
-    to_date="2018-05-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                               burnRate
-datetime
-2018-05-01 00:00:00+00:00      2.514926e+09
-2018-05-02 00:00:00+00:00      1.363158e+10
-2018-05-03 00:00:00+00:00      2.182971e+09
-2018-05-04 00:00:00+00:00      9.731035e+09
-2018-05-05 00:00:00+00:00      2.867054e+10
-```
-
-### Token Age Consumed
-
-Each transaction has an equivalent 'Age consumed' record. The consumed age is calculated by multiplying
-the number of tokens moved by the number of blocks in which they appeared.
-Spikes in consumed token age could indicate large transactions or movement of tokens that
-have been held for a long time.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "token_age_consumed/santiment",
-    from_date="2018-05-01",
-    to_date="2018-05-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           tokenAgeConsumed
-datetime
-2018-05-01 00:00:00+00:00      2.514926e+09
-2018-05-02 00:00:00+00:00      1.363158e+10
-2018-05-03 00:00:00+00:00      2.182971e+09
-2018-05-04 00:00:00+00:00      9.731035e+09
-2018-05-05 00:00:00+00:00      2.867054e+10
-```
-
-### Average Token Age Consumed in Days
-
-Based on 'Token Age Consumed' above, this returns the Token Age that gets consumed on
-average over the interval. The result is given in days instead of blocks.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "average_token_age_consumed_in_days/santiment",
-    from_date="2018-05-01",
-    to_date="2018-05-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                             tokenAge
-datetime
-2018-05-01 00:00:00+00:00    6.353738
-2018-05-02 00:00:00+00:00   22.303985
-2018-05-03 00:00:00+00:00    3.873644
-2018-05-04 00:00:00+00:00  140.566428
-2018-05-05 00:00:00+00:00   56.730010
-```
-
-### Transaction Volume
-
-Total amount of tokens for a project that were transacted on the blockchain.
-This metric includes only on-chain volume, not volume in exchanges.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "transaction_volume/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                                       value
-datetime
-2018-06-01 00:00:00+00:00          46.848943
-2018-06-02 00:00:00+00:00         666.194095
-2018-06-03 00:00:00+00:00       31326.856743
-2018-06-04 00:00:00+00:00        1371.245641
-2018-06-05 00:00:00+00:00       42825.036598
-```
-
-### Token Velocity
-
-Token Velocity returns the average number of times that a token changes wallets over the interval.
-Simply put, a higher token velocity means that the same token is used in transactions more
-often within a set time frame.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "token_velocity/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d")
-```
-
-Example result:
-
-```
-                           tokenVelocity
-datetime
-2018-06-01 00:00:00+00:00           1.00
-2018-06-02 00:00:00+00:00           3.00
-2018-06-03 00:00:00+00:00           1.97
-2018-06-04 00:00:00+00:00           1.00
-2018-06-05 00:00:00+00:00           2.92
-```
-
-### Token Circulation
-
-Token Circulation returns the total amount of tokens that have been sent at least once during
-each given time period. Minimum interval is '1d'.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "token_circulation/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-```
-
-Example result:
-
-```
-                           tokenCirculation
-datetime
-2018-06-01 00:00:00+00:00         46.848943
-2018-06-02 00:00:00+00:00        222.194095
-2018-06-03 00:00:00+00:00      15933.955221
-2018-06-04 00:00:00+00:00       1371.245641
-2018-06-05 00:00:00+00:00      14678.249398
-```
-
-### Realized Value
-
-Realized Value returns the total acquisition cost of all tokens on the network,
-based on the historical price when each coin was last sent, in USD.
-Returns RV for all tokens and RV for all tokens known to be on exchanges.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "realized_value/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           nonExchangeRealizedValue  realizedValue
-datetime
-2018-06-01 00:00:00+00:00              2.334917e+07   9.248495e+07
-2018-06-02 00:00:00+00:00              2.334917e+07   9.248498e+07
-2018-06-03 00:00:00+00:00              2.335106e+07   9.248275e+07
-2018-06-04 00:00:00+00:00              2.335138e+07   9.248269e+07
-2018-06-05 00:00:00+00:00              2.335073e+07   9.243114e+07
-```
-
-### MVRV Ratio
-
-MVRV ratio returns the ratio of the market value of all tokens (market cap) to the
-realized value of all tokens.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "mvrv_ratio/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                              ratio
-datetime
-2018-06-01 00:00:00+00:00  0.836489
-2018-06-02 00:00:00+00:00  0.850379
-2018-06-03 00:00:00+00:00  0.848195
-2018-06-04 00:00:00+00:00  0.822243
-2018-06-05 00:00:00+00:00  0.781964
-```
-
-### NVT Ratio
-
-NVT ratio returns the Network-Value-to-Transactions ratio. We use the market cap as network value
-and either token circulation or transaction volume as a measurement for transactions, returning two values.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "nvt_ratio/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           nvtRatioCirculation  nvtRatioTxVolume
-datetime
-2018-06-01 00:00:00+00:00         1.337498e+06      1.337498e+06
-2018-06-02 00:00:00+00:00         2.820074e+05      9.405723e+04
-2018-06-03 00:00:00+00:00         3.868500e+03      2.000213e+03
-2018-06-04 00:00:00+00:00         4.569595e+04      4.569595e+04
-2018-06-05 00:00:00+00:00         4.268927e+03      1.463171e+03
-```
-
-### Daily Active Deposits
-
-Daily Active Deposits, similar to Daily Active Addresses, returns the number of unique addresses
-that participated in the transfers of tokens to exchange deposit addresses during the day.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "daily_active_deposits/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           activeDeposits
-datetime
-2018-06-01 00:00:00+00:00               0
-2018-06-02 00:00:00+00:00               2
-2018-06-03 00:00:00+00:00               0
-2018-06-04 00:00:00+00:00               2
-2018-06-05 00:00:00+00:00               6
-```
-
-### Github Activity
-
-Returns a list of github activity for a given slug and time interval.
-
-[Premium metric](#premium-metrics)
-
-[An article explaining the github activity tracking](https://medium.com/santiment/tracking-github-activity-of-crypto-projects-introducing-a-better-approach-9fb1af3f1c32)
-
-```python
-san.get(
-    "github_activity/santiment",
-    from_date="2018-05-01",
-    to_date="2018-05-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                           activity
-datetime
-2018-05-02 00:00:00+00:00        32
-2018-05-03 00:00:00+00:00         9
-2018-05-04 00:00:00+00:00        18
-```
-
-You can also fetch only events connected to development activity by using the `devActivity` query.
-
-```python
-san.get(
-    "dev_activity/santiment",
-    from_date="2018-05-01",
-    to_date="2018-05-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                              value
-datetime
-2018-05-02 00:00:00+00:00        29
-2018-05-03 00:00:00+00:00         9
-2018-05-04 00:00:00+00:00        16
-```
-
-### Prices
-
-Fetch history price in USD or BTC, traded volume and marketcap for a given slug.
-
-```python
-san.get(
-    "prices/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-
-san.get(
-    "prices/ethereum",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                              marketcap  priceBtc  priceUsd   volume
-datetime
-2018-06-01 00:00:00+00:00  7.736268e+07  0.000165  1.234635   852857
-2018-06-02 00:00:00+00:00  7.864724e+07  0.000165  1.255135  1242520
-2018-06-03 00:00:00+00:00  7.844339e+07  0.000163  1.251882  1032910
-2018-06-04 00:00:00+00:00  7.604326e+07  0.000160  1.213578   617451
-
-                              marketcap  priceBtc    priceUsd      volume
-datetime
-2018-06-01 00:00:00+00:00  5.756716e+10  0.077083  576.825315  1945890000
-2018-06-02 00:00:00+00:00  5.875660e+10  0.077475  588.620775  1880390000
-2018-06-03 00:00:00+00:00  6.097134e+10  0.079460  610.682490  1832550000
-2018-06-04 00:00:00+00:00  6.015676e+10  0.079466  602.399792  1903430000
-```
-
-### Open, High, Close, Low Prices, Volume, Marketcap
+#### Open, High, Close, Low Prices, Volume, Marketcap
 
 Note: this query cannot be batched!
 
@@ -686,159 +513,12 @@ san.get(
 
 Example result:
 
-```
-                           openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume     marketcap
-datetime
-2018-06-01 00:00:00+00:00       1.24380        1.27668       1.26599      1.19099   852857  7.736268e+07
-2018-06-02 00:00:00+00:00       1.26136        1.30779       1.27612      1.20958  1242520  7.864724e+07
-2018-06-03 00:00:00+00:00       1.28270        1.28357       1.24625      1.21872  1032910  7.844339e+07
-2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528      1.18010   617451  7.604326e+07
-```
-
-### Exchange Funds Flow
-
-Fetch the difference between the tokens that were deposited minus the tokens that were withdrawn
-from an exchange for a given slug in the selected time period.
-
-[Premium metric](#premium-metrics)
-
 ```python
-san.get(
-    "exchange_funds_flow/santiment",
-    from_date="2018-04-16T10:02:19Z",
-    to_date="2018-05-23T10:02:19Z",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-                         inOutDifference
-datetime
-2018-04-16 10:02:19+00:00    -208.797310
-2018-04-17 00:00:00+00:00     164.006467
-2018-04-18 00:00:00+00:00       0.000000
-2018-04-19 00:00:00+00:00  -45213.112849
-2018-04-20 00:00:00+00:00 -135364.839572
-```
-
-### Social Volume Projects
-
-Fetch a list of slugs for which there is social volume data.
-
-```python
-san.get("social_volume_projects")
-```
-
-Example result:
-
-```
-                   0
-0            cardano
-1       bitcoin-cash
-2            bitcoin
-3        dragonchain
-4                eos
-5   ethereum-classic
-6           ethereum
-7      kyber-network
-8           litecoin
-9               iota
-10          ontology
-11              tron
-12          wanchain
-13           stellar
-14            ripple
-15             verge
-16                0x
-```
-
-### Social Volume
-
-Fetch a list of mentions count for a given project and time interval.
-
-[Premium metric](#premium-metrics)
-
-Arguments description:
-
-- `endpoint` - social_volume/project_slug
-- `interval` - an integer followed by one of: `m`, `h`, `d`, `w`
-- `from_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-- `to_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-05-23T10:02:19Z"
-- `social_volume_type` - the source of mention counts, one of the following:
-  - "PROFESSIONAL_TRADERS_CHAT_OVERVIEW" - shows how many times the given project was mentioned in the professional traders chat
-  - "TELEGRAM_CHATS_OVERVIEW" - shows how many times the given project was mentioned across all telegram chats, except the project's own community chat (if there is one)
-  - "TELEGRAM_DISCUSSION_OVERVIEW" - the general volume of messages in the project's community chat (if there is one)
-  - "DISCORD_DISCUSSION_OVERVIEW" - shows how many times the given project has been mentioned in the discord channels
-
-```python
-san.get(
-    "social_volume/dragonchain",
-    interval="1d",
-    from_date="2018-04-16T10:02:19Z",
-    to_date="2018-05-23T10:02:19Z",
-    social_volume_type="PROFESSIONAL_TRADERS_CHAT_OVERVIEW"
-)
-```
-
-Example result:
-
-```
-                           mentionsCount
-datetime
-2018-04-17 00:00:00+00:00              4
-2018-04-18 00:00:00+00:00              8
-2018-04-19 00:00:00+00:00              7
-2018-04-20 00:00:00+00:00              1
-2018-04-21 00:00:00+00:00              3
-2018-04-22 00:00:00+00:00              2
-2018-04-23 00:00:00+00:00              1
-```
-
-### Topic search
-
-Returns lists with the mentions of the search phrase from the selected source.
-The results are in two formats - the messages themselves and the data for building graph representation of the result.
-
-[Premium metric](#premium-metrics)
-
-Arguments description:
-
-- `endpoint` - a string in the format "topic_search"
-- `source` - one of the following:
-  - TELEGRAM
-  - PROFESSIONAL_TRADERS_CHAT
-  - REDDIT
-  - DISCORD
-- `search_text` - a string containing the key words for which the sources should be searched.
-- `from_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-- `to_date` - a string representation of datetime value according to the iso8601 standard, e.g. "2018-04-16T10:02:19Z"
-- `interval` - an integer followed by one of: `m`, `h`, `d`, `w`
-
-```python
-san.get(
-    "topic_search",
-    source="TELEGRAM",
-    search_text="btc moon",
-    from_date="2019-08-01T12:00:00Z",
-    to_date="2019-08-02T12:00:00Z",
-    interval="6h"
-)
-```
-
-Example result:
-
-```
-datetime                   mentionsCount
-2019-08-01 12:00:00+00:00            208
-2019-08-01 18:00:00+00:00            265
-2019-08-02 00:00:00+00:00            115
-2019-08-02 06:00:00+00:00            219
-2019-08-02 12:00:00+00:00            358
-2019-08-02 18:00:00+00:00            212
-2019-08-03 00:00:00+00:00            229
-2019-08-03 06:00:00+00:00            225
+datetime                        openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume  marketcap
+2018-06-01 00:00:00+00:00       1.24380        1.27668       1.26599       1.19099       852857  7.736268e+07
+2018-06-02 00:00:00+00:00       1.26136        1.30779       1.27612       1.20958      1242520  7.864724e+07
+2018-06-03 00:00:00+00:00       1.28270        1.28357       1.24625       1.21872      1032910  7.844339e+07
+2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528       1.18010       617451  7.604326e+07
 ```
 
 ### Gas Used
@@ -944,89 +624,6 @@ datetime                     balance
 2019-04-20 00:00:00+00:00  382338.33
 2019-04-21 00:00:00+00:00  215664.33
 2019-04-22 00:00:00+00:00  215664.33
-```
-
-### Social Dominance
-
-Returns the % of the social dominance a given project has over time in a given social channel.
-
-Available sources are:
-
-- PROFESSIONAL_TRADERS_CHAT
-- TELEGRAM
-- DISCORD
-- REDDIT
-- ALL
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "social_dominance/santiment",
-    from_date="2019-04-08",
-    to_date="2019-04-13",
-    interval="1d",
-    source="ALL"
-)
-```
-
-Example result:
-
-```
-datetime                   dominance
-2019-04-08 00:00:00+00:00   0.043028
-2019-04-09 00:00:00+00:00   0.025337
-2019-04-10 00:00:00+00:00   0.045376
-2019-04-11 00:00:00+00:00   0.036051
-2019-04-12 00:00:00+00:00   0.035585
-2019-04-13 00:00:00+00:00   0.034957
-```
-
-### Top Holders Percent Of Total Supply
-
-Returns the top holders' percent of total supply - in exchanges, outside exchanges and combined.
-
-```python
-san.get(
-    "top_holders_percent_of_total_supply/ethereum",
-    number_of_holders=10,
-    from_date="2019-04-08",
-    to_date="2019-04-11"
-)
-```
-
-Example Result:
-
-```
-datetime                   inExchanges  inTopHoldersTotal  outsideExchanges
-2019-04-09 00:00:00+00:00     7.977318          13.277961          5.300643
-2019-04-10 00:00:00+00:00     7.976282          13.310953          5.334671
-2019-04-11 00:00:00+00:00     7.975260          13.296356          5.321096
-```
-
-### History Twitter Data
-
-Fetch the historical count of twitter followers.
-
-```python
-san.get(
-    "history_twitter_data/santiment",
-    from_date="2019-04-08",
-    to_date="2019-04-13",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-datetime                   followers_count
-2019-04-08 00:00:00+00:00            10524
-2019-04-09 00:00:00+00:00            10524
-2019-04-10 00:00:00+00:00            10525
-2019-04-11 00:00:00+00:00            10520
-2019-04-12 00:00:00+00:00            10526
-2019-04-13 00:00:00+00:00            10529
 ```
 
 ### Price Volume Difference
@@ -1136,46 +733,6 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
-### Full list of on-chain metrics (including timebounded)
-
-This list includes:
-
-- MVRV
-- Age Destroyed
-- Transaction Volume
-- Circulation
-- NVT
-- Realized Value
-- Realized Price
-- Velocity
-- Mean Age
-- Exchange Metrics
-
-All of the following metrics have accept the same parameters and have the same response structure
-
-Returns data for a given metric. The input, that is needed, is the string 'metric/slug', a 'from' date, a 'to' date, a string for the interval and an aggregation, which is optional (When not given, the aggregation is determined automatically by the API).
-
-The available metrics can be seen [here](./on-chain-metrics.md):
-
-```python
-san.get(
-   "daily_active_addresses/santiment",
-   from_date="2019-08-31",
-   to_date="2019-09-03",
-   interval="2d",
-   aggregation="AVG"
-)
-```
-
-Example result:
-
-```
-datetime                      value
-2019-08-30 00:00:00+00:00    4.0
-2019-09-01 00:00:00+00:00    5.5
-2019-09-03 00:00:00+00:00    9.0
-```
-
 ### Emerging Trends
 
 Emerging trends for a given period of time
@@ -1238,24 +795,6 @@ datetime                              slug     change    status
 2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
 ```
 
-### Metadata
-
-Fetching the metadata for an on-chain metric.
-
-```python
-san.metadata(
-    "nvt",
-    arr=['metric', 'defaultAggregation']
-)
-```
-
-Example result:
-
-```
-{'defaultAggregation': 'AVG', 'metric': 'nvt'}
-
-```
-
 ## Extras
 
 Take a look at the [examples](/examples/extras) folder.
@@ -1266,30 +805,30 @@ It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing y
 
 Setup project:
 
-```
+```bash
 pipenv install
 ```
 
 Install main dependencies:
 
-```
+```bash
 pipenv run pip install -e .
 ```
 
 Install extra dependencies:
 
-```
+```bash
 pipenv run pip install -e '.[extras]'
 ```
 
 ## Running tests
 
-```
+```bash
 python setup.py test
 ```
 
 ## Running integration tests
 
-```
+```bash
 python setup.py nosetests -a integration
 ```
