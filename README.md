@@ -29,6 +29,7 @@ Santiment API python client.
     - [Token Top Transactions](#token-top-transactions)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
+    - [Metric Complexity](#metric-complexity)
   - [Extras](#extras)
   - [Development](#development)
   - [Running tests](#running-tests)
@@ -793,6 +794,25 @@ datetime                              slug     change    status
 2019-07-30 11:00:00+00:00            storj  21.000000    GAINER
 2019-07-30 11:00:00+00:00            aergo  -1.000000     LOSER
 2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
+```
+
+### Metric Complexity
+
+Fetch the complexity of a query
+
+```python
+san.metric_complexity(
+    metric='price_usd',
+    from_datetime='2020-02-02',
+    to_datetime='2020-03-20',
+    interval='1d'
+)
+```
+
+Example result:
+
+```
+29
 ```
 
 ## Extras
