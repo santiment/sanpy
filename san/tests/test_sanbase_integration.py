@@ -435,3 +435,15 @@ def test_slug_metrics():
     result = san.available_metrics_for_slug('santiment')
 
     assert len(result) != 0
+
+
+@attr('integration')
+def test_metric_complexity():
+    result = san.metric_complexity(
+        'price_usd',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d'
+    )
+
+    assert result != 0

@@ -798,13 +798,16 @@ datetime                              slug     change    status
 
 ### Metric Complexity
 
-Fetch the complexity of a query
+Fetch the complexity of a metric. The complexity depends on the from/to/interval parameters, as well as the metric and the subscription plan. A request might have a maximum complexity of 20000. If a request has a higher complexity there are a few ways to solve the issue:
+
+- Break down the request into multiple requests with smaller from-to ranges.
+- Upgrade to a higher subscription plan.
 
 ```python
 san.metric_complexity(
     metric='price_usd',
-    from_datetime='2020-02-02',
-    to_datetime='2020-03-20',
+    from_date='2020-01-01',
+    to_date='2020-02-20',
     interval='1d'
 )
 ```
@@ -812,7 +815,7 @@ san.metric_complexity(
 Example result:
 
 ```
-29
+31
 ```
 
 ## Extras

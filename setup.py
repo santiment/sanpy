@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sanpy",
-    version="0.7.20",
+    version="0.8.0",
     author="Santiment",
     author_email="admin@santiment.net",
     description="Package for Santiment API access with python",
