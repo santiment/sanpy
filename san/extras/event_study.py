@@ -382,7 +382,7 @@ def compute_beta_alpha(data,ev_data,starting_point,benchmark):
     for date, row in betas_df.iterrows():
             sid = row.symbol
             if date not in data.index or sid not in data.columns:
-                    continue
+            	continue
             if sid=='ethereum' and benchmark=='ethereum':
                 benchmark='bitcoin'
             elif sid=='bitcoin' and benchmark=='bitcoin':
