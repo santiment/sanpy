@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as pyplot
 from datetime import timedelta
 from scipy import stats
+from IPython.display import display
 
 
 """
