@@ -187,13 +187,12 @@ def compute_return_matrix(ev_data,data,sample_size,starting_point,
     for date, row in ev_data.iterrows():
         sid = row.symbol
         if date not in data.index or sid not in data.columns:
-                continue
-		
+		continue
         if sid=='ethereum' and benchmark=='ethereum':
             benchmark='bitcoin'
         elif sid=='bitcoin' and benchmark=='bitcoin':
             benchmark='ethereum'
-		
+	
         project_return = get_returns(data, starting_point, sid, date, day_num)
         benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
 
