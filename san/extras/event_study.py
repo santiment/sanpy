@@ -179,7 +179,7 @@ def get_price_history(data, date, beta_window, sid, benchmark):
     """
     Create a DataFrame containing the data for the necessary sids within that time frame
     """
-    if beta_window:
+    if not beta_window:
         history_index = data.index.searchsorted(date)
         history_index_start = data.index.searchsorted(data[data[sid] != 0].index[0])
         histotical_prices = data.iloc[history_index_start:history_index][[sid, benchmark]]
