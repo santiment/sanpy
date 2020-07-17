@@ -13,6 +13,7 @@ Santiment API python client.
   - [Retrieving data from the API](#retrieving-data-from-the-api)
     - [Fetch single metric](#fetch-single-metric)
     - [Batching multiple queries](#batching-multiple-queries)
+    - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
   - [Available metrics](#available-metrics)
     - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
     - [All Projects](#all-projects)
@@ -193,6 +194,31 @@ batch.get(
 )
 
 [daa, trx_volume] = batch.execute()
+```
+
+### Making a custom graphql query to the API
+
+```python
+from san.graphql import execute_gql
+import pandas as pd
+
+res = execute_gql("""{
+  projectBySlug(slug: "santiment") {
+    slug
+    name
+    ticker
+    infrastructure
+    mainContractAddress
+    twitterLink
+  }
+}""")
+
+pd.DataFrame(res['projectBySlug'], index=[0])
+```
+
+```
+  infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
+0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
 
 ## Available metrics
