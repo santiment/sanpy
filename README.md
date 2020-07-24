@@ -15,6 +15,9 @@ Santiment API python client.
     - [Batching multiple queries](#batching-multiple-queries)
     - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
   - [Available metrics](#available-metrics)
+    - [Available Metric for Slug](#available-metrics-for-slug)
+    - [Metric Complexity](#metric-complexity)
+    - [Available Since](#available-since)
     - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
@@ -30,7 +33,6 @@ Santiment API python client.
     - [Token Top Transactions](#token-top-transactions)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
-    - [Metric Complexity](#metric-complexity)
   - [Extras](#extras)
   - [Development](#development)
   - [Running tests](#running-tests)
@@ -229,11 +231,38 @@ Getting all of the metrics as a list is done using the following code:
 san.available_metrics()
 ```
 
+## Available Metrics for Slug
+
 Getting all of the metrics for a given slug is achieved with the following code:
 
 ```python
 san.available_metrics_for_slug('santiment')
 ```
+
+## Metric Complexity
+
+Fetch the complexity of a metric. The complexity depends on the from/to/interval parameters, as well as the metric and the subscription plan. A request might have a maximum complexity of 20000. If a request has a higher complexity there are a few ways to solve the issue:
+
+- Break down the request into multiple requests with smaller from-to ranges.
+- Upgrade to a higher subscription plan.
+
+```python
+san.metric_complexity(
+    metric='price_usd',
+    from_date='2020-01-01',
+    to_date='2020-02-20',
+    interval='1d'
+)
+```
+
+## Available Since
+
+Fetch the first datetime for which a metric is available for a given slug.
+
+```python
+san.available_metric_for_slug_since(metric='daily_active_addresses', slug='santiment')
+```
+
 
 Below are described the available metrics and are given examples for fetching them.
 
@@ -820,28 +849,6 @@ datetime                              slug     change    status
 2019-07-30 11:00:00+00:00            storj  21.000000    GAINER
 2019-07-30 11:00:00+00:00            aergo  -1.000000     LOSER
 2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
-```
-
-### Metric Complexity
-
-Fetch the complexity of a metric. The complexity depends on the from/to/interval parameters, as well as the metric and the subscription plan. A request might have a maximum complexity of 20000. If a request has a higher complexity there are a few ways to solve the issue:
-
-- Break down the request into multiple requests with smaller from-to ranges.
-- Upgrade to a higher subscription plan.
-
-```python
-san.metric_complexity(
-    metric='price_usd',
-    from_date='2020-01-01',
-    to_date='2020-02-20',
-    interval='1d'
-)
-```
-
-Example result:
-
-```
-31
 ```
 
 ## Extras

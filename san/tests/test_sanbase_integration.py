@@ -1,5 +1,5 @@
 import san
-from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics, available_metrics_for_slug
+from san import Batch, sanbase_graphql, sanbase_graphql_helper, available_metrics, available_metrics_for_slug, available_metric_for_slug_since
 from san.tests.utils import two_days_ago, four_days_ago, month_ago
 from nose.plugins.attrib import attr
 
@@ -416,6 +416,11 @@ def test_emerging_trends():
 @attr('integration')
 def test_available_metrics():
     assert len(san.available_metrics()) >= 1
+
+
+@attr('integration')
+def test_available_metric_for_slug_since():
+    assert available_metric_for_slug_since('daily_active_addresses', 'santiment') == '2017-07-12T00:00:00Z'
 
 
 @attr('integration')

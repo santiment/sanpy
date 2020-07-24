@@ -1,7 +1,7 @@
 from .get import get
 from .metadata import metadata
 from .metric_complexity import metric_complexity
-from .available_metrics import available_metrics, available_metrics_for_slug
+from .available_metrics import available_metrics, available_metrics_for_slug, available_metric_for_slug_since
 from .batch import Batch
 from .api_config import ApiConfig
 import pkg_resources
