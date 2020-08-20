@@ -15,7 +15,7 @@ def execute_gql(gql_query_str):
             json={'query': gql_query_str},
             headers=headers)
     except requests.exceptions.RequestException as e:
-        raise SanError(e)
+        raise SanError('Error running query: ({})'.format(e))
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
