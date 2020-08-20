@@ -9,10 +9,13 @@ def execute_gql(gql_query_str):
     if ApiConfig.api_key:
         headers = {'authorization': "Apikey {}".format(ApiConfig.api_key)}
 
-    response = requests.post(
-        SANBASE_GQL_HOST,
-        json={'query': gql_query_str},
-        headers=headers)
+    try:
+        response = requests.post(
+            SANBASE_GQL_HOST,
+            json={'query': gql_query_str},
+            headers=headers)
+    except requests.exceptions.RequestException as e:
+        raise SanError(e)
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
