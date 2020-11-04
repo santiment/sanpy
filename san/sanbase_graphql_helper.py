@@ -249,6 +249,9 @@ def _default_from_date():
 
 
 def _format_from_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, str) and 'utc_now' in datetime_obj_or_str:
+        return datetime_obj_or_str
+
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
@@ -256,6 +259,9 @@ def _format_from_date(datetime_obj_or_str):
 
 
 def _format_to_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, str) and 'utc_now' in datetime_obj_or_str:
+        return datetime_obj_or_str
+
     if isinstance(datetime_obj_or_str, datetime.datetime):
       return iso8601.parse_date(datetime_obj_or_str.isoformat())
     
