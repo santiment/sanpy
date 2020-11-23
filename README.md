@@ -104,7 +104,7 @@ san.get("projects/all")
 
 Parameters:
 
-- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
+- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data or the string for ex: `2018-06-01`, or a string, representing the relative datetime `utc_now-<interval>`
 - `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
 Default values for parameters:
