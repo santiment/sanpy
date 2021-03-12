@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-#import tkinter as tk
 import matplotlib.pyplot as pyplot
 from datetime import timedelta
 from scipy import stats
@@ -86,20 +85,20 @@ def timedelta_format(seconds):
     words = [' day', ' hour', ' minute', ' second']
     values = [0, 0, 0, 0]
 
-    value = seconds
+    value = int(seconds)
     text = ''
-    ind=0
-    while value>0:
-        units = value//numbers[ind]
-        rem = value%numbers[ind]
+    ind = 0
+    while value > 0:
+        units = value // numbers[ind]
+        rem = value % numbers[ind]
         values[ind] = units
         value = rem
-        if units>0:
-            if len(text)>0:
-                text+=', '
+        if units > 0:
+            if len(text) > 0:
+                text += ', '
             text = text + str(units) + words[ind]
-            if units>1:
-                text+='s'
+            if units > 1:
+                text += 's'
         ind += 1
 
     return text
@@ -216,7 +215,7 @@ def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_re
         abnormal_returns,
         xerr=0,
         yerr=abnormal_volatility,
-        label="events=%s" % events, 
+        label="events=%s" % events,
         color=COLOR_1
     )
 
@@ -408,21 +407,21 @@ def plotting_events(day_numbers, all_returns, all_benchmark_returns, all_abnorma
         returns=all_returns,
         events=events,
         x_ticks=x_ticks,
-        interval_text = timedelta_format(interval.seconds)
+        interval_text=timedelta_format(interval.total_seconds())
     )
 
     plot_average_returns(
         returns=all_returns,
         benchmark_returns=all_benchmark_returns,
         x_ticks=x_ticks,
-        interval_text=timedelta_format(interval.seconds)
+        interval_text=timedelta_format(interval.total_seconds())
     )
 
     plot_cumulative_abnormal_returns(
         returns=all_returns,
         abnormal_returns=all_abnormal_returns,
         x_ticks=x_ticks,
-        interval_text=timedelta_format(interval.seconds)
+        interval_text=timedelta_format(interval.total_seconds())
     )
     plot_cumulative_return_with_errors(
         returns=all_returns,
@@ -569,7 +568,7 @@ def plot_CI(tstats, pvalues, CI):
     ax[0].set_title(tstats.name+' Statistic', fontsize=20)
     ax[1].set_title('P-Values ', fontsize=20)
     tstats.plot(ax=ax[0], label=tstats.name, color=COLOR_1)
-    ax[0].axhline(y=c, linestyle='--', color=COLOR_4, alpha=.9, label='Significance Line ('+ str(round(c,2)) + ')')
+    ax[0].axhline(y=c, linestyle='--', color=COLOR_4, alpha=.9, label='Significance Line (' + str(round(c, 2)) + ')')
     ax[0].axhline(y=-c, linestyle='--', color=COLOR_4, alpha=.9)
     ax[0].legend()
     ax[1].bar(pvalues.index, pvalues, label=pvalues.name, color=COLOR_1)
