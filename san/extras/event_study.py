@@ -5,7 +5,6 @@ from datetime import timedelta
 from scipy import stats
 from IPython.display import display
 
-
 """
 Event study to  evaluate events or signals.
 The main parameters the event study function accepts are a pandas dataframe containing the price data
@@ -17,8 +16,16 @@ FIGURE_WIDTH = 20
 FIGURE_HEIGHT = 7
 FIGURE_SIZE = [FIGURE_WIDTH, FIGURE_HEIGHT]
 
+COLOR_1 = '#14c393'  # used as a main color, jungle-green
+COLOR_2 = '#ffad4d'  # used as a second color for 2-line charts, texas-rose
+COLOR_3 = '#5275ff'  # benchmark, dodger-blue
+COLOR_4 = '#ff5b5b'  # custom red, persommin
 
-def get_close_price(data, sid, current_date, day_number):
+FONT_SIZE_LEGEND = 18
+FONT_SIZE_AXES = 14
+
+
+def get_close_price(data, sid, current_date, day_number, interval):
     # If we're looking at day 0 just return the indexed date
     if day_number == 0:
         return data.loc[current_date][sid]
@@ -27,15 +34,15 @@ def get_close_price(data, sid, current_date, day_number):
         # If the close price is too far ahead, just get the last available
         total_date_index_length = len(data.index)
         # Find the closest date to the target date
-        date_index = data.index.searchsorted(current_date + timedelta(day_number))
+        date_index = data.index.searchsorted(current_date + interval*day_number)
         # If the closest date is too far ahead, reset to the latest date possible
         date_index = total_date_index_length - 1 if date_index >= total_date_index_length else date_index
         # Use the index to return a close price that matches
         return data.iloc[date_index][sid]
 
 
-def get_first_price(data, starting_point, sid, date):
-    starting_day = date - timedelta(starting_point)
+def get_first_price(data, starting_point, sid, date, interval):
+    starting_day = date - interval*starting_point
     date_index = data.index.searchsorted(starting_day)
 
     return data.iloc[date_index][sid]
@@ -45,9 +52,9 @@ def remove_outliers(returns, num_std_devs):
     return returns[~((returns-returns.mean()).abs() > num_std_devs*returns.std())]
 
 
-def get_returns(data, starting_point, sid, date, day_num):
-    first_price = get_first_price(data, starting_point, sid, date)
-    close_price = get_close_price(data, sid, date, day_num)
+def get_returns(data, starting_point, sid, date, day_num, interval):
+    first_price = get_first_price(data, starting_point, sid, date, interval)
+    close_price = get_close_price(data, sid, date, day_num, interval)
     if first_price == 0:
         return 0
     return (close_price - first_price) / (first_price + 0.0)
@@ -73,40 +80,83 @@ def calc_beta(stock, benchmark, price_history):
     return slope
 
 
-def build_x_ticks(day_numbers):
-    return [d for d in day_numbers if d % 2 == 0]
+def timedelta_format(seconds):
+    numbers = [3600*24,  3600, 60, 1]
+    words = [' day', ' hour', ' minute', ' second']
+    values = [0, 0, 0, 0]
+
+    value = int(seconds)
+    text = ''
+    ind = 0
+    while value > 0:
+        units = value // numbers[ind]
+        rem = value % numbers[ind]
+        values[ind] = units
+        value = rem
+        if units > 0:
+            if len(text) > 0:
+                text += ', '
+            text = text + str(units) + words[ind]
+            if units > 1:
+                text += 's'
+        ind += 1
+
+    return text
 
 
-def plot_cumulative_returns(returns, x_ticks, events):
+def neg(n):
+    return -1*n
+
+
+def build_x_ticks(day_numbers, number_of_ticks):
+    max_value = day_numbers[len(day_numbers)-1]
+    if max_value < 30:
+        return [d for d in day_numbers if d % 2 == 0]
+    else:
+        n1 = round(max_value / number_of_ticks)
+        if n1 % 2 > 0:
+            n1 += 1
+        base = [i for i in range(n1, max_value + 1, n1)]
+        base_neg = base.copy()
+        base_neg.reverse()
+        base_neg = [i * (-1) for i in base_neg]
+        return base_neg + [0] + base
+
+
+def plot_cumulative_returns(returns, x_ticks, events, interval_text):
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    returns.plot(xticks=x_ticks, label="events=%s" % events)
+    returns.plot(xticks=x_ticks, label="events=%s" % events, color=COLOR_1)
+
+    pyplot.axvline(x=0, color='black', alpha=.3)
 
     pyplot.title("Cumulative Return from Events")
-    pyplot.xlabel("Window Length (t)")
+    pyplot.xlabel("Time Window (t), 1t="+interval_text)
     pyplot.ylabel("Cumulative Return (r)")
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.legend()
 
 
-def plot_average_returns(returns, benchmark_returns, x_ticks):
+def plot_average_returns(returns, benchmark_returns, x_ticks, interval_text):
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    returns.plot(xticks=x_ticks, label="Cumulative Return from Events")
-    benchmark_returns.plot(xticks=x_ticks, label='Benchmark')
+    returns.plot(xticks=x_ticks, label="Cumulative Return from Events", color=COLOR_1)
+    benchmark_returns.plot(xticks=x_ticks, label='Benchmark', color=COLOR_3)
+
+    pyplot.axvline(x=0, color='black', alpha=.3)
 
     pyplot.title("Benchmark's average returns around that time to Signals_Events")
     pyplot.ylabel("% Cumulative Return")
-    pyplot.xlabel("Time Window")
+    pyplot.xlabel("Time Window (t), 1t="+interval_text)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.legend()
 
 
-def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks):
+def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks, interval_text):
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    returns.plot(xticks=x_ticks, label="Average Cumulative Returns")
-    abnormal_returns.plot(xticks=x_ticks, label="Abnormal Average Cumulative Returns")
+    returns.plot(xticks=x_ticks, label="Average Cumulative Returns", color=COLOR_1)
+    abnormal_returns.plot(xticks=x_ticks, label="Abnormal Average Cumulative Returns", color=COLOR_2)
 
     pyplot.axhline(
         y=abnormal_returns.loc[0],
@@ -123,9 +173,11 @@ def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks):
         alpha=.3
     )
 
+    pyplot.axvline(x=0, color='black', alpha=.3)
+
     pyplot.title("Cumulative Abnormal Returns versus Cumulative Returns")
     pyplot.ylabel("% Cumulative Return")
-    pyplot.xlabel("Time Window")
+    pyplot.xlabel("Time Window (t), 1t="+interval_text)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.legend()
 
@@ -136,7 +188,14 @@ def plot_cumulative_return_with_errors(returns, std_devs, events):
     """
     pyplot.figure(figsize=FIGURE_SIZE)
 
-    pyplot.errorbar(returns.index, returns, xerr=0, yerr=std_devs, label="events=%s" % events)
+    pyplot.axvline(x=0, color='black', alpha=.3)
+
+    pyplot.errorbar(returns.index,
+                    returns,
+                    xerr=0,
+                    yerr=std_devs,
+                    label="events=%s" % events,
+                    color=COLOR_1)
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
@@ -156,8 +215,11 @@ def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_re
         abnormal_returns,
         xerr=0,
         yerr=abnormal_volatility,
-        label="events=%s" % events
+        label="events=%s" % events,
+        color=COLOR_1
     )
+
+    pyplot.axvline(x=0, color='black', alpha=.3)
 
     pyplot.grid(b=None, which=u'major', axis=u'y')
     pyplot.title("Abnormal Cumulative Return from Events with error")
@@ -172,7 +234,7 @@ def build_day_numbers(starting_point):
     Create our range of day_numbers that will be used to calculate returns
     Looking from -starting_point to +starting_point to create timeframe band
     """
-    return [i for i in range(-starting_point, starting_point)]
+    return [i for i in range(-starting_point, starting_point+1)]
 
 
 def get_price_history(data, date, beta_window, sid, benchmark):
@@ -192,7 +254,7 @@ def get_price_history(data, date, beta_window, sid, benchmark):
 
 
 def compute_return_matrix(ev_data, data, sample_size, starting_point,
-                          day_num, benchmark, returns, benchmark_returns, abnormal_returns, beta_window):
+                          day_num, benchmark, returns, benchmark_returns, abnormal_returns, beta_window, interval):
     """
     Computes the returns for the project, benchmark and abnormal
     """
@@ -205,8 +267,8 @@ def compute_return_matrix(ev_data, data, sample_size, starting_point,
         elif sid == 'bitcoin' and benchmark == 'bitcoin':
             benchmark = 'ethereum'
 
-        project_return = get_returns(data, starting_point, sid, date, day_num)
-        benchmark_return = get_returns(data, starting_point, benchmark, date, day_num)
+        project_return = get_returns(data, starting_point, sid, date, day_num, interval)
+        benchmark_return = get_returns(data, starting_point, benchmark, date, day_num, interval)
 
         returns.append(project_return)
         benchmark_returns.append(benchmark_return)
@@ -223,7 +285,7 @@ def compute_return_matrix(ev_data, data, sample_size, starting_point,
 def compute_averages(ev_data, data, starting_point, day_numbers,
                      benchmark, all_returns, all_std_devs,
                      total_sample_size, all_benchmark_returns,
-                     abnormal_volatility, all_abnormal_returns, beta_window):
+                     abnormal_volatility, all_abnormal_returns, beta_window, interval):
 
     """
     Computes the avegare returns and standards deviation of the events
@@ -237,7 +299,7 @@ def compute_averages(ev_data, data, starting_point, day_numbers,
 
         sample_size = compute_return_matrix(ev_data, data, sample_size, starting_point,
                                             day_num, benchmark, returns, benchmark_returns,
-                                            abnormal_returns, beta_window)
+                                            abnormal_returns, beta_window, interval)
         returns = pd.Series(returns).dropna()
         returns = remove_outliers(returns, 2)
 
@@ -271,13 +333,20 @@ def clean_data(data, events, starting_point):
         hist_index_start = event_day - starting_point
         hist_index_end = event_day + starting_point
         event_window = data.iloc[hist_index_start:hist_index_end][[sid]]
-        if event_window.min()[0] == 0 or len(event_window) == 0:
+        if event_window.min()[0] == 0 or len(event_window) == 0 or True in pd.isnull(list(event_window[sid])):
             events_df.iloc[id, -1] = 1
         id = id+1
     return events_df[events_df['in_pricesdf'] == 0]
 
 
-def event_study(data, events, starting_point=30, benchmark='bitcoin', origin_zero=True, beta_window=None):
+def event_study(data,
+                events,
+                starting_point=30,
+                benchmark='bitcoin',
+                origin_zero=True,
+                beta_window=None,
+                interval=timedelta(days=1),
+                x_ticks_amount=12):
 
     ev_data = clean_data(data, events, starting_point)
 
@@ -292,11 +361,11 @@ def event_study(data, events, starting_point=30, benchmark='bitcoin', origin_zer
     compute_averages(ev_data, data, starting_point, day_numbers,
                      benchmark, all_returns, all_std_devs,
                      total_sample_size, all_benchmark_returns,
-                     abnormal_volatility, all_abnormal_returns, beta_window)
+                     abnormal_volatility, all_abnormal_returns, beta_window, interval)
 
     plotting_events(day_numbers, all_returns, all_benchmark_returns, all_abnormal_returns,
                     all_std_devs, abnormal_volatility,
-                    total_sample_size, origin_zero)
+                    total_sample_size, origin_zero, x_ticks_amount, interval)
 
 
 def signals_format(signals, project):
@@ -304,7 +373,7 @@ def signals_format(signals, project):
     Returns signals in the needed format.
     Accepts a column with the signals as boolean values and the projects name as a string
     """
-    sign = pd.DataFrame(signals).tz_convert(None)
+    sign = pd.DataFrame(signals)
     sign.columns = ['symbol']
     sign = sign.replace(True, project)
     events_ = sign[sign["symbol"] == project]
@@ -313,7 +382,7 @@ def signals_format(signals, project):
 
 
 def plotting_events(day_numbers, all_returns, all_benchmark_returns, all_abnormal_returns, all_std_devs,
-                    abnormal_volatility, total_sample_size, origin_zero):
+                    abnormal_volatility, total_sample_size, origin_zero, x_ticks_amount, interval):
 
     all_returns = pd.Series(all_returns)
     all_std_devs = pd.Series(all_std_devs)
@@ -332,24 +401,27 @@ def plotting_events(day_numbers, all_returns, all_benchmark_returns, all_abnorma
     all_std_devs.loc[:-1] = 0
     abnormal_volatility.loc[:-1] = 0
 
-    x_ticks = build_x_ticks(day_numbers)
+    x_ticks = build_x_ticks(day_numbers, x_ticks_amount)
 
     plot_cumulative_returns(
         returns=all_returns,
+        events=events,
         x_ticks=x_ticks,
-        events=events
+        interval_text=timedelta_format(interval.total_seconds())
     )
 
     plot_average_returns(
         returns=all_returns,
         benchmark_returns=all_benchmark_returns,
-        x_ticks=x_ticks
+        x_ticks=x_ticks,
+        interval_text=timedelta_format(interval.total_seconds())
     )
 
     plot_cumulative_abnormal_returns(
         returns=all_returns,
         abnormal_returns=all_abnormal_returns,
-        x_ticks=x_ticks
+        x_ticks=x_ticks,
+        interval_text=timedelta_format(interval.total_seconds())
     )
     plot_cumulative_return_with_errors(
         returns=all_returns,
@@ -360,17 +432,18 @@ def plotting_events(day_numbers, all_returns, all_benchmark_returns, all_abnorma
     plot_abnormal_cumulative_return_with_errors(
         abnormal_volatility=abnormal_volatility,
         abnormal_returns=all_abnormal_returns,
-        events=events)
+        events=events
+    )
 
 
 def calc_beta_testing(stock, benchmark, price_history):
     """
     Calculate beta and alpha amounts for each security
     """
-    # stock_prices = price_history[stock].pct_change().dropna()
+
     stock_prices = np.log(1+price_history[stock].pct_change().dropna())
-    # bench_prices = price_history[benchmark].pct_change().dropna()
     bench_prices = np.log(1+price_history[benchmark].pct_change().dropna())
+
     aligned_prices = bench_prices.align(stock_prices, join='inner')
     bench_prices = aligned_prices[0]
     stock_prices = aligned_prices[1]
@@ -402,16 +475,18 @@ def compute_beta_alpha(data, ev_data, starting_point, benchmark):
             benchmark = 'bitcoin'
         elif sid == 'bitcoin' and benchmark == 'bitcoin':
             benchmark = 'ethereum'
-        beta, alpha = calc_beta_testing(sid, benchmark, get_price_history(data, date, starting_point, sid, benchmark))
-        betas_df.iloc[id, -2] = beta
-        betas_df.iloc[id, -1] = alpha
-        id = id+1
+        coeff = calc_beta_testing(sid, benchmark, get_price_history(data, date, starting_point, sid, benchmark))
+        if coeff:
+            beta, alpha = coeff
+            betas_df.iloc[id, -2] = beta
+            betas_df.iloc[id, -1] = alpha
+            id = id+1
     return betas_df.reset_index()
 
 
 def calculate_ab_returns(returns_df, betas_df, intercept, benchmark):
     """
-    Calculate abnormal returns for every project
+    Calculate abnormal returns for every event case
     """
     ab_returns = pd.DataFrame()
     for number, dta in betas_df.iterrows():
@@ -436,7 +511,8 @@ def ab_returns_matrix(ab_returns, betas_df, starting_point):
         eventdate = dta.datetime
         sid = number
         # find specific event row, look where Date is equal to event_date
-        row = abnormal_returns_df.loc[abnormal_returns_df['datetime'] == eventdate]
+        col_name = abnormal_returns_df.columns[0]
+        row = abnormal_returns_df.loc[abnormal_returns_df[col_name] == eventdate]
         # get index of row
         index = row.index[0]
         # select starting_point plus and starting_point minus around that row
@@ -471,19 +547,18 @@ def calculate_stats(new_sample, starting_point):
     # results['STD CAR'] = std_CAR
     results['t-CAAR'] = mean_CAR / std_CAR
     results['P-Value t-CAAR'] = stats.norm.cdf(results['t-CAAR'])
-
     return results
 
 
 def plot_ARR_CAAR(results):
     fig, ax = pyplot.subplots(figsize=FIGURE_SIZE)
     ax.set_title('ARS vs CARS', fontsize=20)
-    ax.plot(results.index, results['AAR'], color="red", marker="o")
+    ax.plot(results.index, results['AAR'], color=COLOR_4, marker="o")
     ax.set_xlabel("Days", fontsize=14)
-    ax.set_ylabel("AAR", color="red", fontsize=14)
+    ax.set_ylabel("AAR", color=COLOR_4, fontsize=14)
     ax2 = ax.twinx()
-    ax2.plot(results.index, results['CAAR'], color="blue", marker="o")
-    ax2.set_ylabel("CAAR", color="blue", fontsize=14)
+    ax2.plot(results.index, results['CAAR'], color=COLOR_1, marker="o")
+    ax2.set_ylabel("CAAR", color=COLOR_1, fontsize=14)
     pyplot.show()
 
 
@@ -492,12 +567,12 @@ def plot_CI(tstats, pvalues, CI):
     fig, ax = pyplot.subplots(nrows=2, figsize=FIGURE_SIZE)
     ax[0].set_title(tstats.name+' Statistic', fontsize=20)
     ax[1].set_title('P-Values ', fontsize=20)
-    tstats.plot(ax=ax[0], label=tstats.name)
-    ax[0].axhline(y=c, linestyle='--', color='red', alpha=.9, label='Significance Line')
-    ax[0].axhline(y=-c, linestyle='--', color='red', alpha=.9)
+    tstats.plot(ax=ax[0], label=tstats.name, color=COLOR_1)
+    ax[0].axhline(y=c, linestyle='--', color=COLOR_4, alpha=.9, label='Significance Line (' + str(round(c, 2)) + ')')
+    ax[0].axhline(y=-c, linestyle='--', color=COLOR_4, alpha=.9)
     ax[0].legend()
-    ax[1].bar(pvalues.index, pvalues, label=pvalues.name)
-    ax[1].axhline(y=(1-CI)/2, linestyle='--', color='red', alpha=.9, label='Significance Line')
+    ax[1].bar(pvalues.index, pvalues, label=pvalues.name, color=COLOR_1)
+    ax[1].axhline(y=(1-CI)/2, linestyle='--', color=COLOR_4, alpha=.9, label='Significance Line('+str(round((1-CI)/2, 2))+')')
     ax[1].legend()
 
 
@@ -510,7 +585,7 @@ def get_log_returns(data):
     return pd.DataFrame(returns_array, index=data.index, columns=data.columns).fillna(0)
 
 
-def hypothesis_test(data, ev_data, starting_point, benchmark='ethereum', intercept=True, CI=.95):
+def hypothesis_test(data, ev_data, starting_point, benchmark='ethereum', intercept=True, CI=.95, interval=timedelta(days=1)):
     # Drops events with no pricing data
     cleaned_events = clean_data(data, ev_data, starting_point)
     # Call function to calculate betas for events
