@@ -78,7 +78,7 @@ def test_error_response(mock):
     mock.return_value = TestResponse(
         status_code=500, data={
             'errors': {
-                'detail': 'Internal server error'}})
+                'details': 'Internal server error'}})
     with assert_raises(SanError):
         san.get(
             "prices/santiment_usd",
