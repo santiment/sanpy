@@ -107,8 +107,8 @@ QUERY_MAPPING = {
             ('chartData', ['datetime, ''mentionsCount'])
         ]
     },
-    'top_transactions': {
-        'query': 'topTransactions',
+    'top_transfers': {
+        'query': 'topTransfers',
         'return_fields': [
             'datetime',
             ('fromAddress', ['address']),

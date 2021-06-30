@@ -31,7 +31,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
-    - [Top Transactions](#top-transactions)
+    - [Top Transfers](#top-transfers)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Extras](#extras)
@@ -790,13 +790,13 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
-### Top Transactions
+### Top Transfers
 
-Top transactions for the token of a given project, an address argument can be added as well:
+Top transfers for the token of a given project, an address argument can be added as well, in the form of a key-value pair - ```address_selector="XYZ"```:
 
 ```python
 san.get(
-    "top_transactions/santiment",
+    "top_transfers/santiment",
     from_date='utc_now-30d',
     to_date='utc_now',
 )

@@ -58,7 +58,7 @@ def eth_top_transactions_transform(data):
     }, data))
 
 
-def top_transactions_transform(data):
+def top_transfers_transform(data):
     return list(map(lambda column: {
         'datetime': column['datetime'],
         'fromAddress': column['fromAddress']['address'],

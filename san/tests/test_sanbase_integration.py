@@ -455,9 +455,9 @@ def test_metric_complexity():
 
 
 @attr('integration')
-def test_top_transactions():
+def test_top_transfers():
     result = san.get(
-        'top_transactions/santiment',
+        'top_transfers/santiment',
         from_date=params['from_date'],
         to_date=params['to_date'],
         interval='1d'
