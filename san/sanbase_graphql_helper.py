@@ -107,6 +107,16 @@ QUERY_MAPPING = {
             ('chartData', ['datetime, ''mentionsCount'])
         ]
     },
+    'top_transactions': {
+        'query': 'topTransactions',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address']),
+            ('toAddress', ['address']),
+            'trxValue',
+            'trxHash'
+        ]
+    },
     'eth_top_transactions': {
         'query': 'ethTopTransactions',
         'return_fields': [
@@ -228,6 +238,9 @@ def transform_query_args(query, **kwargs):
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else _DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else _DEFAULT_SEARCH_TEXT
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
+    kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs.get("address_selector")}\"}},' \
+        if 'address_selector' in kwargs else ''
+
 
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])

@@ -58,6 +58,16 @@ def eth_top_transactions_transform(data):
     }, data))
 
 
+def top_transactions_transform(data):
+    return list(map(lambda column: {
+        'datetime': column['datetime'],
+        'fromAddress': column['fromAddress']['address'],
+        'toAddress': column['toAddress']['address'],
+        'trxHash': column['trxHash'],
+        'trxValue': column['trxValue']
+    }, data))
+
+
 def news_transform(data):
     result = list(map(lambda column: OrderedDict({
         'datetime': column['datetime'],

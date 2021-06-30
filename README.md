@@ -31,6 +31,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
+    - [Top Transactions](#top-transactions)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Extras](#extras)
@@ -787,6 +788,30 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-28 07:53:32+00:00  0x868074aab18ea3...                  False  0x876eabf441b2e...                 True  0x90bd286da38a2b...   33181.82279
 2019-04-26 14:38:45+00:00  0x876eabf441b2ee...                   True  0x76af586d041d6...                False  0xe45b86f415e930...   28999.64023
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
+```
+
+### Top Transactions
+
+Top transactions for the token of a given project, an address argument can be added as well:
+
+```python
+san.get(
+    "top_transactions/santiment",
+    from_date='utc_now-30d',
+    to_date='utc_now',
+)
+```
+
+**The result is shortened for convenience**
+
+Example result:
+```
+                          fromAddress   toAddress     trxHash       trxValue
+datetime                                                                                                                                                                                                                          
+2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
+2021-06-17 00:10:05+00:00  0xbd3c2...  0x876ea...  0x732a5...  117339.779890
+2021-06-19 21:36:03+00:00  0x59646...  0x0d45b...  0x5de31...  112336.882707
+...
 ```
 
 ### Emerging Trends

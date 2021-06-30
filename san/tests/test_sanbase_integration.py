@@ -452,3 +452,15 @@ def test_metric_complexity():
     )
 
     assert result != 0
+
+
+@attr('integration')
+def test_top_transactions():
+    result = san.get(
+        'top_transactions/santiment',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d'
+    )
+
+    assert result != 0
