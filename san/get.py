@@ -42,3 +42,12 @@ def get(dataset, **kwargs):
     res = execute_gql(gql_query)
 
     return transform_query_result(0, query, res)
+
+
+def is_rate_limit_exception(exception):
+    return 'API Rate Limit Reached' in str(exception)
+
+
+def rate_limit_time_left(exception):
+    words = str(exception).split()
+    return list(filter(lambda x: x.isnumeric(), words))[0] # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)

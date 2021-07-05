@@ -14,6 +14,7 @@ Santiment API python client.
     - [Fetch single metric](#fetch-single-metric)
     - [Batching multiple queries](#batching-multiple-queries)
     - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
+    - [Rate Limit Tools](#rate-limit-tools)
   - [Available metrics](#available-metrics)
     - [Available Metric for Slug](#available-metrics-for-slug)
     - [Metric Complexity](#metric-complexity)
@@ -223,6 +224,13 @@ pd.DataFrame(res['projectBySlug'], index=[0])
   infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
+
+### Rate Limit Tools
+
+There are two functions, which can help you in handling the rate limits:
+* ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
+* ``rate_limit_time_left`` - Returns the time left before the rate limit expires
+
 
 ## Available metrics
 
