@@ -466,3 +466,10 @@ def test_invalid_request():
 def test_invalid_method():
     with assert_raises(SanError):
         san.get("invalid_method/slug")
+
+
+def test_rate_limits():
+    exception = SanError('API Rate Limit Reached. Try again in 366 seconds(7 minutes)')
+    
+    assert san.is_rate_limit_exception(exception)
+    assert san.rate_limit_time_left(exception) == 366

@@ -50,4 +50,4 @@ def is_rate_limit_exception(exception):
 
 def rate_limit_time_left(exception):
     words = str(exception).split()
-    return list(filter(lambda x: x.isnumeric(), words))[0] # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)
+    return int(list(filter(lambda x: x.isnumeric(), words))[0]) # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)
