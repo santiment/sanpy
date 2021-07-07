@@ -178,6 +178,21 @@ def price_volume_difference(idx, slug, **kwargs):
     return query_str
 
 
+def top_transfers(idx, slug, **kwargs):
+    kwargs = sgh.transform_query_args('top_transfers', **kwargs)
+
+    query_str = ("""
+    query_{idx}: topTransfers(
+        {address_selector}
+        slug: \"{slug}\",
+        from: \"{from_date}\",
+        to: \"{to_date}\"
+    ){{
+    """ + ' '.join(kwargs['return_fields']) + '}}').format(idx=idx, slug=slug, **kwargs)
+
+    return query_str
+
+
 def eth_top_transactions(idx, slug, **kwargs):
     kwargs = sgh.transform_query_args('eth_top_transactions', **kwargs)
 

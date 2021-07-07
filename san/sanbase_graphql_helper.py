@@ -107,6 +107,16 @@ QUERY_MAPPING = {
             ('chartData', ['datetime, ''mentionsCount'])
         ]
     },
+    'top_transfers': {
+        'query': 'topTransfers',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address']),
+            ('toAddress', ['address']),
+            'trxValue',
+            'trxHash'
+        ]
+    },
     'eth_top_transactions': {
         'query': 'ethTopTransactions',
         'return_fields': [
@@ -228,6 +238,16 @@ def transform_query_args(query, **kwargs):
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else _DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else _DEFAULT_SEARCH_TEXT
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
+
+    kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
+    kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs and kwargs['address'] != '' else ''
+    if kwargs['address'] != '':
+        if kwargs['transaction_type'] != '':
+            kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\", transactionType: {kwargs["transaction_type"]}}},'
+        else:
+            kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\"}},'
+    else:
+        kwargs['address_selector'] = ''
 
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])

@@ -14,6 +14,7 @@ Santiment API python client.
     - [Fetch single metric](#fetch-single-metric)
     - [Batching multiple queries](#batching-multiple-queries)
     - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
+    - [Rate Limit Tools](#rate-limit-tools)
   - [Available metrics](#available-metrics)
     - [Available Metric for Slug](#available-metrics-for-slug)
     - [Metric Complexity](#metric-complexity)
@@ -31,6 +32,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
+    - [Top Transfers](#top-transfers)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Extras](#extras)
@@ -221,6 +223,31 @@ pd.DataFrame(res['projectBySlug'], index=[0])
 ```
   infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
+```
+
+### Rate Limit Tools
+
+There are two functions, which can help you in handling the rate limits:
+* ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
+* ``rate_limit_time_left`` - Returns the time left before the rate limit expires
+
+Example:
+```python
+import time
+import san
+
+try:
+  san.get(
+    "price_usd/santiment",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+    interval="1d"
+  )
+except Exception as e:
+  if san.is_rate_limit_exception(e):
+    rate_limit_seconds = san.rate_limit_time_left(e)
+    print(f"Will sleep for {rate_limit_seconds}")
+    time.sleep(rate_limit_seconds)
 ```
 
 ## Available metrics
@@ -787,6 +814,50 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-28 07:53:32+00:00  0x868074aab18ea3...                  False  0x876eabf441b2e...                 True  0x90bd286da38a2b...   33181.82279
 2019-04-26 14:38:45+00:00  0x876eabf441b2ee...                   True  0x76af586d041d6...                False  0xe45b86f415e930...   28999.64023
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
+```
+
+### Top Transfers
+
+Top transfers for the token of a given project, ``address`` and ``transaction_type`` arguments can be added as well, in the form of a key-value pair. The ``transaction_type`` parameter can have one of these three values: ``ALL``, ``OUT``, ``IN``.
+
+```python
+san.get(
+    "top_transfers/santiment",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+)
+```
+
+**The result is shortened for convenience**
+
+Example result:
+```
+                          fromAddress   toAddress     trxHash       trxValue
+datetime                                                                                                                                                                                                                          
+2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
+2021-06-17 00:10:05+00:00  0xbd3c2...  0x876ea...  0x732a5...  117339.779890
+2021-06-19 21:36:03+00:00  0x59646...  0x0d45b...  0x5de31...  112336.882707
+...
+```
+
+```python
+san.get(
+    "top_transfers/santiment",
+    address="0x26e068650ae54b6c1b149e1b926634b07e137b9f",
+    transaction_type="ALL",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+)
+```
+
+Example result:
+```
+                          fromAddress  toAddress    trxHash   trxValue
+datetime                                                                                                                                                                                        
+2021-06-13 09:14:01+00:00  0x26e06...  0xfd3d...  0x4af6...  69854.528
+2021-06-13 09:13:01+00:00  0x876ea...  0x26e0...  0x18c1...  69854.528
+2021-06-14 08:54:52+00:00  0x876ea...  0x26e0...  0xdceb...  59920.591
+...
 ```
 
 ### Emerging Trends
