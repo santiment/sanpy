@@ -180,7 +180,7 @@ def price_volume_difference(idx, slug, **kwargs):
 
 def top_transfers(idx, slug, **kwargs):
     kwargs = sgh.transform_query_args('top_transfers', **kwargs)
-    
+
     query_str = ("""
     query_{idx}: topTransfers(
         {address_selector}
