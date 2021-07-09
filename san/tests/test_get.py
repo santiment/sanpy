@@ -473,3 +473,25 @@ def test_rate_limits():
     
     assert san.is_rate_limit_exception(exception)
     assert san.rate_limit_time_left(exception) == 366
+
+
+def test_transform_arg_transform_given():
+    kwargs = {
+        'transform': {'type': 'moving_average', 'moving_average_base': 100},
+        'from_date':'utc_now-30d',
+        'to_date': 'utc_now',
+        'slug': 'bitcoin',
+        'interval': '1d'
+    }
+    assert san.sanbase_graphql._transform_arg_helper(kwargs) ==\
+        'transform:{type: \"moving_average\"\nmoving_average_base: 100\n}'
+
+
+def test_transform_arg_no_transform_given():
+    kwargs = {
+        'from_date':'utc_now-30d',
+        'to_date': 'utc_now',
+        'slug': 'bitcoin',
+        'interval': '1d'
+    }
+    assert san.sanbase_graphql._transform_arg_helper(kwargs) == ''
