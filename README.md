@@ -19,7 +19,7 @@ Santiment API python client.
     - [Available Metric for Slug](#available-metrics-for-slug)
     - [Metric Complexity](#metric-complexity)
     - [Available Since](#available-since)
-    - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
+    - [Full list of on-chain metrics, including timebounded](#full-list-of-metrics-for-a-single-project)
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
     - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
@@ -293,7 +293,7 @@ san.available_metric_for_slug_since(metric='daily_active_addresses', slug='santi
 
 Below are described the available metrics and are given examples for fetching them.
 
-### Full list of metrics for a single project
+## Full list of metrics for a single project
 
 > NOTE: When a new metric is added to the API, `san.available_metrics()` will
 > automatically pick it up and it will be accessible with sanpy, but it might
@@ -308,6 +308,28 @@ All these metrics are returned as a Pandas dataframe with two columns - `datetim
 and float `value`.
 
 All metrics that do not follow the same format are explicitly listed after that.
+
+Example usage:
+```python
+san.get(
+  "price_usd/santiment",
+  from_date="2020-06-01",
+  to_date="2021-06-05",
+  interval="1d",
+  transform={"type": "moving_average", "moving_average_base": 100},
+  aggregation="LAST"
+)
+```
+
+Where the parameters, that are not mentioned, are optional:
+
+``transform`` - Apply a transformation on the data. The supported transformations are:
+- "moving_average" - Replace every value V<sub>i</sub> with the average of the last "moving_average_base" values.
+- "consecutive_differences" - Replace every value V<sub>i</sub> with the value V<sub>i</sub> - V<sub>i-1</sub> where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
+- "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) * 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
+
+``aggregation`` - the aggregation which is used for the query results.
+
 
 #### Holder Metrics
 

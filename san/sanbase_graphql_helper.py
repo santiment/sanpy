@@ -240,7 +240,7 @@ def transform_query_args(query, **kwargs):
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
 
     kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
-    kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs and kwargs['address'] != '' else ''
+    kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
     if kwargs['address'] != '':
         if kwargs['transaction_type'] != '':
             kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\", transactionType: {kwargs["transaction_type"]}}},'

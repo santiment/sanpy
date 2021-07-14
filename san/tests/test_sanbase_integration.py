@@ -463,4 +463,4 @@ def test_top_transfers():
         interval='1d'
     )
 
-    assert result != 0
+    assert len(result) != 0

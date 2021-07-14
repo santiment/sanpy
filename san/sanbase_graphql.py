@@ -355,14 +355,15 @@ def ohlcv(idx, slug, **kwargs):
 
 def get_metric(idx, metric, slug, **kwargs):
     kwargs = sgh.transform_query_args('get_metric', **kwargs)
-
+    transform_arg = _transform_arg_helper(kwargs)
     query_str = ("""
     query_{idx}: getMetric(metric: \"{metric}\"){{
         timeseriesData(
             slug: \"{slug}\"
+            {transform_arg}
             from: \"{from_date}\"
             to: \"{to_date}\"
-            interval: \"{interval}\",
+            interval: \"{interval}\"
             aggregation: {aggregation}
         ){{
         """ + ' '.join(kwargs['return_fields']) + """
@@ -372,10 +373,27 @@ def get_metric(idx, metric, slug, **kwargs):
         idx=idx,
         metric=metric,
         slug=slug,
+        transform_arg=transform_arg,
         **kwargs
     )
 
     return query_str
+
+
+def _transform_arg_helper(kwargs):
+    transform_arg_str = ''
+    if 'transform' in kwargs and isinstance(kwargs['transform'], dict):
+        transform_arg_str += 'transform:{'
+        for k,v in kwargs['transform'].items():
+            if isinstance(v, int):  
+                transform_arg_str += f'{k}: {v}\n'
+            elif isinstance(v, str):
+                transform_arg_str += f'{k}: \"{v}\"\n'
+            else:
+                raise SanError(f'\"transform\" argument incorrect: {kwargs["transform"]}')
+        transform_arg_str += '}'
+
+    return transform_arg_str
 
 
 def projects(idx, slug, **kwargs):
