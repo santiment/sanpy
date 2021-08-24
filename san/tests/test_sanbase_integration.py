@@ -224,9 +224,7 @@ def test_social_dominance():
     sources = [
         'ALL',
         'REDDIT',
-        'TELEGRAM',
-        'DISCORD',
-        'PROFESSIONAL_TRADERS_CHAT']
+        'TELEGRAM']
     for item in sources:
         result = san.get('social_dominance/' + params['project_slug'],
                          from_date=params['from_date'],
