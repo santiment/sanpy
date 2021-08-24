@@ -89,7 +89,7 @@ def test_batched_queries_different_format():
         from_date=month_ago(),
         to_date=params['to_date'],
         interval=params['interval'],
-        social_volume_type='PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
+        social_volume_type='TELEGRAM_CHATS_OVERVIEW'
     )
     batch.get(
         'topic_search',
