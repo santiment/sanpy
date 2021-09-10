@@ -1,15 +1,21 @@
-import datetime
-import pandas as pd
 import numpy as np
-import san
+import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
 
 register_matplotlib_converters()
 
+
 class Backtest:
 
-    def __init__(self, returns: pd.Series, trades: pd.Series, lagged=True, transaction_cost=0, percent_invested_per_trade=1):
+    def __init__(
+        self,
+        returns: pd.Series,
+        trades: pd.Series,
+        lagged: bool = True,
+        transaction_cost: float = 0,
+        percent_invested_per_trade: float = 1,
+    ):
         """ Initializing Backtesting function
             Init function generates performance of the test and several risk metrics. The object lets
             you specify wether you want to lag the trades to avoid overfitting, the transaction costs
@@ -102,49 +108,3 @@ class Backtest:
 
         plt.legend()
         plt.show()
-
-
-class Portfolio:
-
-    def __init__(self, start_date="2017-01-01", end_date=datetime.datetime.now().strftime("%Y-%m-%d"), asset_list=[]):
-        """ Takes in list of project slugs"""
-
-        self.start_date = start_date
-        self.end_date = end_date
-        self.asset_list = asset_list
-        self.portfolio = pd.DataFrame()
-        self.benchmark = san.get("ohlcv/bitcoin", from_date=start_date,
-                                 to_date=end_date).closePriceUsd.pct_change()
-
-        for portfolio_asset in asset_list:
-            self.portfolio[portfolio_asset] = san.get("ohlcv/" + portfolio_asset,
-                                                      from_date=start_date,
-                                                      to_date=end_date).closePriceUsd.pct_change()
-            self.portfolio = self.portfolio.replace([np.inf, -np.inf], 0)
-            self.metrics = dict()
-
-    def add_project(self, project):
-        self.asset_list.append(project)
-        self.portfolio[project] = san.get("ohlcv/" + project, from_date=self.start_date,
-                                          to_date=self.end_date).closePriceUsd.pct_change()
-        self.portfolio = self.portfolio.replace([np.inf, -np.inf], 0)
-
-    def remove_project(self, project):
-        self.portfolio = self.portfolio.drop([project], axis=1)
-        self.asset_list.remove(project)
-
-    def all_assets(self):
-        print(self.asset_list)
-        return self.asset_list
-
-    def metrics(self, metric):
-        metric_data = pd.DataFrame()
-        for asset in self.asset_list:
-            metric_data[asset] = san.get(metric + "/" + asset,
-                                         from_date=self.start_date, to_date=self.end_date).iloc[:, 0]
-
-        self.metrics[metric] = metric_data
-        return metric_data
-
-    def show_portfolio(self):
-        return self.portfolio
