@@ -1,26 +1,52 @@
 import datetime
 import pandas as pd
+import logging
+import re
+
+
+def convert_dt(timestamp_string, postfix=' 00:00:00'):
+
+    if type(timestamp_string) == datetime.date:
+        timestamp_string = timestamp_string.strftime('%Y-%m-%d')
+
+    if type(timestamp_string) == datetime.datetime:
+        timestamp_string = timestamp_string.strftime('%Y-%m-a%d %H:%M:%S')
+
+    timestamp_string = timestamp_string.replace('Z', '').replace('T', ' ')
+    timestamp_string = timestamp_string[:19]
+
+    if re.match(r'\d\d\d\d-\d\d-\d\d.\d\d:\d\d:\d\d', timestamp_string):
+        return timestamp_string[:10] + ' ' + timestamp_string[11:]
+    elif re.match(r'\d\d\d\d-\d\d-\d\d', timestamp_string):
+        return timestamp_string + postfix
+    else:
+        raise Exception(f"Unknown format: {timestamp_string} !")
+
+
+def str_to_ts(x):
+    return datetime.datetime.strptime(convert_dt(x), '%Y-%m-%d %H:%M:%S')
 
 
 class Strategy:
 
-    assets = {}
-    reserve_assets = {}
-
     def __init__(
         self,
         start_dt: str or datetime,
-        assets: list = [],
-        reserve_assets: list = [],
+        granularity='1D'
     ):
         '''
-        TODO: add kwargs
+        TODO: add kwargs?
         TODO: add docs
         '''
-        self._start_dt = start_dt
+        self._start_dt = str_to_ts(start_dt)
         self.end_dt = None
-        self._granularity = '1D'
+        self._granularity = granularity
         self.decision_delay = datetime.timedelta(days=0)
+
+        # TODO: reindex with end_dt if provided
+        assets_index = pd.date_range(start=start_dt, freq=granularity, periods=1)
+        self.assets = pd.DataFrame(index=assets_index)
+        self.reserve_assets = pd.DataFrame(index=assets_index)
 
         self.prices = pd.DataFrame(None)
         self.asset_shares = pd.DataFrame(None)
@@ -47,39 +73,81 @@ class Strategy:
 
     def add_assets(self, assets_type: str, assets: dict):
         '''
-        kwargs: start_dt, end_dt
-        TODO: custom start/end dts
-        TODO: check if asset in reserve AND non-reserve assets
-        TODO: introduce breaks in assets: dataframes instead of series
+        TODO: default start/end dts
+        TODO: check if asset in reserve AND non-reserve assets in the same time only
         TODO: check if provided datetimes are in self.start/self.end range
-        TODO: test series performance and memory usage
 
         Input assets example: {
-            'ethereum': ['2021-01-01', '2022-01-01'],
-            'uniswap': [2021-01-01, '2021-06-01]
+            'ethereum': ['2021-01-01', '2022-01-02'],
+            'uniswap': [2021-01-01, '2021-01-04]
             }
 
-        Result (self.)assets example: {
-            'ethereum': pd.Series(),
-            'uniswap': pd.Series()
-            }
+        Result (self.)assets: DataFrame
+                    eth     uni
+        dt
+        2021-01-01  1       1
+        2021-01-02  1       1
+        2021-01-03  0       1
+        2021-01-04  0       1
         '''
 
-        def update_assets(assets, new_assets, granularity):
+        def update_assets(assets, check_list, new_assets=assets, granularity=self._granularity):
+            ''' Updates assets-in-the-portfolio dataFrame. '''
+
             for asset_name in new_assets:
-                dates = new_assets[asset_name]
-                assets[asset_name] = pd.date_range(start=dates[0], end=dates[1], freq=granularity)
+                # Check if asset belongs to one and only one of (assets, reserve_assets)
+                assert asset_name not in check_list, \
+                    f'*{asset_name}* cant be used both as reserve and non-reserve asset!'
+
+                # Convert datetimes
+                dates = [str_to_ts(dt) for dt in new_assets[asset_name]]
+                assert min(dates) >= self._start_dt, \
+                    f'Provided datetime ({min(dates)}) is smaller than expected ({self._start_dt}). [{asset_name}]'
+
+                # Add given asset to the assets list if it isn't there already
+                if asset_name not in assets:
+                    assets[asset_name] = False
+
+                # If new dateranges exceed current daterange, update current daterange
+                if max(dates) > max(assets.index):
+                    new_index = pd.date_range(
+                        start=min(dates + list(assets.index)),
+                        end=max(dates + list(assets.index)),
+                        freq=granularity)
+                    assets = assets.reindex(assets.index.join(new_index, how='outer')).fillna(False)
+
+                # Finally update assets in the portfolio
+                assert len(dates) % 2 == 0, f'Unsupported datetime sequence for {asset_name}: odd amount of dates.'
+                for i in range(int(len(dates) / 2)):
+                    series_index = pd.date_range(start=dates[2 * i], end=dates[2 * i + 1], freq=granularity)
+                    assets[asset_name] |= pd.Series(index=series_index, data=True)
+
+            return assets
 
         if assets_type.lower() in ('r', 'reserve'):
-            update_assets(self.reserve_assets, new_assets=assets, granularity=self._granularity)
+            self.reserve_assets = update_assets(assets=self.reserve_assets, check_list=self.assets)
         else:
-            update_assets(self.assets, new_assets=assets, granularity=self._granularity)
+            self.assets = update_assets(assets=self.assets, check_list=self.reserve_assets)
 
-    def remove_asset(self, asset_name, **kwargs):
+    def remove_asset(self, assets: dict):
+        '''Removes from reserve or non-reserve assets.
+
+        # TODO: add complete asset removal
         '''
-        remove from reserve or non-reserve assets
-        '''
-        pass
+
+        def remove_assets(assets_df, exclude_asset, exclude_dates):
+            dates = [str_to_ts(dt) for dt in exclude_dates]
+            assert len(dates) % 2 == 0, f'Unsupported datetime sequence for {exclude_asset}: odd amount of dates.'
+            for i in range(int(len(dates) / 2)):
+                assets_df[exclude_asset].loc[dates[2 * i]:dates[2 * i + 1]] = False
+
+        for asset in assets:
+            if asset in self.reserve_assets:
+                remove_assets(assets_df=self.reserve_assets, exclude_asset=asset, exclude_dates=assets[asset])
+            elif asset in self.assets:
+                remove_assets(assets_df=self.assets, exclude_asset=asset, exclude_dates=assets[asset])
+            else:
+                logging.warning(f'can\'t find {asset} in assets.')
 
     def add_signals(self, signal_type, signals_df, **kwargs):
         '''
