@@ -1,49 +1,21 @@
-'''
-TODO: Do we need some constants section? (columns sets etc)
-'''
-
-import datetime
-import pandas as pd
 import logging
-import re
+import datetime
+import itertools
 import numpy as np
+import pandas as pd
 
-def convert_dt(timestamp_string, postfix=' 00:00:00'):
-
-    if type(timestamp_string) == datetime.date:
-        timestamp_string = timestamp_string.strftime('%Y-%m-%d')
-
-    if type(timestamp_string) == datetime.datetime:
-        timestamp_string = timestamp_string.strftime('%Y-%m-a%d %H:%M:%S')
-
-    timestamp_string = timestamp_string.replace('Z', '').replace('T', ' ')
-    timestamp_string = timestamp_string[:19]
-
-    if re.match(r'\d\d\d\d-\d\d-\d\d.\d\d:\d\d:\d\d', timestamp_string):
-        return timestamp_string[:10] + ' ' + timestamp_string[11:]
-    elif re.match(r'\d\d\d\d-\d\d-\d\d', timestamp_string):
-        return timestamp_string + postfix
-    else:
-        raise Exception(f"Unknown format: {timestamp_string} !")
-
-
-def str_to_ts(x):
-    return datetime.datetime.strptime(convert_dt(x), '%Y-%m-%d %H:%M:%S')
+from san.extras.utils import str_to_ts, pairwise
 
 
 class Strategy:
 
-<<<<<<< HEAD
-=======
     buy_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
     sell_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
     rebalance_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
     assets = pd.DataFrame(columns=['asset'])
     reserve_assets = pd.DataFrame(columns=['asset'])
-    prices = pd.DataFrame(None)
+    prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
     asset_shares = pd.DataFrame(None)
-    assets = pd.DataFrame(columns=['asset'])
-    reserve_assets = pd.DataFrame(columns=['asset'])
     transaction_log = pd.DataFrame(None)
     portfolio = pd.DataFrame(None)
 
@@ -55,20 +27,17 @@ class Strategy:
     percentage_anchoring_to_asset = True  # percentage_anchor = 'portfolio'  # 'portfolio' or 'asset'
     structure_change_behaviour = False  # wait for signals after an asset was added or removed
 
->>>>>>> f198614... Resolve linter issues and conflicts
     def __init__(
         self,
         start_dt: str or datetime,
-        granularity='1D'
+        end_dt: str or datetime or None = None,
+        granularity: str = '1D',
+        decision_delay: int = 0
     ):
-        '''
-        TODO: add kwargs?
-        TODO: add docs
-        '''
         self._granularity = granularity
         self._start_dt = str_to_ts(start_dt)
-        self.end_dt = None
-        self.decision_delay = datetime.timedelta(days=0)
+        self.end_dt = end_dt
+        self.decision_delay = datetime.timedelta(seconds=decision_delay)
 
         # TODO: reindex with end_dt if provided
         assets_index = pd.date_range(start=start_dt, freq=granularity, periods=1)
@@ -136,7 +105,7 @@ class Strategy:
                         data={'asset': asset_name}
                     ))
 
-            return assets.sort_index()
+            return assets[~(assets.index.duplicated() & assets.duplicated())].sort_index()
 
         def test_asset_name(new_assets, assets):
             ''' Check if asset belongs to one and only one of (assets, reserve_assets).'''
@@ -185,42 +154,22 @@ class Strategy:
     def add_signals(self, signal_type, signals_df, **kwargs):
         '''
         signal_type (str): buy, b, sell, s, rebalance, r
-        kwargs: desicion_delay: timedelta, signals_name: str
+        kwargs: desicion_delay: timedelta, signal_name: str
 
-        ---------
-        (old)
-        sell / buy signals
-        {
-            'mvrv_lower':
-                {
-                    'df': signals_df,
-                    'decision_delay': timedelta,
-                    'trade_percentage': trade_percentage
-                },
-        }
-
-        signals_df:
-                asset   value   metadata
-        dt_1     eth      ?       {}
-
-        ---------
 
         signals_df:
         dt      asset       signal          trade_percentage        delay       delayed_dt
-        10      eth         1               40                      1           11
-        20      uni         2               10                      2           22
+        10      eth         1               0.4                     1           11
+        20      uni         2               0.1                     2           22
 
-        ---------
-
-        TODO: trigger warning in case of signal name already exists
-        TODO: signals collisions (simultaneous opposite signals)
+        TODO: signals collisions, repeating (probably should be resolved on the step of signals fetching)
         TODO: unify signals dts with granularity
         TODO: unify columns set
         '''
 
         def update_signals(signals, df, **kwargs):
-            if 'signals_name' in kwargs.keys():
-                name = kwargs['signals_name']
+            if 'signal_name' in kwargs.keys():
+                name = kwargs['signal_name']
             else:
                 # Trying to define signals_1 as the default name
                 # Find available signals_n if 'signals_1' is busy
@@ -262,7 +211,7 @@ class Strategy:
 
         def update_signals(signals, signal_name):
             if signal_name:
-                logging.info(f'''Deleting {len(signals[signals['signal'] == signal_name])} signals named {signal_name}''')
+                logging.info(f'Deleting {len(signals[signals["signal"] == signal_name])} signals named {signal_name}')
                 return signals[~(signals['signal'] == signal_name)]
             else:
                 logging.info(f'''Deleting {len(signals)} signals''')
@@ -288,6 +237,7 @@ class Strategy:
     def set_rebalance_proportion(self, proportions_df):
         '''
         TODO: should reserve asset have the same share?
+        TODO: implement same logic with updates as in set_prices()
 
         Input: proportions_df
         dt      asset       value
@@ -306,24 +256,46 @@ class Strategy:
         15      uni         0.5
         '''
 
-        if 'value' not in proportions_df.columns:
-            logging.warning('`value` column name not found. Setting assets to equal shares.')
-            proportions_df['value'] = 1
-
         # transform proportion metric into assets' shares in the portfolio
         proportions_df['share'] = proportions_df['value'] / proportions_df.groupby('dt')['value'].transform(sum)
-        self.asset_shares = proportions_df[['dt', 'asset', 'share']]
+        self.asset_shares = proportions_df[['asset', 'share']]
 
-    def set_default_rebalance_proportion(self, end_dt):
+    def __set_default_rebalance_proportion(self, end_dt):
         '''
         Should be called inside build_portfolio().
+        # TODO: when setting equal asset shares consider assets availability (self.assets)
         '''
-        dates = pd.date_range(self._start_dt, end_dt, self._granularity)
         df = pd.DataFrame(
-            list(itertools.product(dates, list(self.assets.asset.unique()) + list(self.reserve_assets.asset.unique()))),
-            columns=['dt', 'asset']
+            list(itertools.product(
+                pd.date_range(self._start_dt, end_dt, freq=self._granularity),  # dates
+                list(self.assets.asset.unique()) + list(self.reserve_assets.asset.unique()),  # all available assets
+                [1]  # equal shares
+            )),
+            columns=['dt', 'asset', 'value']
         ).set_index('dt')
         self.set_rebalance_proportion(df)
+
+    def set_prices(self, price_df):
+        '''
+        TODO: check price gaps
+
+        price df:
+                    asset       price       price_change
+        dt
+        2021-01-01  eth         4000        NaN
+        2021-01-01  dai         1           NaN
+        2021-01-02  eth         4100        1.025
+        2021-01-02  dai         1           1
+        '''
+        if not isinstance(price_df.index, pd.DatetimeIndex):
+            price_df.index = pd.DatetimeIndex(price_df.index)
+        # compute price multiplier as 1 + (x[t] - x[t-1]) / x[t]
+        price_df['price_change'] = price_df.groupby('asset').transform(lambda x: 1 + pd.DataFrame.pct_change(x))
+        # append new prices
+        self.prices = self.prices.append(price_df)
+        # remove duplicated records. In case of duplicates leave last value. Leaving last value makes
+        # possible prices updates - just set new prices.
+        self.prices = self.prices.groupby(['dt', 'asset']).last().reset_index('asset').sort_index()
 
     def init_strategy(self):
         '''
@@ -333,11 +305,11 @@ class Strategy:
             'Add at least one asset to the portfolio!'
 
         if self.asset_shares.empty:
-            self.set_default_rebalance_proportion(self._start_dt)
+            self.__set_default_rebalance_proportion(self._start_dt)
 
         self.portfolio = self.asset_shares.loc[self._start_dt]
 
-    def build_portfolio(self, start_dt, end_dt):
+    def build_portfolio(self, start_dt, end_dt, rebuild=False):
         '''
         Portfolio df:
                     asset       share
@@ -346,8 +318,7 @@ class Strategy:
         2021-01-01  uni         0.25
         2021-01-01  dai         0.25
         2021-01-02  eth         0.5
-        2021-01-02  uni         0.5
-        ...
+        2021-01-02  uni         0.5...
         '''
 
         def build_trades():
@@ -360,25 +331,45 @@ class Strategy:
                self.percentage_anchoring_to_asset:
                 return default_build_trades()
 
+        def recompute_asset_shares(dt, prev_dt):
+            '''TODO: add docs'''
+            df = self.portfolio.loc[prev_dt].merge(self.prices.loc[dt].reset_index(), on=['asset'])
+            df['share'] = df['share'] * df['price_change']  # recompute share (so share column contains new shares)
+            df['share'] = df['share'] / df['share'].sum()
+            df = df[['dt', 'asset', 'share']].set_index('dt')
+            self.portfolio = self.portfolio.append(df)
+
         def check_signals():
             # TODO: check/generate rebalance signals
             # TODO: other signals checks?
+            # TODO: also check for asset shares!
             pass
 
-        def recompute_asset_shares():
+        def execute_trades():
             pass
 
+        if rebuild:
+            # discard part of the portfolio. loc[] cant be used as start_dt should be excluded as well
+            self.portfolio = self.portfolio[self.portfolio.index < start_dt]
+
+        # init if needed
         if self.portfolio.empty:
             self.init_strategy()
 
-        for day in pd.timedelta_range(start_dt, end_dt, self.granularity):
+        for prev_dt, dt in pairwise(pd.date_range(start_dt, end_dt, freq=self._granularity)):
+            if dt == self._start_dt:
+                # Initial portfolio must be computed with init_strategy(). Most probably it's already computed.
+                continue
+            if dt in self.portfolio.index:
+                # TODO: maybe remove logging here
+                logging.warning(f'Portfolio for {dt} exists already. Skipping {dt}.')
+                continue
             # check if any trades needed -> check for signals
+            recompute_asset_shares(dt, prev_dt)
             signals = check_signals()
             if signals:
-                trades = build_trades(day)
-                recompute_asset_shares(trades=trades)
-            else:
-                recompute_asset_shares(trades=[])
+                trades = build_trades(dt, signals)
+                execute_trades(trades=trades)
 
 
 def default_build_trades():
