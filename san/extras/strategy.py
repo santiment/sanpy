@@ -1,17 +1,17 @@
 import logging
 import datetime
 import itertools
-import numpy as np
 import pandas as pd
+from croniter import croniter
 
 from san.extras.utils import str_to_ts, pairwise
 
 
 class Strategy:
 
-    buy_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
-    sell_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
-    rebalance_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'delay', 'delayed_dt'])
+    buy_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
+    sell_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
+    rebalance_signals = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
     assets = pd.DataFrame(columns=['asset'])
     reserve_assets = pd.DataFrame(columns=['asset'])
     prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
@@ -19,13 +19,13 @@ class Strategy:
     transaction_log = pd.DataFrame(None)
     portfolio = pd.DataFrame(None)
 
-    default_trade_percantage = 1
-    trade_reserve_assets = False  # applies both to sell and buy signals
     rebalance_on_sell_signals = False
-    default_rebalance_period = None
-    add_absent_assets_on_rebalance = False
-    percentage_anchoring_to_asset = True  # percentage_anchor = 'portfolio'  # 'portfolio' or 'asset'
-    structure_change_behaviour = False  # wait for signals after an asset was added or removed
+
+    # default_trade_percantage = 1
+    # trade_reserve_assets = False  # applies both to sell and buy signals
+    # add_absent_assets_on_rebalance = False
+    # percentage_anchoring_to_asset = True  # percentage_anchor = 'portfolio'  # 'portfolio' or 'asset'
+    # structure_change_behaviour = False  # wait for signals after an asset was added or removed
 
     def __init__(
         self,
@@ -151,54 +151,58 @@ class Strategy:
             else:
                 logging.warning(f'can\'t find {asset} in assets.')
 
-    def add_signals(self, signal_type, signals_df, **kwargs):
+    def add_signals(self, signal_type, signals_df, signal_name=None):
         '''
-        signal_type (str): buy, b, sell, s, rebalance, r
-        kwargs: desicion_delay: timedelta, signal_name: str
+        signal_type: 'buy', 'b', 'sell', 's', 'rebalance', 'r'
 
+        Input DataFrame example:
 
-        signals_df:
-        dt      asset       signal          trade_percentage        delay       delayed_dt
-        10      eth         1               0.4                     1           11
-        20      uni         2               0.1                     2           22
+        dt                      signal      asset       trade_percantage        desicion_delay
+        2021-01-01 00:00:00     mvrv_lower  ethereum    0.3                     3 days (datetime.timedelta)
+        2021-02-01 13:00:00     mvrv_lower  uniswap     0.2                     3 days
+
+        The signals df main contain only 'dt' and 'asset' columns in case of buy/sell
+        signals or 'dt' in case of rebalance signals.
+        The signals_name will be generated and remaining columns will be filled with default values.
 
         TODO: signals collisions, repeating (probably should be resolved on the step of signals fetching)
-        TODO: unify signals dts with granularity
         TODO: unify columns set
         '''
 
-        def update_signals(signals, df, **kwargs):
-            if 'signal_name' in kwargs.keys():
-                name = kwargs['signal_name']
-            else:
+        def update_signals(signals, df, signal_name):
+            if not signal_name:
                 # Trying to define signals_1 as the default name
                 # Find available signals_n if 'signals_1' is busy
-                name = "signals_1"
-                while name in signals['signal'].unique():
-                    name = name.split('_')[0] + '_' + str(int(name.split('_')[1])+1)
+                signal_name = "signals_1"
+                while signal_name in signals['signal'].unique():
+                    signal_name = signal_name.split('_')[0] + '_' + str(int(signal_name.split('_')[1])+1)
 
-            df['signal'] = name
+            df['signal'] = signal_name
             df['dt'] = df['dt'].apply(lambda x: str_to_ts(x))
 
-            df['trade_percantage'] = df.apply(lambda x: x['trade_percantage'] \
-                if 'trade_percantage' in x.keys() and isinstance(x['trade_percantage'], (float, int)) and not np.isnan(x['trade_percantage']) \
-                else self.default_trade_percantage, axis=1)
+            if 'trade_percantage' not in df.columns:
+                df['trade_percantage'] = self.default_trade_percantage
 
-            delay = kwargs['decision_delay'] if 'decision_delay' in kwargs.keys() else self.decision_delay
-            df['delay'] = delay
-            df['delayed_dt'] = df['dt']+delay
+            if 'decision_delay' not in df.columns:
+                df['decision_delay'] = self.decision_delay
 
-            return signals.append(df).reset_index(drop=True)
+            df['delayed_dt'] = df['dt']+df['decision_delay']
+
+            df.set_index('delayed_dt', inplace=True)
+            df.set_index(df.index.ceil(freq=self._granularity), inplace=True)
+
+            # df = df['dt', 'signal', 'asset', 'decision_delay', 'trade_percantage']
+            return signals.append(df)
 
         df = signals_df.copy(deep=True)
         if signal_type.lower() in ('buy', 'b'):
-            self.buy_signals = update_signals(self.buy_signals, df, **kwargs)
+            self.buy_signals = update_signals(self.buy_signals, df, signal_name)
 
         elif signal_type.lower() in ('sell', 's'):
-            self.sell_signals = update_signals(self.sell_signals, df, **kwargs)
+            self.sell_signals = update_signals(self.sell_signals, df, signal_name)
 
         elif signal_type.lower() in ('rebalance', 'r'):
-            self.rebalance_signals = update_signals(self.rebalance_signals, df, **kwargs)
+            self.rebalance_signals = update_signals(self.rebalance_signals, df, signal_name)
 
         else:
             logging.error(f'Signal_type {signal_type} is not valid. Please provide valid signal_type')
@@ -226,39 +230,41 @@ class Strategy:
         else:
             logging.error(f'Signal_type {signal_type} is not valid. Please provide valid signal_type')
 
-    def add_periodic_rebalance(self):
+    def add_periodic_rebalance(self, cron_expr: str, skip_first_rebalance=False):
         '''
-        TODO: cron support
-        TODO: is rebalance_period field neccessary
         '''
-        # self.default_rebalance_period
-        pass
+        self.cron = croniter(cron_expr, self._start_dt)
+        self.cron.get_next()
+        if skip_first_rebalance:
+            self.cron.get_next()
 
     def set_rebalance_proportion(self, proportions_df):
         '''
-        TODO: should reserve asset have the same share?
-        TODO: implement same logic with updates as in set_prices()
-
         Input: proportions_df
-        dt      asset       value
-        10      eth         1
-        10      uni         1
-        10      dai         2
-        15      eth         1
-        15      uni         1
-
-        Output: updated self.shares_df
-        dt      asset       share
-        10      eth         0.5
-        10      uni         0.25
-        10      dai         0.25
-        15      eth         0.5
-        15      uni         0.5
+        dt              asset       value
+        2021-01-01      eth         1
+        2021-01-01      uni         1
+        2021-01-01      dai         2
+        2021-01-02      eth         1
+        2021-01-02      uni         1
         '''
 
-        # transform proportion metric into assets' shares in the portfolio
-        proportions_df['share'] = proportions_df['value'] / proportions_df.groupby('dt')['value'].transform(sum)
-        self.asset_shares = proportions_df[['asset', 'share']]
+        assert proportions_df.index.name == 'dt', 'dt index not found'
+        assert 'asset' in proportions_df.columns, 'asset column not found.'
+        assert 'value' in proportions_df.columns, 'value column not found.'
+
+        # update according to value provided at last
+        self.asset_shares = self.asset_shares.append(proportions_df)
+        self.asset_shares = self.asset_shares.groupby(['dt', 'asset']).last().reset_index('asset').sort_index()
+
+    def compute_asset_shares_for_dt(self, dt, assets=[]):
+        ''' Computes rebalance proportions.'''
+        df = self.asset_shares.loc[dt]
+        if assets:
+            df = df[df['asset'].isin(assets)]
+
+        df['share'] = df['value'] / df['value'].sum()
+        return df[['asset', 'share']]
 
     def __set_default_rebalance_proportion(self, end_dt):
         '''
@@ -307,7 +313,7 @@ class Strategy:
         if self.asset_shares.empty:
             self.__set_default_rebalance_proportion(self._start_dt)
 
-        self.portfolio = self.asset_shares.loc[self._start_dt]
+        self.portfolio = self.compute_asset_shares_for_dt(self._start_dt)
 
     def build_portfolio(self, start_dt, end_dt, rebuild=False):
         '''
@@ -321,16 +327,6 @@ class Strategy:
         2021-01-02  uni         0.5...
         '''
 
-        def build_trades():
-            '''returns trades'''
-            # TODO: maybe move to separate module
-
-            if self.trade_reserve_assets and \
-               self.structure_change_behaviour and \
-               self.add_absent_assets_on_rebalance and \
-               self.percentage_anchoring_to_asset:
-                return default_build_trades()
-
         def recompute_asset_shares(dt, prev_dt):
             '''TODO: add docs'''
             df = self.portfolio.loc[prev_dt].merge(self.prices.loc[dt].reset_index(), on=['asset'])
@@ -339,11 +335,15 @@ class Strategy:
             df = df[['dt', 'asset', 'share']].set_index('dt')
             self.portfolio = self.portfolio.append(df)
 
-        def check_signals():
-            # TODO: check/generate rebalance signals
-            # TODO: other signals checks?
-            # TODO: also check for asset shares!
-            pass
+        def check_signals(dt):
+            '''
+            TODO: other signals checks?
+            TODO: also check for asset shares!
+            '''
+            # check/generate rebalance signals
+            if dt >= self.get_current(datetime.datetime):
+                self.add_signals('r', pd.DataFrame({'dt': [dt]}), signal_name='cron_rebalance')
+                self.cron.get_next()
 
         def execute_trades():
             pass
@@ -352,44 +352,26 @@ class Strategy:
             # discard part of the portfolio. loc[] cant be used as start_dt should be excluded as well
             self.portfolio = self.portfolio[self.portfolio.index < start_dt]
 
-        # init if needed
         if self.portfolio.empty:
-            self.init_strategy()
+            self.init_strategy()  # init if needed
 
         for prev_dt, dt in pairwise(pd.date_range(start_dt, end_dt, freq=self._granularity)):
+
             if dt == self._start_dt:
                 # Initial portfolio must be computed with init_strategy(). Most probably it's already computed.
                 continue
             if dt in self.portfolio.index:
-                # TODO: maybe remove logging here
-                logging.warning(f'Portfolio for {dt} exists already. Skipping {dt}.')
+                logging.warning(f'Portfolio for {dt} exists already. Skipping {dt}.')  # TODO: remove logging here??
                 continue
-            # check if any trades needed -> check for signals
+
             recompute_asset_shares(dt, prev_dt)
-            signals = check_signals()
+            signals = check_signals()  # check if any trades needed -> check for signals
             if signals:
-                trades = build_trades(dt, signals)
+                trades = self.build_trades(dt, signals)
                 execute_trades(trades=trades)
 
-
-def default_build_trades():
-    pass
-
-# 10-01 sell (delay = 2)
-# --
-# 12-01 sell
-
-# 1 eth: 50% dai: 50%
-
-# -2-
-# signal: sell eth (...)          ['eth', 'dai'] -> ['dai', 'uni'], {'dai': 75%, 'uni': 25%}
-#     trx: eth(50%) -> dai(25%) + uni(25%)
-
-# update_portfolio:
-#     dai: 75%, uni: 25%
-
-# -3-
-# signal: ...
-#     trx: ...
-
-#     ...
+    def build_trades(self, **kwargs):
+        '''
+        That method must be redefined in a child class
+        '''
+        return []
