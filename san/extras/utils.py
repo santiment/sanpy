@@ -1,12 +1,5 @@
 import re
 import datetime
-from itertools import tee
-
-
-def pairwise(iterable):
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
 
 
 def convert_dt(timestamp_string, postfix=' 00:00:00'):
@@ -29,4 +22,19 @@ def convert_dt(timestamp_string, postfix=' 00:00:00'):
 
 
 def str_to_ts(x):
+    if isinstance(x, datetime.datetime):
+        return x
     return datetime.datetime.strptime(convert_dt(x), '%Y-%m-%d %H:%M:%S')
+
+
+def parse_str_to_timedelta(time_str):
+    regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)hr)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+    parts = regex.match(time_str.lower())
+    if not parts:
+        return
+    parts = parts.groupdict()
+    time_params = {}
+    for name, param in parts.items():
+        if param:
+            time_params[name] = int(param)
+    return datetime.timedelta(**time_params)
