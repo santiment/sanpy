@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import pandas as pd
 
-from san.extras.strategy import Strategy
+from san.extras.strategy.strategy import Strategy
 
 
 class SanX(Strategy):
@@ -48,7 +48,7 @@ class SanX(Strategy):
         current_portfolio = {item['asset']: item['share'] for i, item in current_portfolio.iterrows()}
         trades = []
 
-        # Ignore signals on assets if they have both buy and sell signals 
+        # Ignore signals on assets if they have both buy and sell signals
         if len(signals['sell_signals']) > 0 and len(signals['buy_signals']) > 0:
             assets_both = [el for el in signals['sell_signals']['asset'] if el in signals['buy_signals']['asset']]
             signals['sell_signals'] = signals['sell_signals'][~signals['sell_signals']['asset'].isin(assets_both)]
@@ -77,19 +77,19 @@ class SanX(Strategy):
         if len(to_add) > 0 or (len(signals['rebalance_signals']) > 0 and len(current_portfolio) > 1):
             for asset in current_portfolio:
                 if asset != reserve_asset:
-                    trades.append(self.genetate_trade(current_portfolio[asset], asset, reserve_asset))
+                    trades.append(self.generate_trade(current_portfolio[asset], asset, reserve_asset))
 
             for asset in new_portfolio_asset_shares:
-                trades.append(self.genetate_trade(new_portfolio_asset_shares[asset], reserve_asset, asset))
+                trades.append(self.generate_trade(new_portfolio_asset_shares[asset], reserve_asset, asset))
 
         # No new assets or rebalance signals while sell-signal exists
         elif len(to_add) == 0 and len(signals['rebalance_signals']) == 0 and len(to_remove) > 0:
             sold_share = 0
             for asset in to_remove:
-                trades.append(self.genetate_trade(current_portfolio[asset], asset, reserve_asset))
+                trades.append(self.generate_trade(current_portfolio[asset], asset, reserve_asset))
                 sold_share += current_portfolio[asset]
 
             for asset in new_portfolio_assets:
-                trades.append(self.genetate_trade(sold_share*new_portfolio_asset_shares[asset], reserve_asset, asset))
+                trades.append(self.generate_trade(sold_share*new_portfolio_asset_shares[asset], reserve_asset, asset))
 
         return trades

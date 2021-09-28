@@ -1,12 +1,26 @@
+import re
 import logging
 import datetime
 import itertools
 import pandas as pd
 from croniter import croniter
 
-from san.extras.utils import str_to_ts, parse_str_to_timedelta
+from san.extras.utils import str_to_ts
 
 pd.options.mode.chained_assignment = None
+
+
+def parse_time(time_str):
+    regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)hr)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+    parts = regex.match(time_str.lower())
+    if not parts:
+        return
+    parts = parts.groupdict()
+    time_params = {}
+    for name, param in parts.items():
+        if param:
+            time_params[name] = int(param)
+    return datetime.timedelta(**time_params)
 
 
 class Strategy:
@@ -18,7 +32,7 @@ class Strategy:
     reserve_assets = pd.DataFrame(columns=['asset'])
     prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
     asset_shares = pd.DataFrame(None)
-    trades_log = pd.DataFrame(columns=['dt', 'share', 'from', 'to', 'metadata'])
+    transaction_log = pd.DataFrame(None)
     portfolio = pd.DataFrame(None)
     default_trade_percantage = 1
 
@@ -310,17 +324,6 @@ class Strategy:
         # possible prices updates - just set new prices.
         self.prices = self.prices.groupby(['dt', 'asset']).last().reset_index('asset').sort_index()
 
-    def genetate_trade(self, share, asset_from, asset_to, metadata=''):
-        '''
-        # TODO: do we need variative share anchor? (asset/portfolio)
-        '''
-        return {
-            'share': share,
-            'from': asset_from,
-            'to': asset_to,
-            'metadata': metadata
-        }
-
     def init_strategy(self):
         '''
         Initiates the strategy.
@@ -372,7 +375,7 @@ class Strategy:
             if dt not in signals.index:
                 return ''
             if assets_check:
-                return '' if dt not in self.assets.index else signals[signals['asset'].isin(self.assets.loc[[dt]]['asset'])].loc[[dt]]
+                return '' if dt not in self.assets.index else signals[signals['asset'].isin(self.assets.loc[[dt]]['asset'])]
             return signals.loc[[dt]]
 
         def check_signals(dt):
@@ -422,11 +425,6 @@ class Strategy:
             if abs(sum(current_portfolio.values()) - 1) > 2*self.accuracy:
                 logging.warning(f'Portfolio scructure sum is {sum(current_portfolio.values())} - trades may contain errors')
 
-            for trade in trades:
-                self.trades_log.loc[len(self.trades_log)] = {
-                    'dt': dt,
-                    **trade
-                }
             result_df = pd.DataFrame({'dt': dt, 'asset': list(current_portfolio.keys()), 'share': list(current_portfolio.values())})
             result_df.set_index('dt', inplace=True)
             self.portfolio = self.portfolio[self.portfolio.index != dt]
@@ -442,7 +440,7 @@ class Strategy:
 
         for dt in pd.date_range(start_dt, end_dt, freq=self._granularity):
 
-            prev_dt = dt if dt == self._start_dt else dt - parse_str_to_timedelta(self._granularity)
+            prev_dt = dt if dt == self._start_dt else dt - parse_time(self._granularity)
 
             if dt in self.portfolio.index and dt != self._start_dt:
                 logging.warning(f'Portfolio for {dt} exists already. Skipping {dt}.')  # TODO: remove logging here??
@@ -450,7 +448,8 @@ class Strategy:
 
             recompute_asset_shares(dt, prev_dt)
             signals = check_signals(dt)  # check if any trades needed -> check for signals
-            if sum([len(x) for x in signals.values()]) > 0:
+            #if sum([len(x) for x in signals.values()]) > 0:
+            if len(signals) > 0:
                 trades = self.build_trades(dt, prev_dt, signals)
                 execute_trades(dt, trades=trades)
 
