@@ -1,7 +1,4 @@
 import logging
-import datetime
-import itertools
-import numpy as np
 import pandas as pd
 
 from san.extras.strategy.strategy import Strategy
@@ -9,41 +6,19 @@ from san.extras.strategy.strategy import Strategy
 
 class SanX(Strategy):
 
-    def init_strategy(self):
-        '''
-        Initiates the strategy.
-        '''
-
-        allowed_assets = list(self.assets.loc[[self._start_dt]]['asset'].unique())
-        allowed_reserve_assets = list(self.reserve_assets.loc[[self._start_dt]]['asset'].unique())
-
-        if len(allowed_reserve_assets) == 0:
-            logging.error('Add reserve asset')
-            return
-
-        assert len(allowed_assets) + len(allowed_reserve_assets) > 0, \
-            'Add at least one asset to the portfolio!'
-
-        if len(allowed_assets) > 0:
-            self.portfolio = self.compute_asset_shares_for_dt(self._start_dt, allowed_assets)
-
-        else:
-            self.portfolio = self.compute_asset_shares_for_dt(self._start_dt, allowed_reserve_assets)
-
-
     def build_trades(self, dt, prev_dt, signals, **kwargs):
         '''
         # TODO : multiple reserve assets (may be provided via parent class)
         '''
 
-        reserve_asset = list(self.reserve_assets.loc[[dt]]['asset'].unique())
+        reserve_asset = self.assets.get_authorized_assets_for_dt(dt, 'r')
         if len(reserve_asset) == 0 or len(reserve_asset) > 1:
-            logging.error('The strategy requires a single reserve asset.')
+            logging.warning('The strategy requires a single reserve asset.')
             return []
 
         reserve_asset = reserve_asset[0]
 
-        current_portfolio = self.portfolio[self.portfolio['share']>0].loc[[dt]]
+        current_portfolio = self.portfolio[self.portfolio['share'] > 0].loc[[dt]]
 
         current_portfolio = {item['asset']: item['share'] for i, item in current_portfolio.iterrows()}
         trades = []
@@ -68,7 +43,11 @@ class SanX(Strategy):
 
         to_remove = list(signals['sell_signals']['asset'].unique()) if len(signals['sell_signals']) > 0 else []
         to_add = list(signals['buy_signals']['asset'].unique()) if len(signals['buy_signals']) > 0 else []
-        new_portfolio_assets = [el for el in list(current_portfolio) + to_add if el not in to_remove]
+
+        if reserve_asset in current_portfolio:
+            new_portfolio_assets = [asset for asset in to_add if asset not in to_remove]
+        else:
+            new_portfolio_assets = [asset for asset in list(current_portfolio) + to_add if asset not in to_remove]
 
         new_portfolio_asset_shares = self.compute_asset_shares_for_dt(dt, new_portfolio_assets)
         new_portfolio_asset_shares = {item['asset']: item['share'] for index, item in new_portfolio_asset_shares.iterrows()}

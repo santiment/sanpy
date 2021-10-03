@@ -20,8 +20,6 @@ class Prices:
     TODO: prices interpolation
     '''
 
-    prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
-
     def __init__(
         self,
         start_dt: str or datetime,
@@ -32,6 +30,8 @@ class Prices:
         self._granularity = granularity
         self._start_dt = str_to_ts(start_dt)
         self.end_dt = end_dt
+
+        self.prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
 
     def set(self, price_df: pd.DataFrame):
         '''

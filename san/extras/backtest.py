@@ -1,150 +1,218 @@
 import datetime
 import pandas as pd
-import numpy as np
-import san
-import matplotlib.pyplot as plt
-from pandas.plotting import register_matplotlib_converters
+import logging
+from san.extras.strategy.prices import Prices
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from san.extras.utils import str_to_ts
 
-register_matplotlib_converters()
+
+def prepare_df(source_df: pd.DataFrame):
+    '''
+    DF can be provided to the object with dt index or dt column
+    which will be transformed into index.
+    '''
+    df = source_df.copy()
+    if 'dt' in df.columns:
+        if not is_datetime(df['dt']):
+            df['dt'] = df['dt'].apply(lambda x: str_to_ts(x))
+        df.set_index('dt', inplace=True)
+    else:
+        if type(df.index) != pd.core.indexes.datetimes.DatetimeIndex:
+            logging.error('Please provide a df with datetime index or index data using column named "dt"')
+            return
+        else:
+            df.index.name = 'dt'
+            df = df.reset_index()
+            df['dt'] = [item.replace(tzinfo=None) for item in df['dt']]
+            df.set_index('dt', inplace=True)
+    return df
+
 
 class Backtest:
+    '''
+    Backtest class provides the ability to calculate portfolio step-by step returns
+    based on the assets' price returns and portfolio structure
+    and build strategy models with transaction fees taken into account.
 
-    def __init__(self, returns: pd.Series, trades: pd.Series, lagged=True, transaction_cost=0, percent_invested_per_trade=1):
-        """ Initializing Backtesting function
-            Init function generates performance of the test and several risk metrics. The object lets
-            you specify wether you want to lag the trades to avoid overfitting, the transaction costs
-            and the percentage of the portfolio to be invested per trade (50% as 0.5).
-            Trade example:
-                With given prices [P1, P2, P3] and given trades [False, True, False]
-                you buy asset when the price is P2 and sell when the price is P3.
-        """
+    TODO:
+    '''
 
-        if lagged:
-            trades = trades.shift(1)
-            trades.iloc[0] = False
-        self.strategy_returns = ((returns * percent_invested_per_trade) * trades)
-        self.trades = trades
+    def __init__(self,
+                 start_dt: str or datetime.datetime,
+                 initial_investment: float = 10**6,
+                 default_trades_limit: int = 1,
+                 accuracy: float = 3*10**(-6)
+                 ):
+        self.start_dt = str_to_ts(start_dt)
+        self.initial_investment = initial_investment
+        self.default_transfers_limit = default_trades_limit
+        self.accuracy = accuracy
 
-        self.nr_trades = {'buy': [], 'sell': []}
-        for i in range(1, len(trades)):
-            if trades[i] != trades[i - 1]:
-                self.strategy_returns.iloc[i] -= transaction_cost
-                if trades[i]:
-                    self.nr_trades['buy'].append(self.trades.index[i])
-                else:
-                    self.nr_trades['sell'].append(self.trades.index[i])
-        if trades[-1]:  # include last day sell to make benchmark possible
-            self.nr_trades['sell'].append(self.trades.index[i])
+        self.prices = Prices(start_dt=self.start_dt)
+        self.portfolio_price_change = pd.DataFrame(None)
+        self.portfolio_price = pd.DataFrame(None)
+        self.portfolio = pd.DataFrame(None)
+        self.trades_log = pd.DataFrame(None)
+        self.fees = pd.DataFrame(None)
 
-        self.performance = (self.strategy_returns + 1).cumprod() - 1
-        self.benchmark = (returns + 1).cumprod() - 1
-
-    def get_sharpe_ratio(self, decimals=2):
-        sharpe_ratio = (self.strategy_returns.mean() * 365) / (self.strategy_returns.std() * np.sqrt(365))
-        return round(sharpe_ratio, decimals)
-
-    def get_value_at_risk(self, percentile=5):
-        sorted_rets = sorted(self.strategy_returns)
-        var = np.percentile(sorted_rets, percentile)
-        return round(var * 100, 2)
-
-    def get_nr_trades(self):
-        return len(self.nr_trades['sell']) + len(self.nr_trades['buy'])
-
-    def get_maximum_drawdown(self, decimals=2):
-        running_value = np.array(self.performance + 1)
-        running_value[0] = 0
-        end = np.argmax(np.maximum.accumulate(running_value) - running_value)  # end of the dropdown period
-        start = np.argmax(running_value[:end])  # start of the dropdown period
-        maximum_drawdown = (running_value[end] - running_value[start]) / running_value[start]
-        return round(maximum_drawdown * 100, decimals)
-
-    def get_return(self, decimals=2):
-        return round(((self.performance.iloc[-1] + 1) / (self.performance.iloc[1] + 1) - 1) * 100, decimals)
-
-    def get_return_benchmark(self, decimals=2):
-        return round(((self.benchmark.iloc[-1] + 1) / (self.benchmark.iloc[0] + 1) - 1) * 100, decimals)
-
-    def get_annualized_return(self, decimals=2):
-        return round((((self.performance.iloc[-1] + 1) ** (1 / len(self.performance))) - 1) * 365 * 100, decimals)
-
-    def summary(self):
-        print("Returns in Percent: ", self.get_return())
-        print("Returns Benchmark in Percent: ", self.get_return_benchmark())
-        print("Annualized Returns in Percent: ", self.get_annualized_return())
-        print("Annualized Sharpe Raito: ", self.get_sharpe_ratio())
-        print("Number of Trades: ", self.get_nr_trades())
-
-    def plot_backtest(self, viz=None):
-        ''' param viz: None OR "trades" OR "hodl".
+    def add_portfolio(self, portfolio_df, replace=False):
         '''
-        plt.figure(figsize=(15, 8))
-        plt.plot(self.performance, label="performance")
-        plt.plot(self.benchmark, label="holding")
+        Input DataFrame examples:
 
-        if viz == 'trades':
-            min_y = min(self.performance.min(), self.benchmark.min())
-            max_y = max(self.performance.max(), self.benchmark.max())
-            plt.vlines(self.nr_trades['sell'], min_y, max_y, color='red')
-            plt.vlines(self.nr_trades['buy'], min_y, max_y, color='green')
-        elif viz == 'hodl':
-            hodl_periods = []
-            for i in range(len(self.trades)):
-                state = self.trades[i - 1] if i > 0 else self.trades[i]
-                if self.trades[i] and not state:
-                    start = self.strategy_returns.index[i]
-                elif not self.trades[i] and state:
-                    hodl_periods.append([start, self.strategy_returns.index[i]])
-            if self.trades[-1]:
-                hodl_periods.append([start, self.strategy_returns.index[i]])
-            for hodl_period in hodl_periods:
-                plt.axvspan(hodl_period[0], hodl_period[1], color='#aeffa8')
+                        asset   share
+        dt
+        2020-01-01       eth     0.5
+        2020-01-01       uni     0.5
+        2020-01-02       eth     0.6
+        2020-01-03       uni     0.4
+        dt is pandas DateTimeIndex.
 
-        plt.legend()
-        plt.show()
+                dt               asset   share
+        index
+        1       2020-01-01       eth     0.5
+        2       2020-01-01       uni     0.5
+        3       2020-01-02       eth     0.6
+        4       2020-01-03       uni     0.4
+        dt contains date/datetime objects
+        or string values that can be parsed as date/datetime
+        '''
+        df = prepare_df(portfolio_df)
 
+        if replace:
+            self.portfolio = self.portfolio[~self.portfolio.index.isin(list(df.index))]
+        else:
+            df = df[~df.index.isin(self.portfolio.index)]
+        self.portfolio = self.portfolio.append(df).sort_index()
 
-class Portfolio:
+    def add_trades(self, trades_df, replace=False):
+        df = prepare_df(trades_df)
+        if replace:
+            self.trades_log = self.trades_log[~self.trades_log.index.isin(list(df.index))]
+        else:
+            df = df[~df.index.isin(list(self.trades_log.index))]
+        self.trades_log = self.trades_log.append(df).sort_index()
 
-    def __init__(self, start_date="2017-01-01", end_date=datetime.datetime.now().strftime("%Y-%m-%d"), asset_list=[]):
-        """ Takes in list of project slugs"""
+    def add_fees(self, fees_df: pd.DataFrame):
+        df = prepare_df(fees_df)
+        self.fees = self.fees[~self.fees.index.isin(df.index)]
+        self.fees = self.fees.append(df).sort_index()
 
-        self.start_date = start_date
-        self.end_date = end_date
-        self.asset_list = asset_list
-        self.portfolio = pd.DataFrame()
-        self.benchmark = san.get("ohlcv/bitcoin", from_date=start_date,
-                                 to_date=end_date).closePriceUsd.pct_change()
+    def get_trades_amount(self, dt):
+        trades_amount = len(self.trades_log[self.trades_log.index == dt])
+        trades_amount *= self.default_transfers_limit
+        return trades_amount
 
-        for portfolio_asset in asset_list:
-            self.portfolio[portfolio_asset] = san.get("ohlcv/" + portfolio_asset,
-                                                      from_date=start_date,
-                                                      to_date=end_date).closePriceUsd.pct_change()
-            self.portfolio = self.portfolio.replace([np.inf, -np.inf], 0)
-            self.metrics = dict()
+    def init_portfolio_price_change(self):
+        if self.start_dt not in list(self.portfolio.index):
+            logging.error('Please provide the portfolio dataframe')
+            return
 
-    def add_project(self, project):
-        self.asset_list.append(project)
-        self.portfolio[project] = san.get("ohlcv/" + project, from_date=self.start_date,
-                                          to_date=self.end_date).closePriceUsd.pct_change()
-        self.portfolio = self.portfolio.replace([np.inf, -np.inf], 0)
+        self.portfolio_price_change = pd.DataFrame({
+            'dt': [self.start_dt],
+            'price_change': [1]
+        }).set_index('dt')
 
-    def remove_project(self, project):
-        self.portfolio = self.portfolio.drop([project], axis=1)
-        self.asset_list.remove(project)
+    def init_portfolio_price(self):
+        dt_portfolio_price = self.initial_investment
+        dt_trades_amount = self.get_trades_amount(self.start_dt)
+        if dt_trades_amount > 0:
+            txn_fee = float(self.fees.loc[self.start_dt]['value'])
+            dt_fee = txn_fee * dt_trades_amount
+            dt_portfolio_price -= dt_fee
 
-    def all_assets(self):
-        print(self.asset_list)
-        return self.asset_list
+        self.portfolio_price = pd.DataFrame({
+            'dt': [self.start_dt],
+            'value': [dt_portfolio_price],
+            'max_trades': [dt_trades_amount]
+        }).set_index('dt')
 
-    def metrics(self, metric):
-        metric_data = pd.DataFrame()
-        for asset in self.asset_list:
-            metric_data[asset] = san.get(metric + "/" + asset,
-                                         from_date=self.start_date, to_date=self.end_date).iloc[:, 0]
+    def get_available_portfolio_dts(self, start_dt, end_dt):
+        dt1 = start_dt if type(start_dt) == datetime.datetime else str_to_ts(start_dt)
 
-        self.metrics[metric] = metric_data
-        return metric_data
+        if end_dt:
+            dt2 = end_dt if end_dt and type(end_dt) == datetime.datetime else str_to_ts(end_dt)
+            return list(self.portfolio[(self.portfolio.index >= dt1) & (self.portfolio.index <= dt2)].index.unique())
+        else:
+            return list(self.portfolio[self.portfolio.index >= dt1].index.unique())
 
-    def show_portfolio(self):
-        return self.portfolio
+    def build_portfolio_price_change(self, start_dt, end_dt, rebuild=False):
+        '''
+        Build the daily returns of the provided strategy
+        '''
+
+        if rebuild:
+            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index <= start_dt]
+
+        if self.portfolio_price_change.empty:
+            self.init_portfolio_price_change()
+
+        dts = self.get_available_portfolio_dts(start_dt, end_dt)
+
+        for dt in dts[1:]:
+            if dt in self.portfolio_price_change.index:
+                logging.info(f'The price change data already contains values for {dt}')
+                continue
+
+            prev_dt = dts[dts.index(dt) - 1]
+            dt_portfolio = self.portfolio[self.portfolio['share'] > 0].loc[prev_dt]
+
+            dt_prices = self.prices.prices.loc[[dt]][['asset', 'price_change']]
+            dt_prices = dt_prices[dt_prices['price_change'] > 0]
+            dt_prices = dt_prices[dt_prices['asset'].isin(list(dt_portfolio['asset'].unique()))]
+
+            dt_portfolio = {el['asset']: el['share'] for i, el in dt_portfolio.iterrows()}
+            dt_prices = {el['asset']: el['price_change'] for i, el in dt_prices.iterrows()}
+
+            if abs(sum(dt_portfolio.values()) - 1) > self.accuracy:
+                logging.warning(f'Portfolio asset shares sum is different from 1 on {dt} ')
+
+            if not all(asset in dt_prices for asset in dt_portfolio):
+                logging.error(f'Price data is missing for some of assets on {dt}')
+                return
+
+            dt_price_change = 0
+            for asset in dt_portfolio:
+                dt_price_change += dt_portfolio[asset] * dt_prices[asset]
+
+            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index != dt]
+            self.portfolio_price_change.loc[dt] = {'price_change': dt_price_change}
+
+    def build_portfolio_price(self, start_dt, end_dt, rebuild=False):
+        '''
+        TODO: process txns limit for each trade (provided via metadata or a separate column?)
+        '''
+
+        if rebuild:
+            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index <= start_dt]
+
+        dts = self.get_available_portfolio_dts(start_dt, end_dt)
+
+        # We need portfolio price change for the desired time range to run the backtest with transfers
+        if any(dt not in self.portfolio_price_change.index for dt in dts):
+            self.build_portfolio_price_change(start_dt, end_dt, rebuild)
+
+        if self.portfolio_price.empty:
+            self.init_portfolio_price()
+
+        for dt in dts[1:]:
+
+            if dt in self.portfolio_price.index:
+                logging.info(f'The portfolio price data already contains values for {dt}')
+                continue
+
+            prev_dt = dts[dts.index(dt) - 1]
+            if prev_dt not in self.portfolio_price.index:
+                logging.error(f'Portfolio price data is missing for {prev_dt}')
+                return
+            dt_portfolio_price = float(self.portfolio_price.loc[prev_dt]['value']) * float(self.portfolio_price_change.loc[dt]['price_change'])
+
+            dt_trades_amount = self.get_trades_amount(dt)
+            if dt_trades_amount > 0:
+                txn_fee = float(self.fees.loc[dt]['value'])
+                dt_fee = txn_fee * dt_trades_amount
+                dt_portfolio_price -= dt_fee
+
+            self.portfolio_price.loc[dt] = {
+                'value': dt_portfolio_price,
+                'max_trades': dt_trades_amount
+            }

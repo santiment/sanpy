@@ -11,14 +11,25 @@ _shared_error_msg = 'Signal_type {} is not valid. Please provide valid signal_ty
 class Signals:
     '''
     Signals management tool.
+
+    Signal is an event that happens in a certain point in time. In general case
+    the signal could be represented by a set of datetimes. A signal could
+    correspond to a particular asset or to a few assets.
+
+    Signals are interpreted in a 3 different ways:
+    1. Buy-signals
+        Buy-signal an instruction to buy a particluar asset. E.g. include a
+        particular asset in the portfolio. In general case, increase asset's
+        share in the portfolio.
+    2. Sell-signals
+        Sell-signal an instruction to sell a particluar asset. E.g. exclude a
+        particular asset from the portfolio. In general case, decrease
+        asset's share in the portfolio.
+    3. Rebalance-signals
+        Rebalance-signals leads to some changes in the portfolio structure.
+        These changes may or may not lead to including an asset or complete
+        asset excluding from the portfolio.
     '''
-
-    _default_signals_df = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
-
-    buy_signals = _default_signals_df.copy()
-    sell_signals = _default_signals_df.copy()
-    rebalance_signals = _default_signals_df.copy()
-    default_trade_percantage = 1
 
     def __init__(
         self,
@@ -31,6 +42,12 @@ class Signals:
         self._start_dt = str_to_ts(start_dt)
         self.end_dt = end_dt
         self.decision_delay = datetime.timedelta(seconds=decision_delay)
+        self.default_trade_percantage = 1
+
+        _default_signals_df = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
+        self.buy_signals = _default_signals_df.copy()
+        self.sell_signals = _default_signals_df.copy()
+        self.rebalance_signals = _default_signals_df.copy()
 
     def add(self, signal_type: str, signals_df: pd.DataFrame, signal_name: str or None = None):
         '''

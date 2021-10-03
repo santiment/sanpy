@@ -56,9 +56,6 @@ class Strategy:
     '''
 
     accuracy = 3 * 10**(-6)
-    portfolio = pd.DataFrame(None)
-    asset_shares = pd.DataFrame(None)
-    trades_log = pd.DataFrame(columns=['dt', 'share', 'from', 'to', 'metadata'])
 
     def __init__(
         self,
@@ -81,6 +78,10 @@ class Strategy:
         self.assets = Assets(start_dt=start_dt, end_dt=end_dt, granularity=granularity, init_asset=init_asset)
         self.prices = Prices(start_dt=start_dt, end_dt=end_dt, granularity=granularity)
         self.signals = Signals(start_dt=start_dt, end_dt=end_dt, granularity=granularity, decision_delay=decision_delay)
+
+        self.portfolio = pd.DataFrame(None)
+        self.asset_shares = pd.DataFrame(None)
+        self.trades_log = pd.DataFrame(columns=['dt', 'share', 'from', 'to', 'metadata'])
 
     def add_periodic_rebalance(self, cron_expr: str, skip_rebalance_on_init: bool = True):
         '''
@@ -161,6 +162,8 @@ class Strategy:
         if assets:
             # TODO: consider authorized assets only
             df = df[df['asset'].isin(assets)]
+        else:
+            return []
 
         df['share'] = df['value'] / df['value'].sum()
         return df[['asset', 'share']]
@@ -223,7 +226,7 @@ class Strategy:
 
         if not self.init_asset:
             assert len(self.assets.get_names('r')) > 0, 'Either init_asset or reserve_assets must be set up!'
-            self.init_asset = self.assets.get_names[0]
+            self.init_asset = self.assets.get_names('r')[0]
             logging.info(f'Set {self.init_asset} as init asset.')
 
         if self.asset_shares.empty:
@@ -352,7 +355,7 @@ class Strategy:
                         current_portfolio[trade['to']] += transferred_share
                 else:
                     logging.error(f'Trade can not be performed on {dt}: {trade}.'
-                                  'Portfolio structure: {current_portfolio}')
+                                  f'Portfolio structure: {current_portfolio}')
                     return
 
             if abs(sum(current_portfolio.values()) - 1) > self.accuracy:
@@ -374,6 +377,7 @@ class Strategy:
         if rebuild:
             # discard part of the portfolio. loc[] cant be used as start_dt should be excluded as well
             self.portfolio = self.portfolio[self.portfolio.index < start_dt]
+            self.trades_log = self.trades_log[self.trades_log.index < start_dt]
 
         if self.portfolio.empty:
             self._init_strategy()  # init if needed
