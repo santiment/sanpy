@@ -1,5 +1,4 @@
 import logging
-import pandas as pd
 
 from san.extras.strategy.strategy import Strategy
 
@@ -31,11 +30,13 @@ class SanX(Strategy):
 
         # Ignore buy signals of assets which are already in portfolio
         if len(signals['buy_signals']) > 0:
-            signals['buy_signals'] = signals['buy_signals'][~signals['buy_signals']['asset'].isin(list(current_portfolio))]
+            signals['buy_signals'] = \
+                signals['buy_signals'][~signals['buy_signals']['asset'].isin(list(current_portfolio))]
 
         # Ignore removing of assets which are missing in the existing portfolio
         if len(signals['sell_signals']) > 0:
-            signals['sell_signals'] = signals['sell_signals'][signals['sell_signals']['asset'].isin(list(current_portfolio))]
+            signals['sell_signals'] = \
+                signals['sell_signals'][signals['sell_signals']['asset'].isin(list(current_portfolio))]
 
         # Check if the valid signals remain
         if len(signals['buy_signals']) + len(signals['sell_signals']) + len(signals['rebalance_signals']) == 0:
@@ -50,7 +51,8 @@ class SanX(Strategy):
             new_portfolio_assets = [asset for asset in list(current_portfolio) + to_add if asset not in to_remove]
 
         new_portfolio_asset_shares = self.compute_asset_shares_for_dt(dt, new_portfolio_assets)
-        new_portfolio_asset_shares = {item['asset']: item['share'] for index, item in new_portfolio_asset_shares.iterrows()}
+        new_portfolio_asset_shares = {
+            item['asset']: item['share'] for index, item in new_portfolio_asset_shares.iterrows()}
 
         # New asset has to be added or the rebalance signal appeared (if we have what we want to rebalance)
         if len(to_add) > 0 or (len(signals['rebalance_signals']) > 0 and len(current_portfolio) > 1):

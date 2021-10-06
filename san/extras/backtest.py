@@ -30,11 +30,18 @@ def prepare_df(source_df: pd.DataFrame):
 
 class Backtest:
     '''
-    Backtest class provides the ability to calculate portfolio step-by step returns
+    The tool provides the ability to calculate portfolio step-by step returns
     based on the assets' price returns and portfolio structure
     and build strategy models with transaction fees taken into account.
 
-    TODO:
+    Backtest is designed to work together with Strategy child classes,
+    some components may be provided from the Strategy-based object
+    which contains the strategy that has to be backtested.
+
+    TODO: Transform the default_trades_amount meaning
+    TODO: Add the ability to provide custom fees and trade_limits via trades_log
+    TODO: (probably) Automatic check of missing trades
+          (or simply the functions that gets trades from the portfolio and price data)
     '''
 
     def __init__(self,
@@ -49,15 +56,22 @@ class Backtest:
         self.accuracy = accuracy
 
         self.prices = Prices(start_dt=self.start_dt)
-        self.portfolio_price_change = pd.DataFrame(None)
-        self.portfolio_price = pd.DataFrame(None)
+
         self.portfolio = pd.DataFrame(None)
+        self.net_returns = pd.DataFrame(None)
+        self.portfolio_price = pd.DataFrame(None)
+
         self.trades_log = pd.DataFrame(None)
         self.fees = pd.DataFrame(None)
 
     def add_portfolio(self, portfolio_df, replace=False):
         '''
-        Input DataFrame examples:
+        Sets or updates the portfolio structure dataframe
+
+        Input dataframe is supposed to be indexes with DateTimeIndex
+        or to have a column named 'dt' which contains date/datetime objects
+        or string values that can be parsed as date/datetime
+        The DataFrame examples:
 
                         asset   share
         dt
@@ -65,7 +79,7 @@ class Backtest:
         2020-01-01       uni     0.5
         2020-01-02       eth     0.6
         2020-01-03       uni     0.4
-        dt is pandas DateTimeIndex.
+
 
                 dt               asset   share
         index
@@ -73,8 +87,6 @@ class Backtest:
         2       2020-01-01       uni     0.5
         3       2020-01-02       eth     0.6
         4       2020-01-03       uni     0.4
-        dt contains date/datetime objects
-        or string values that can be parsed as date/datetime
         '''
         df = prepare_df(portfolio_df)
 
@@ -85,6 +97,10 @@ class Backtest:
         self.portfolio = self.portfolio.append(df).sort_index()
 
     def add_trades(self, trades_df, replace=False):
+        '''
+        Sets or updates the trades dataframe
+        '''
+
         df = prepare_df(trades_df)
         if replace:
             self.trades_log = self.trades_log[~self.trades_log.index.isin(list(df.index))]
@@ -93,26 +109,42 @@ class Backtest:
         self.trades_log = self.trades_log.append(df).sort_index()
 
     def add_fees(self, fees_df: pd.DataFrame):
+        '''
+        Sets or updates the fees data
+        '''
+
         df = prepare_df(fees_df)
         self.fees = self.fees[~self.fees.index.isin(df.index)]
         self.fees = self.fees.append(df).sort_index()
 
     def get_trades_amount(self, dt):
+        '''
+        Calculates the amount of trades for a provided dt
+        '''
+
         trades_amount = len(self.trades_log[self.trades_log.index == dt])
         trades_amount *= self.default_transfers_limit
         return trades_amount
 
-    def init_portfolio_price_change(self):
+    def init_net_returns(self):
+        '''
+        Initiates the net returns
+        '''
+
         if self.start_dt not in list(self.portfolio.index):
             logging.error('Please provide the portfolio dataframe')
             return
 
-        self.portfolio_price_change = pd.DataFrame({
+        self.net_returns = pd.DataFrame({
             'dt': [self.start_dt],
-            'price_change': [1]
+            'value': [1]
         }).set_index('dt')
 
     def init_portfolio_price(self):
+        '''
+        Initiates the portfolio price
+        '''
+
         dt_portfolio_price = self.initial_investment
         dt_trades_amount = self.get_trades_amount(self.start_dt)
         if dt_trades_amount > 0:
@@ -126,35 +158,41 @@ class Backtest:
             'max_trades': [dt_trades_amount]
         }).set_index('dt')
 
-    def get_available_portfolio_dts(self, start_dt, end_dt):
+    def get_available_portfolio_dts(self, df, start_dt, end_dt):
+        '''
+        Gets the available date/datetime points from the range of start_dt and end_dt
+        from the provided dataframe
+        '''
+
         dt1 = start_dt if type(start_dt) == datetime.datetime else str_to_ts(start_dt)
 
         if end_dt:
             dt2 = end_dt if end_dt and type(end_dt) == datetime.datetime else str_to_ts(end_dt)
-            return list(self.portfolio[(self.portfolio.index >= dt1) & (self.portfolio.index <= dt2)].index.unique())
+            return list(df[(df.index >= dt1) & (df.index <= dt2)].index.unique())
         else:
-            return list(self.portfolio[self.portfolio.index >= dt1].index.unique())
+            return list(df[df.index >= dt1].index.unique())
 
-    def build_portfolio_price_change(self, start_dt, end_dt, rebuild=False):
+    def build_net_returns(self, start_dt, end_dt=None, rebuild=False):
         '''
-        Build the daily returns of the provided strategy
+        Builds the net returns of the portfolio in the range from the start_dt to the end_dt
+        based only on the price changes and the assets' shares in the portfolio.
         '''
 
         if rebuild:
-            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index <= start_dt]
+            self.net_returns = self.net_returns[self.net_returns.index <= start_dt]
 
-        if self.portfolio_price_change.empty:
-            self.init_portfolio_price_change()
+        if self.net_returns.empty:
+            self.init_net_returns()
 
-        dts = self.get_available_portfolio_dts(start_dt, end_dt)
+        dts = self.get_available_portfolio_dts(self.portfolio, start_dt, end_dt)
 
         for dt in dts[1:]:
-            if dt in self.portfolio_price_change.index:
-                logging.info(f'The price change data already contains values for {dt}')
+            if dt in self.net_returns.index:
+                logging.info(f'The net returns data already contains values for {dt}')
                 continue
 
             prev_dt = dts[dts.index(dt) - 1]
-            dt_portfolio = self.portfolio[self.portfolio['share'] > 0].loc[prev_dt]
+            dt_portfolio = self.portfolio[self.portfolio['share'] > 0].loc[[prev_dt]]
 
             dt_prices = self.prices.prices.loc[[dt]][['asset', 'price_change']]
             dt_prices = dt_prices[dt_prices['price_change'] > 0]
@@ -174,22 +212,26 @@ class Backtest:
             for asset in dt_portfolio:
                 dt_price_change += dt_portfolio[asset] * dt_prices[asset]
 
-            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index != dt]
-            self.portfolio_price_change.loc[dt] = {'price_change': dt_price_change}
+            self.net_returns = self.net_returns[self.net_returns.index != dt]
+            self.net_returns.loc[dt] = {'value': dt_price_change}
 
-    def build_portfolio_price(self, start_dt, end_dt, rebuild=False):
+    def build_portfolio_price(self, start_dt, end_dt=None, rebuild=False):
         '''
-        TODO: process txns limit for each trade (provided via metadata or a separate column?)
+        Calculates the portfolio price in the range from the start_dt to the end_dt.
+        Takes into account the initial investment, trades log and fees.
+        Calculates the returns and the performance based the portfolio price.
+
+        Calls build_net_returns in case the net_returns is missing.
         '''
 
         if rebuild:
-            self.portfolio_price_change = self.portfolio_price_change[self.portfolio_price_change.index <= start_dt]
+            self.portfolio_price = self.portfolio_price[self.portfolio_price.index <= start_dt]
 
-        dts = self.get_available_portfolio_dts(start_dt, end_dt)
+        dts = self.get_available_portfolio_dts(self.portfolio, start_dt, end_dt)
 
         # We need portfolio price change for the desired time range to run the backtest with transfers
-        if any(dt not in self.portfolio_price_change.index for dt in dts):
-            self.build_portfolio_price_change(start_dt, end_dt, rebuild)
+        if any(dt not in self.net_returns.index for dt in dts):
+            self.build_net_returns(start_dt, end_dt, rebuild)
 
         if self.portfolio_price.empty:
             self.init_portfolio_price()
@@ -204,7 +246,8 @@ class Backtest:
             if prev_dt not in self.portfolio_price.index:
                 logging.error(f'Portfolio price data is missing for {prev_dt}')
                 return
-            dt_portfolio_price = float(self.portfolio_price.loc[prev_dt]['value']) * float(self.portfolio_price_change.loc[dt]['price_change'])
+            dt_portfolio_price = float(self.portfolio_price.loc[prev_dt]['value']) \
+                * float(self.net_returns.loc[dt]['value'])
 
             dt_trades_amount = self.get_trades_amount(dt)
             if dt_trades_amount > 0:
@@ -216,3 +259,6 @@ class Backtest:
                 'value': dt_portfolio_price,
                 'max_trades': dt_trades_amount
             }
+
+        self.portfolio_price['returns'] = 1 + self.portfolio_price['value'].pct_change().fillna(0)
+        self.portfolio_price['performance'] = self.portfolio_price['returns'].cumprod()

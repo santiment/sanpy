@@ -81,7 +81,7 @@ class Strategy:
 
         self.portfolio = pd.DataFrame(None)
         self.asset_shares = pd.DataFrame(None)
-        self.trades_log = pd.DataFrame(columns=['dt', 'share', 'from', 'to', 'metadata'])
+        self.trades_log = pd.DataFrame(columns=['dt', 'order', 'share', 'from', 'to', 'metadata'])
 
     def add_periodic_rebalance(self, cron_expr: str, skip_rebalance_on_init: bool = True):
         '''
@@ -365,6 +365,7 @@ class Strategy:
             for trade in trades:
                 self.trades_log.loc[len(self.trades_log)] = {
                     'dt': dt,
+                    'order': trades.index(trade),
                     **trade
                 }
             result_df = pd.DataFrame(

@@ -31,6 +31,8 @@ class Signals:
         asset excluding from the portfolio.
     '''
 
+    _default_signals_df = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
+
     def __init__(
         self,
         start_dt: str or datetime,
@@ -44,10 +46,9 @@ class Signals:
         self.decision_delay = datetime.timedelta(seconds=decision_delay)
         self.default_trade_percantage = 1
 
-        _default_signals_df = pd.DataFrame(columns=['dt', 'signal', 'asset', 'trade_percantage', 'decision_delay'])
-        self.buy_signals = _default_signals_df.copy()
-        self.sell_signals = _default_signals_df.copy()
-        self.rebalance_signals = _default_signals_df.copy()
+        self.buy_signals = self._default_signals_df.copy()
+        self.sell_signals = self._default_signals_df.copy()
+        self.rebalance_signals = self._default_signals_df.copy()
 
     def add(self, signal_type: str, signals_df: pd.DataFrame, signal_name: str or None = None):
         '''
