@@ -14,11 +14,12 @@ Santiment API python client.
     - [Fetch single metric](#fetch-single-metric)
     - [Batching multiple queries](#batching-multiple-queries)
     - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
+    - [Rate Limit Tools](#rate-limit-tools)
   - [Available metrics](#available-metrics)
     - [Available Metric for Slug](#available-metrics-for-slug)
     - [Metric Complexity](#metric-complexity)
     - [Available Since](#available-since)
-    - [Full list of on-chain metrics (including timebounded)](#full-list-of-on-chain-metrics-including-timebounded)
+    - [Full list of on-chain metrics, including timebounded](#full-list-of-metrics-for-a-single-project)
     - [All Projects](#all-projects)
     - [ERC20 Projects](#erc20-projects)
     - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
@@ -31,6 +32,7 @@ Santiment API python client.
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
+    - [Top Transfers](#top-transfers)
     - [Emerging Trends](#emerging-trends)
     - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Extras](#extras)
@@ -104,7 +106,7 @@ san.get("projects/all")
 
 Parameters:
 
-- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data for ex: `2018-06-01`
+- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data or the string for ex: `2018-06-01`, or a string, representing the relative datetime `utc_now-<interval>`
 - `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
 
 Default values for parameters:
@@ -223,6 +225,31 @@ pd.DataFrame(res['projectBySlug'], index=[0])
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
 
+### Rate Limit Tools
+
+There are two functions, which can help you in handling the rate limits:
+* ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
+* ``rate_limit_time_left`` - Returns the time left before the rate limit expires
+
+Example:
+```python
+import time
+import san
+
+try:
+  san.get(
+    "price_usd/santiment",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+    interval="1d"
+  )
+except Exception as e:
+  if san.is_rate_limit_exception(e):
+    rate_limit_seconds = san.rate_limit_time_left(e)
+    print(f"Will sleep for {rate_limit_seconds}")
+    time.sleep(rate_limit_seconds)
+```
+
 ## Available metrics
 
 Getting all of the metrics as a list is done using the following code:
@@ -266,7 +293,7 @@ san.available_metric_for_slug_since(metric='daily_active_addresses', slug='santi
 
 Below are described the available metrics and are given examples for fetching them.
 
-### Full list of metrics for a single project
+## Full list of metrics for a single project
 
 > NOTE: When a new metric is added to the API, `san.available_metrics()` will
 > automatically pick it up and it will be accessible with sanpy, but it might
@@ -281,6 +308,28 @@ All these metrics are returned as a Pandas dataframe with two columns - `datetim
 and float `value`.
 
 All metrics that do not follow the same format are explicitly listed after that.
+
+Example usage:
+```python
+san.get(
+  "price_usd/santiment",
+  from_date="2020-06-01",
+  to_date="2021-06-05",
+  interval="1d",
+  transform={"type": "moving_average", "moving_average_base": 100},
+  aggregation="LAST"
+)
+```
+
+Where the parameters, that are not mentioned, are optional:
+
+``transform`` - Apply a transformation on the data. The supported transformations are:
+- "moving_average" - Replace every value V<sub>i</sub> with the average of the last "moving_average_base" values.
+- "consecutive_differences" - Replace every value V<sub>i</sub> with the value V<sub>i</sub> - V<sub>i-1</sub> where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
+- "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) * 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
+
+``aggregation`` - the aggregation which is used for the query results.
+
 
 #### Holder Metrics
 
@@ -320,14 +369,10 @@ All metrics that do not follow the same format are explicitly listed after that.
 
 - twitter_followers
 - social_dominance_telegram
-- social_dominance_discord
 - social_dominance_reddit
-- social_dominance_professional_traders_chat
 - social_dominance_total
 - social_volume_telegram
-- social_volume_discord
 - social_volume_reddit
-- social_volume_professional_traders_chat
 - social_volume_twitter
 - social_volume_bitcointalk
 - social_volume_total
@@ -335,30 +380,22 @@ All metrics that do not follow the same format are explicitly listed after that.
 - community_messages_count_total
 - sentiment_positive_total
 - sentiment_positive_telegram
-- sentiment_positive_professional_traders_chat
 - sentiment_positive_reddit
-- sentiment_positive_discord
 - sentiment_positive_twitter
 - sentiment_positive_bitcointalk
 - sentiment_negative_total
 - sentiment_negative_telegram
-- sentiment_negative_professional_traders_chat
 - sentiment_negative_reddit
-- sentiment_negative_discord
 - sentiment_negative_twitter
 - sentiment_negative_bitcointalk
 - sentiment_balance_total
 - sentiment_balance_telegram
-- sentiment_balance_professional_traders_chat
 - sentiment_balance_reddit
-- sentiment_balance_discord
 - sentiment_balance_twitter
 - sentiment_balance_bitcointalk
 - sentiment_volume_consumed_total
 - sentiment_volume_consumed_telegram
-- sentiment_volume_consumed_professional_traders_chat
 - sentiment_volume_consumed_reddit
-- sentiment_volume_consumed_discord
 - sentiment_volume_consumed_twitter
 - sentiment_volume_consumed_bitcointalk
 
@@ -787,6 +824,50 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-28 07:53:32+00:00  0x868074aab18ea3...                  False  0x876eabf441b2e...                 True  0x90bd286da38a2b...   33181.82279
 2019-04-26 14:38:45+00:00  0x876eabf441b2ee...                   True  0x76af586d041d6...                False  0xe45b86f415e930...   28999.64023
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
+```
+
+### Top Transfers
+
+Top transfers for the token of a given project, ``address`` and ``transaction_type`` arguments can be added as well, in the form of a key-value pair. The ``transaction_type`` parameter can have one of these three values: ``ALL``, ``OUT``, ``IN``.
+
+```python
+san.get(
+    "top_transfers/santiment",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+)
+```
+
+**The result is shortened for convenience**
+
+Example result:
+```
+                          fromAddress   toAddress     trxHash       trxValue
+datetime                                                                                                                                                                                                                          
+2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
+2021-06-17 00:10:05+00:00  0xbd3c2...  0x876ea...  0x732a5...  117339.779890
+2021-06-19 21:36:03+00:00  0x59646...  0x0d45b...  0x5de31...  112336.882707
+...
+```
+
+```python
+san.get(
+    "top_transfers/santiment",
+    address="0x26e068650ae54b6c1b149e1b926634b07e137b9f",
+    transaction_type="ALL",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+)
+```
+
+Example result:
+```
+                          fromAddress  toAddress    trxHash   trxValue
+datetime                                                                                                                                                                                        
+2021-06-13 09:14:01+00:00  0x26e06...  0xfd3d...  0x4af6...  69854.528
+2021-06-13 09:13:01+00:00  0x876ea...  0x26e0...  0x18c1...  69854.528
+2021-06-14 08:54:52+00:00  0x876ea...  0x26e0...  0xdceb...  59920.591
+...
 ```
 
 ### Emerging Trends

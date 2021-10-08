@@ -89,7 +89,7 @@ def test_batched_queries_different_format():
         from_date=month_ago(),
         to_date=params['to_date'],
         interval=params['interval'],
-        social_volume_type='PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
+        social_volume_type='TELEGRAM_CHATS_OVERVIEW'
     )
     batch.get(
         'topic_search',
@@ -224,9 +224,7 @@ def test_social_dominance():
     sources = [
         'ALL',
         'REDDIT',
-        'TELEGRAM',
-        'DISCORD',
-        'PROFESSIONAL_TRADERS_CHAT']
+        'TELEGRAM']
     for item in sources:
         result = san.get('social_dominance/' + params['project_slug'],
                          from_date=params['from_date'],
@@ -452,3 +450,15 @@ def test_metric_complexity():
     )
 
     assert result != 0
+
+
+@attr('integration')
+def test_top_transfers():
+    result = san.get(
+        'top_transfers/santiment',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d'
+    )
+
+    assert len(result) != 0

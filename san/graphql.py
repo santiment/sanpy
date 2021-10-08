@@ -1,3 +1,4 @@
+import json
 import requests
 from san.api_config import ApiConfig
 from san.env_vars import SANBASE_GQL_HOST
@@ -15,14 +16,19 @@ def execute_gql(gql_query_str):
             json={'query': gql_query_str},
             headers=headers)
     except requests.exceptions.RequestException as e:
-        raise SanError(e)
+        raise SanError('Error running query: ({})'.format(e))
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
     else:
+        if __result_has_gql_errors__(response):
+            error_response = response.json()['errors']['details']
+        else:
+            error_response = ''
         raise SanError(
-            "Error running query. Status code: {}.\n {}".format(
+            "Error running query. Status code: {}.\n {}\n {}".format(
                 response.status_code,
+                error_response,
                 gql_query_str))
 
 

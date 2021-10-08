@@ -17,8 +17,12 @@ setuptools.setup(
     test_suite='nose.collector',
     tests_require=['nose'],
     packages=setuptools.find_packages(),
+    setup_requires=[
+        'numpy',
+        'Cython'
+    ],
     install_requires=[
-        'pandas',
+        'pandas==1.3.0',
         'requests',
         'iso8601',
         'setuptools'

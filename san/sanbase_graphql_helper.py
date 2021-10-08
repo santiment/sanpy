@@ -2,7 +2,7 @@ import iso8601
 import datetime
 
 _DEFAULT_INTERVAL = '1d'
-_DEFAULT_SOCIAL_VOLUME_TYPE = 'PROFESSIONAL_TRADERS_CHAT_OVERVIEW'
+_DEFAULT_SOCIAL_VOLUME_TYPE = 'TELEGRAM_CHATS_OVERVIEW'
 _DEFAULT_SOURCE = 'TELEGRAM'
 _DEFAULT_SEARCH_TEXT = ''
 
@@ -105,6 +105,16 @@ QUERY_MAPPING = {
         'query': 'topicSearch',
         'return_fields': [
             ('chartData', ['datetime, ''mentionsCount'])
+        ]
+    },
+    'top_transfers': {
+        'query': 'topTransfers',
+        'return_fields': [
+            'datetime',
+            ('fromAddress', ['address']),
+            ('toAddress', ['address']),
+            'trxValue',
+            'trxHash'
         ]
     },
     'eth_top_transactions': {
@@ -229,6 +239,16 @@ def transform_query_args(query, **kwargs):
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else _DEFAULT_SEARCH_TEXT
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
 
+    kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
+    kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
+    if kwargs['address'] != '':
+        if kwargs['transaction_type'] != '':
+            kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\", transactionType: {kwargs["transaction_type"]}}},'
+        else:
+            kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\"}},'
+    else:
+        kwargs['address_selector'] = ''
+
     kwargs['from_date'] = _format_from_date(kwargs['from_date'])
     kwargs['to_date'] = _format_to_date(kwargs['to_date'])
 
@@ -249,6 +269,9 @@ def _default_from_date():
 
 
 def _format_from_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, str) and 'utc_now' in datetime_obj_or_str:
+        return datetime_obj_or_str
+
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
@@ -256,6 +279,9 @@ def _format_from_date(datetime_obj_or_str):
 
 
 def _format_to_date(datetime_obj_or_str):
+    if isinstance(datetime_obj_or_str, str) and 'utc_now' in datetime_obj_or_str:
+        return datetime_obj_or_str
+
     if isinstance(datetime_obj_or_str, datetime.datetime):
       return iso8601.parse_date(datetime_obj_or_str.isoformat())
     
