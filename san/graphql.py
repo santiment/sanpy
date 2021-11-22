@@ -42,7 +42,7 @@ def __handle_success_response__(response, gql_query_str):
         return response.json()['data']
     else:
         raise SanError(
-            "Error running query. Status code: {}.\n {}" .format(
+            "Error running query, the results are empty. Status code: {}.\n {}" .format(
                 response.status_code,
                 gql_query_str))
 

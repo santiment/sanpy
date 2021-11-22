@@ -457,3 +457,12 @@ def topic_search(idx, **kwargs):
     )
 
     return query_str
+
+
+def get_api_calls_made():
+    return """{
+    currentUser {
+        apiCallsHistory(from: "utc_now-30d", to: "utc_now", interval: "1d", authMethod: APIKEY) {
+            apiCallsCount, datetime
+        }
+    }}"""
