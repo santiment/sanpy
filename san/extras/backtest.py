@@ -30,29 +30,24 @@ def prepare_df(source_df: pd.DataFrame):
 
 class Backtest:
     '''
-    The tool provides the ability to calculate portfolio step-by step returns
-    based on the assets' price returns and portfolio structure
+    The tool provides the ability to calculate portfolio returns
+    based on the assets' prices and portfolio structure
     and build strategy models with transaction fees taken into account.
 
-    Backtest is designed to work together with Strategy child classes,
-    some components may be provided from the Strategy-based object
-    which contains the strategy that has to be backtested.
-
-    TODO: Transform the default_trades_amount meaning
-    TODO: Add the ability to provide custom fees and trade_limits via trades_log
-    TODO: (probably) Automatic check of missing trades
-          (or simply the functions that gets trades from the portfolio and price data)
+    Backtest is designed to work together with Strategy and Strategy-inherited classes,
+    some components may be provided from the Strategy-inherited entity
+    which contains the strategy supposed to be backtested.
     '''
 
     def __init__(self,
                  start_dt: str or datetime.datetime,
                  initial_investment: float = 10**6,
-                 default_trades_limit: int = 1,
+                 default_transfers_limit: int = 1,
                  accuracy: float = 3*10**(-6)
                  ):
         self.start_dt = str_to_ts(start_dt)
         self.initial_investment = initial_investment
-        self.default_transfers_limit = default_trades_limit
+        self.default_transfers_limit = default_transfers_limit
         self.accuracy = accuracy
 
         self.prices = Prices(start_dt=self.start_dt)
@@ -64,13 +59,14 @@ class Backtest:
         self.trades_log = pd.DataFrame(None)
         self.fees = pd.DataFrame(None)
 
-    def add_portfolio(self, portfolio_df, replace=False):
+    def add_portfolio(self, portfolio_df: pd.DataFrame, replace: bool = False):
         '''
         Sets or updates the portfolio structure dataframe
 
         Input dataframe is supposed to be indexes with DateTimeIndex
         or to have a column named 'dt' which contains date/datetime objects
         or string values that can be parsed as date/datetime
+
         The DataFrame examples:
 
                         asset   share
@@ -96,7 +92,7 @@ class Backtest:
             df = df[~df.index.isin(self.portfolio.index)]
         self.portfolio = self.portfolio.append(df).sort_index()
 
-    def add_trades(self, trades_df, replace=False):
+    def add_trades(self, trades_df: pd.DataFrame, replace: bool = False):
         '''
         Sets or updates the trades dataframe
         '''
@@ -110,25 +106,67 @@ class Backtest:
 
     def add_fees(self, fees_df: pd.DataFrame):
         '''
-        Sets or updates the fees data
+        Sets or updates the fees data.
+        Fee values should be provided in the same currency that is used for prices.
+
+        The DataFrame examples:
+
+                        value
+        dt
+        2020-01-01       7.5
+        2020-01-01       10.0
+        2020-01-02       9.0
+        2020-01-03       9.5
+
+
+                dt               value
+        index
+        1       2020-01-01       7.5
+        2       2020-01-01       10.0
+        3       2020-01-02       9.0
+        4       2020-01-03       9.5
         '''
 
         df = prepare_df(fees_df)
+        df['value'] *= self.default_transfers_limit
         self.fees = self.fees[~self.fees.index.isin(df.index)]
         self.fees = self.fees.append(df).sort_index()
 
-    def get_trades_amount(self, dt):
+    def update_default_transfers_limit(self, new_default_transfers_limit: int):
         '''
-        Calculates the amount of trades for a provided dt
+        Updates the fees data according to new transfers_limit value
         '''
+        coeff = new_default_transfers_limit/self.default_transfers_limit
+        self.fees['value'] *= coeff
 
-        trades_amount = len(self.trades_log[self.trades_log.index == dt])
-        trades_amount *= self.default_transfers_limit
-        return trades_amount
+    def get_trades_fee_and_amount(self, dt):
+        '''
+        Calculates the total trades fee for the provided dt and the amount of transactions on the dt.
+        '''
+        current_trades = self.trades_log[self.trades_log.index == dt]
+        if len(current_trades) == 0:
+            return 0, 0
+
+        # If the fee values are provided via trades log
+        # They are used instead of the fees metric
+        total_trade_fee = 0
+        trades_amount = len(current_trades)
+
+        if 'fee' in self.trades_log.columns:
+            # Take the transactions with provided txn fee
+            # And exclude them from the temp current_trades df
+            total_trade_fee += float(current_trades['fee'].sum())
+            current_trades = current_trades[(current_trades['fee'].isna())]
+
+        # Calculate the remaining transfer fees according to the fees dataframe of the entity
+        if len(current_trades) > 0:
+            txn_fee = float(self.fees.loc[dt]['value'])
+            total_trade_fee += len(current_trades) * txn_fee
+        return total_trade_fee, trades_amount
 
     def init_net_returns(self):
         '''
-        Initiates the net returns
+        Initiates the net returns dataframe
         '''
 
         if self.start_dt not in list(self.portfolio.index):
@@ -142,20 +180,20 @@ class Backtest:
 
     def init_portfolio_price(self):
         '''
-        Initiates the portfolio price
+        Initiates the portfolio price dataframe
         '''
 
         dt_portfolio_price = self.initial_investment
-        dt_trades_amount = self.get_trades_amount(self.start_dt)
-        if dt_trades_amount > 0:
-            txn_fee = float(self.fees.loc[self.start_dt]['value'])
-            dt_fee = txn_fee * dt_trades_amount
-            dt_portfolio_price -= dt_fee
+
+        trades_fee, trades_amount = self.get_trades_fee_and_amount(self.start_dt)
+        if trades_fee:
+            dt_portfolio_price -= trades_fee
 
         self.portfolio_price = pd.DataFrame({
             'dt': [self.start_dt],
             'value': [dt_portfolio_price],
-            'max_trades': [dt_trades_amount]
+            'trades_amount': [trades_amount],
+            'trades_fee': [trades_fee]
         }).set_index('dt')
 
     def get_available_portfolio_dts(self, df, start_dt, end_dt):
@@ -172,7 +210,10 @@ class Backtest:
         else:
             return list(df[df.index >= dt1].index.unique())
 
-    def build_net_returns(self, start_dt, end_dt=None, rebuild=False):
+    def build_net_returns(self,
+                          start_dt: str or datetime,
+                          end_dt: str or datetime or None = None,
+                          rebuild: bool = False):
         '''
         Builds the net returns of the portfolio in the range from the start_dt to the end_dt
         based only on the price changes and the assets' shares in the portfolio.
@@ -215,7 +256,10 @@ class Backtest:
             self.net_returns = self.net_returns[self.net_returns.index != dt]
             self.net_returns.loc[dt] = {'value': dt_price_change}
 
-    def build_portfolio_price(self, start_dt, end_dt=None, rebuild=False):
+    def build_portfolio_price(self,
+                              start_dt: str or datetime,
+                              end_dt: str or datetime or None = None,
+                              rebuild: bool = False):
         '''
         Calculates the portfolio price in the range from the start_dt to the end_dt.
         Takes into account the initial investment, trades log and fees.
@@ -249,15 +293,14 @@ class Backtest:
             dt_portfolio_price = float(self.portfolio_price.loc[prev_dt]['value']) \
                 * float(self.net_returns.loc[dt]['value'])
 
-            dt_trades_amount = self.get_trades_amount(dt)
-            if dt_trades_amount > 0:
-                txn_fee = float(self.fees.loc[dt]['value'])
-                dt_fee = txn_fee * dt_trades_amount
-                dt_portfolio_price -= dt_fee
+            trades_fee, trades_amount = self.get_trades_fee_and_amount(dt)
+            if trades_fee:
+                dt_portfolio_price -= trades_fee
 
             self.portfolio_price.loc[dt] = {
                 'value': dt_portfolio_price,
-                'max_trades': dt_trades_amount
+                'trades_amount': trades_amount,
+                'trades_fee': trades_fee
             }
 
         self.portfolio_price['returns'] = 1 + self.portfolio_price['value'].pct_change().fillna(0)

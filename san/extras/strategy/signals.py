@@ -137,7 +137,7 @@ class Signals:
         def _get_signals_on_dt_or_empty(signals_df, dt, assets):
             if dt in signals_df.index:
                 if assets:
-                    return signals_df[signals_df['asset'].isin(assets)].loc[[dt]]
+                    return signals_df[(signals_df['asset'].isin(assets)) & (signals_df.index == dt)]
                 return signals_df.loc[[dt]]
             return self._default_signals_df.copy()  # blank df
 

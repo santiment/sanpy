@@ -28,7 +28,7 @@ def str_to_ts(x):
 
 
 def parse_str_to_timedelta(time_str):
-    regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)hr)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+    regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
     parts = regex.match(time_str.lower())
     if not parts:
         return

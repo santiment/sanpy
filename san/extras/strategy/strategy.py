@@ -81,7 +81,7 @@ class Strategy:
 
         self.portfolio = pd.DataFrame(None)
         self.asset_shares = pd.DataFrame(None)
-        self.trades_log = pd.DataFrame(columns=['dt', 'order', 'share', 'from', 'to', 'metadata'])
+        self.trades_log = pd.DataFrame(columns=['dt', 'order', 'share', 'from', 'to', 'fee', 'metadata'])
 
     def add_periodic_rebalance(self, cron_expr: str, skip_rebalance_on_init: bool = True):
         '''
@@ -193,7 +193,7 @@ class Strategy:
         ).set_index('dt')
         self.set_rebalance_proportion(df)
 
-    def generate_trade(self, share: float, asset_from: str, asset_to: str, metadata: str = ''):
+    def generate_trade(self, share: float, asset_from: str, asset_to: str, fee=None, metadata: str = ''):
         '''
         Generates a trade record.
 
@@ -205,6 +205,8 @@ class Strategy:
             Asset to sell.
         asset_to : str
             Asset to buy.
+        fee: float or None
+            Trade fee value
         metadata : str, default ''
             Trade metadata if needed.
 
@@ -215,6 +217,7 @@ class Strategy:
             'share': share,
             'from': asset_from,
             'to': asset_to,
+            'fee': fee,
             'metadata': metadata
         }
 
@@ -369,9 +372,10 @@ class Strategy:
                     **trade
                 }
             result_df = pd.DataFrame(
-                {'dt': dt, 'asset': list(current_portfolio.keys()), 'share': list(current_portfolio.values())}
+                {'dt': [dt]*len(current_portfolio), 'asset': list(current_portfolio.keys()), 'share': list(current_portfolio.values())}
             )
             result_df.set_index('dt', inplace=True)
+
             self.portfolio = self.portfolio[self.portfolio.index != dt]
             self.portfolio = self.portfolio.append(result_df).sort_index()
 
