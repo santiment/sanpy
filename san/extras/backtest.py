@@ -43,14 +43,15 @@ class Backtest:
                  start_dt: str or datetime.datetime,
                  initial_investment: float = 10**6,
                  default_transfers_limit: int = 1,
-                 accuracy: float = 3*10**(-6)
+                 accuracy: float = 3*10**(-6),
+                 granularity: str = '1D'
                  ):
         self.start_dt = str_to_ts(start_dt)
         self.initial_investment = initial_investment
         self.default_transfers_limit = default_transfers_limit
         self.accuracy = accuracy
 
-        self.prices = Prices(start_dt=self.start_dt)
+        self.prices = Prices(start_dt=self.start_dt, granularity=granularity)
 
         self.portfolio = pd.DataFrame(None)
         self.net_returns = pd.DataFrame(None)

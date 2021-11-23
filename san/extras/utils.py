@@ -1,5 +1,6 @@
 import re
 import datetime
+import pandas as pd
 
 
 def convert_dt(timestamp_string, postfix=' 00:00:00'):
@@ -38,3 +39,27 @@ def parse_str_to_timedelta(time_str):
         if param:
             time_params[name] = int(param)
     return datetime.timedelta(**time_params)
+
+
+def resample_dataframe(source_df: pd.DataFrame,
+                       resample_interval: str or datetime.timedelta,
+                       values_column_name: str,
+                       grouping_column_name: str or None = None,
+                       resample_function: str = 'pad'
+                       ):
+
+    if isinstance(resample_interval, str):
+        resample_interval = parse_str_to_timedelta(resample_interval)
+
+    if not isinstance(resample_interval, datetime.timedelta):
+        return
+
+    df = source_df.copy()
+    if grouping_column_name:
+        df = df.groupby(grouping_column_name)
+
+    df = pd.DataFrame(getattr(df[values_column_name].resample(resample_interval), resample_function)())
+
+    if grouping_column_name:
+        df = df.reset_index(grouping_column_name)
+    return df

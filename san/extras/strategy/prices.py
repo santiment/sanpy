@@ -1,7 +1,7 @@
 import datetime
 import pandas as pd
 
-from san.extras.utils import str_to_ts
+from san.extras.utils import str_to_ts, resample_dataframe
 
 
 class Prices:
@@ -25,6 +25,8 @@ class Prices:
         start_dt: str or datetime,
         end_dt: str or datetime or None = None,
         granularity: str = '1D',
+        fill_gaps_by_default: bool = False,
+        fill_gaps_function: str = 'pad'
     ):
         # These parameters could be used later for checking price gaps, interpolation, etc.
         self._granularity = granularity
@@ -32,6 +34,12 @@ class Prices:
         self.end_dt = end_dt
 
         self.prices = pd.DataFrame(columns=['dt', 'asset', 'price', 'price_change']).set_index('dt')
+        self.fill_gaps_by_default = fill_gaps_by_default
+        self.fill_gaps_function = fill_gaps_function
+
+    def fill_prices_gaps(self):
+        price_df = resample_dataframe(self.prices, self._granularity, 'price', 'asset', self.fill_gaps_function)
+        self.set(price_df)
 
     def set(self, price_df: pd.DataFrame):
         '''
@@ -53,6 +61,9 @@ class Prices:
 
         if not isinstance(price_df.index, pd.DatetimeIndex):
             price_df.index = pd.DatetimeIndex(price_df.index)
+
+        if self.fill_gaps_by_default:
+            price_df = resample_dataframe(price_df, self._granularity, 'price', 'asset', self.fill_gaps_function)
 
         # Compute price multiplier as 1 + (x[t] - x[t-1]) / x[t]
         # Fillna with 1 - normally Nan-s appear only at self._start_dt. When strategy initiation
