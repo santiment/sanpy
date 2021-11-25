@@ -228,9 +228,10 @@ pd.DataFrame(res['projectBySlug'], index=[0])
 ### Rate Limit Tools
 
 There are two functions, which can help you in handling the rate limits:
-1. ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
-2. ``rate_limit_time_left`` - Returns the time left before the rate limit expires
-3. ``api_calls_made`` - Returns the API calls for each day in which it was used
+* ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
+* ``rate_limit_time_left`` - Returns the time left before the rate limit expires
+* ``api_calls_made`` - Returns the API calls for each day in which it was used
+* ``api_calls_remaining`` - Returns the API calls remaining for the month, hour and minute
 
 Example:
 ```python
@@ -253,6 +254,7 @@ except Exception as e:
 ...
 
 calls_by_day = san.api_calls_made()
+calls_remaining = san.api_calls_remaining()
 ```
 
 ## Available metrics

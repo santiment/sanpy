@@ -1,6 +1,6 @@
 import san.sanbase_graphql
 from san.sanbase_graphql_helper import QUERY_MAPPING
-from san.graphql import execute_gql
+from san.graphql import execute_gql, get_response_headers
 from san.query import get_gql_query, parse_dataset
 from san.transform import transform_query_result
 from san.error import SanError
@@ -50,7 +50,13 @@ def is_rate_limit_exception(exception):
 
 def rate_limit_time_left(exception):
     words = str(exception).split()
-    return int(list(filter(lambda x: x.isnumeric(), words))[0]) # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)
+    return int(list(filter(lambda x: x.isnumeric(), words))[0]) # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)  
+
+
+def api_calls_remaining():
+    gql_query_str = san.sanbase_graphql.get_api_calls_made()
+    res = get_response_headers(gql_query_str)
+    return __get_headers_remaining(res)
 
 
 def api_calls_made():
@@ -82,3 +88,14 @@ def __parse_out_calls_data(response):
         raise SanError('An error has occured, please contact our support...')
 
     return api_calls
+
+
+def __get_headers_remaining(data):
+    try:
+        return {
+            'month_remaining': data['x-ratelimit-remaining-month'],
+            'hour_remaining': data['x-ratelimit-remaining-hour'],
+            'minute_remaining': data['x-ratelimit-remaining-minute']
+        }
+    except KeyError as exc:
+        raise SanError('There are no limits for this API Key.')
