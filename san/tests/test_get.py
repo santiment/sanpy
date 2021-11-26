@@ -475,6 +475,11 @@ def test_rate_limits():
     assert san.rate_limit_time_left(exception) == 366
 
 
+def test_api_calls_made_exception_without_key():
+    with assert_raises(SanError):
+        san.api_calls_made()
+
+
 def test_transform_arg_transform_given():
     kwargs = {
         'transform': {'type': 'moving_average', 'moving_average_base': 100},
