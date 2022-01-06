@@ -335,10 +335,8 @@ def test_social_volume_projects():
 @attr('integration')
 def test_social_volume():
     social_volume_types = [
-        'PROFESSIONAL_TRADERS_CHAT_OVERVIEW',
         'TELEGRAM_CHATS_OVERVIEW',
-        'TELEGRAM_DISCUSSION_OVERVIEW',
-        'DISCORD_DISCUSSION_OVERVIEW']
+        'TELEGRAM_DISCUSSION_OVERVIEW']
     for item in social_volume_types:
         result = san.get('social_volume/' + params['project_slug'],
                          from_date=params['from_date'],
