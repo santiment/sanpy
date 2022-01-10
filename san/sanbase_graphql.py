@@ -365,6 +365,7 @@ def get_metric(idx, metric, slug, **kwargs):
             to: \"{to_date}\"
             interval: \"{interval}\"
             aggregation: {aggregation}
+            includeIncompleteData: {includeIncompleteData}
         ){{
         """ + ' '.join(kwargs['return_fields']) + """
         }}

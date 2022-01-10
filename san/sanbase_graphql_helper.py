@@ -237,7 +237,9 @@ def transform_query_args(query, **kwargs):
     kwargs['social_volume_type'] = kwargs['social_volume_type'] if 'social_volume_type' in kwargs else _DEFAULT_SOCIAL_VOLUME_TYPE
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else _DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else _DEFAULT_SEARCH_TEXT
-    kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else "null"
+    kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else 'null'
+    kwargs['includeIncompleteData'] = kwargs['includeIncompleteData'] if 'includeIncompleteData' in kwargs else 'false'
+
 
     kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
     kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
