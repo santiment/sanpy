@@ -15,6 +15,7 @@ def execute_gql(gql_query_str):
             SANBASE_GQL_HOST,
             json={'query': gql_query_str},
             headers=headers)
+        print(response.json())
     except requests.exceptions.RequestException as e:
         raise SanError('Error running query: ({})'.format(e))
 
