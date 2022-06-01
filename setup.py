@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='sanpy',
-    version='0.9.1',
+    version='0.10.0',
     author='Santiment',
     author_email='admin@santiment.net',
     description='Package for Santiment API access with python',
@@ -18,7 +18,7 @@ setuptools.setup(
     tests_require=['nose'],
     packages=setuptools.find_packages(),
     setup_requires=[
-        'numpy==1.21.1',
+        'numpy==1.22.0',
         'Cython'
     ],
     install_requires=[
