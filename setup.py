@@ -18,7 +18,7 @@ setuptools.setup(
     tests_require=['nose'],
     packages=setuptools.find_packages(),
     setup_requires=[
-        'numpy==1.22.0',
+        'numpy',
         'Cython'
     ],
     install_requires=[
@@ -28,6 +28,6 @@ setuptools.setup(
         'setuptools'
     ],
     extras_require={
-        'extras':  ['numpy==1.21.1', 'matplotlib', 'scipy', 'mlfinlab']
+        'extras':  ['numpy', 'matplotlib', 'scipy', 'mlfinlab']
     }
 )
