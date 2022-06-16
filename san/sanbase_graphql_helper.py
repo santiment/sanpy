@@ -241,6 +241,19 @@ def transform_query_args(query, **kwargs):
     kwargs['include_incomplete_data'] = kwargs['include_incomplete_data'] if 'include_incomplete_data' in kwargs else False
     # transform python booleans to strings so it's properly interpolated in the query string
     kwargs['include_incomplete_data'] = 'true' if kwargs['include_incomplete_data'] else 'false'
+    if 'selector' in kwargs:
+        temp_selector = ''
+        for key, value in kwargs['selector'].items():
+            if isinstance(value, str):
+                if value.isdigit():
+                    temp_selector += f'{key}: {value}'
+                else:
+                    temp_selector += f'{key}: \"{value}\"'
+            elif isinstance(value, list):
+                temp_selector += f"{key}: {','.join(value)}"
+
+        kwargs['selector'] = 'selector:{' + temp_selector + '}'
+
     kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
     kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
 
