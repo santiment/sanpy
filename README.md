@@ -6,28 +6,41 @@ Santiment API python client.
 
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
+- [sanpy](#sanpy)
+  - [Table of contents](#table-of-contents)
   - [Installation](#installation)
   - [Upgrade to latest version](#upgrade-to-latest-version)
+  - [Install extra packages](#install-extra-packages)
+  - [Restricted metrics](#restricted-metrics)
   - [Configuration](#configuration)
   - [Retrieving data from the API](#retrieving-data-from-the-api)
     - [Fetch single metric](#fetch-single-metric)
+    - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
     - [Batching multiple queries](#batching-multiple-queries)
     - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
     - [Rate Limit Tools](#rate-limit-tools)
   - [Available metrics](#available-metrics)
-    - [Available Metric for Slug](#available-metrics-for-slug)
-    - [Metric Complexity](#metric-complexity)
-    - [Available Since](#available-since)
-    - [Full list of on-chain metrics, including timebounded](#full-list-of-metrics-for-a-single-project)
-    - [All Projects](#all-projects)
-    - [ERC20 Projects](#erc20-projects)
-    - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
+  - [Available Metrics for Slug](#available-metrics-for-slug)
+  - [Metric Complexity](#metric-complexity)
+  - [Include Incomplete Data Flag](#include-incomplete-data-flag)
+  - [Available Since](#available-since)
+  - [Full list of metrics for a single project](#full-list-of-metrics-for-a-single-project)
+      - [Holder Metrics](#holder-metrics)
+      - [Social Metrics](#social-metrics)
+      - [Price Metrics](#price-metrics)
+      - [Development Metrics](#development-metrics)
+      - [Derivatives](#derivatives)
+      - [MakerDAO Metrics](#makerdao-metrics)
+      - [On-Chain Metrics](#on-chain-metrics)
+    - [Fetching lists of projects](#fetching-lists-of-projects)
+      - [All Projects](#all-projects)
+      - [ERC20 Projects](#erc20-projects)
+    - [Other Price metrics](#other-price-metrics)
+      - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
     - [Gas Used](#gas-used)
     - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
-    - [Top Holders Percent of Total Supply](#top-holders-percent-of-total-supply)
     - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
@@ -286,6 +299,22 @@ san.metric_complexity(
     from_date='2020-01-01',
     to_date='2020-02-20',
     interval='1d'
+)
+```
+
+## Include Incomplete Data Flag
+
+Daily metrics have one value per day. For the current day, the latest computed value will not include a full day of data.
+For example, computing `daily_active_addresses` at 08:00 includes data for one third of the day. To reduce confusion, the current
+day value for metrics that have this behaviour is excluded. To force fetching the current day value, the `includeIncompleteData` flag must be used.
+
+```python
+san.get(
+  "daily_active_addresses/bitcoin",
+  from_date="utc_now-3d",
+  to_date="utc_now",
+  interval="1d",
+  include_incomplete_data=True
 )
 ```
 

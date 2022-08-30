@@ -238,11 +238,12 @@ def transform_query_args(query, **kwargs):
     kwargs['source'] = kwargs['source'] if 'source' in kwargs else _DEFAULT_SOURCE
     kwargs['search_text'] = kwargs['search_text'] if 'search_text' in kwargs else _DEFAULT_SEARCH_TEXT
     kwargs['aggregation'] = kwargs['aggregation'] if 'aggregation' in kwargs else 'null'
-    kwargs['includeIncompleteData'] = kwargs['includeIncompleteData'] if 'includeIncompleteData' in kwargs else 'false'
-
-
+    kwargs['include_incomplete_data'] = kwargs['include_incomplete_data'] if 'include_incomplete_data' in kwargs else False
+    # transform python booleans to strings so it's properly interpolated in the query string
+    kwargs['include_incomplete_data'] = 'true' if kwargs['include_incomplete_data'] else 'false'
     kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
     kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
+
     if kwargs['address'] != '':
         if kwargs['transaction_type'] != '':
             kwargs['address_selector'] = f'addressSelector:{{address:\"{kwargs["address"]}\", transactionType: {kwargs["transaction_type"]}}},'
