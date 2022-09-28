@@ -191,6 +191,24 @@ Example result:
 
 ### Batching multiple queries
 
+Multiple queries can be executed in a batch to speed up the performance.
+
+There are two batch classes provided - `Batch` and `AsyncBatch`.
+
+- `Batch` combines all the provided queries in a single GraphQL document and
+executes them in a single HTTP request. This batching technique should be used
+when lightweight queries that don't fetch a lot of data are used. The reason is
+that the [complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) of each query
+is accumulated and the batch can be rejected.
+- `AsyncBatch` executes all the queries in separate API calls. The benefit of using `AsyncBatch`
+  over looping and executing every API call is that the queries can be executed concurrently.
+  The concurrency is controlled by the `max_workers` optional parameter to the `execute` function.
+  By default the `max_workers` value is 10.
+  
+Note: If you have been using `Batch()` and want to switch to the newer `AsyncBatch()` you only need to
+change the batch initialization. The functions for adding queries and executing the batch, as well as the
+format of the response, are the same.
+
 ```python
 from san import Batch
 
@@ -211,6 +229,28 @@ batch.get(
 )
 
 [daa, trx_volume] = batch.execute()
+```
+
+```python
+from san import AsyncBatch
+
+batch = AsyncBatch()
+
+batch.get(
+    "daily_active_addresses/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+
+batch.get(
+    "transaction_volume/santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+
+[daa, trx_volume] = batch.execute(max_workers=10)
 ```
 
 ### Making a custom graphql query to the API
