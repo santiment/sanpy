@@ -242,14 +242,12 @@ batch.get(
     to_date="2018-06-05",
     interval="1d"
 )
-
 batch.get(
     "transaction_volume/santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
-
 [daa, trx_volume] = batch.execute(max_workers=10)
 ```
 

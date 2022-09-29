@@ -1,6 +1,6 @@
 import san.sanbase_graphql
 import asyncio
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 from san.sanbase_graphql_helper import QUERY_MAPPING
 from san.query import get_gql_query
@@ -34,7 +34,7 @@ class AsyncBatch:
     def execute(self, max_workers=10):
         graphql_result = {}
 
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for response in executor.map(task, enumerate(self.queries)):
                 # response is in the format {'query_0': '<value>'}
                 [(key, value)] = list(response.items())
