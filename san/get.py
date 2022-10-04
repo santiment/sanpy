@@ -23,8 +23,7 @@ DEPRECATED_QUERIES = {
 }
 
 
-def get(dataset, **kwargs):
-    query, slug = parse_dataset(dataset)
+def legacy_get(query, slug, **kwargs):
     if query in DEPRECATED_QUERIES:
         print(
             '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
@@ -32,16 +31,36 @@ def get(dataset, **kwargs):
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
     if query in QUERY_MAPPING.keys():
-        gql_query = "{" + get_gql_query(0, dataset, **kwargs) + "}"
+        gql_query = '{' + get_gql_query(0, dataset, **kwargs) + '}'
     else:
         if slug != '':
-            gql_query = "{" + \
-                san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + "}"
+            gql_query = '{' + \
+                san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + '}'
         else:
             raise SanError('Invalid metric!')
     res = execute_gql(gql_query)
 
     return transform_query_result(0, query, res)
+
+
+def new_get(query, **kwargs):
+    if not ('selector' in kwargs or 'slug' in kwargs):
+        raise SanError('''
+            Invalid call of the get function,you need to either
+            give <metric>/<slug> as a first argument or give a slug
+            or selector as a key-word argument!''')
+    gql_query = '{' + san.sanbase_graphql.get_metric(0, query, **kwargs) + '}'
+    res = execute_gql(gql_query)
+
+    return transform_query_result(0, query, res)
+
+
+def get(dataset, **kwargs):
+    query, slug = parse_dataset(dataset)
+    if slug:
+        return legacy_get(query, slug, **kwargs)
+    elif query and not slug:
+        return new_get(query, **kwargs)
 
 
 def is_rate_limit_exception(exception):
