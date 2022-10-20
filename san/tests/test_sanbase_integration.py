@@ -460,3 +460,29 @@ def test_top_transfers():
     )
 
     assert len(result) != 0
+
+
+@attr('integration')
+def test_get_selector():
+    result = san.get(
+        'price_usd',
+        selector={'slug': 'santiment'},
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d'
+    )
+
+    assert len(result) != 0
+
+
+@attr('integration')
+def test_get_slug_kw_arg():
+    result = san.get(
+        'price_usd',
+        slug='santiment',
+        from_date=params['from_date'],
+        to_date=params['to_date'],
+        interval='1d'
+    )
+
+    assert len(result) != 0

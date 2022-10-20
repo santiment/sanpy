@@ -22,6 +22,13 @@ DEPRECATED_QUERIES = {
     'social_dominance': 'social_dominance_{source}'
 }
 
+NO_SLUG_QUERIES = [
+    'social_volume_projects',
+    'emerging_trends',
+    'top_social_gainers_losers'
+]
+
+
 def get(dataset, **kwargs):
     """
     The old way of using the `get` funtion is to provide the metric and slug
@@ -52,8 +59,8 @@ def get(dataset, **kwargs):
         to_date="utc_now-40d")
     """
     query, slug = parse_dataset(dataset)
-    if slug:
-        return __get_metric_slug_string_selector(query, slug, **kwargs)
+    if slug or query in NO_SLUG_QUERIES:
+        return __get_metric_slug_string_selector(query, slug, dataset, **kwargs)
     elif query and not slug:
         return __get(query, **kwargs)
 
@@ -93,7 +100,7 @@ def __request_api_call_data(query):
     return res
 
 
-def __get_metric_slug_string_selector(query, slug, **kwargs):
+def __get_metric_slug_string_selector(query, slug, dataset, **kwargs):
     if query in DEPRECATED_QUERIES:
         print(
             '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
