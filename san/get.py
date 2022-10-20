@@ -22,45 +22,40 @@ DEPRECATED_QUERIES = {
     'social_dominance': 'social_dominance_{source}'
 }
 
-
-def legacy_get(query, slug, **kwargs):
-    if query in DEPRECATED_QUERIES:
-        print(
-            '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
-                query, DEPRECATED_QUERIES[query]))
-    if query in CUSTOM_QUERIES:
-        return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
-    if query in QUERY_MAPPING.keys():
-        gql_query = '{' + get_gql_query(0, dataset, **kwargs) + '}'
-    else:
-        if slug != '':
-            gql_query = '{' + \
-                san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + '}'
-        else:
-            raise SanError('Invalid metric!')
-    res = execute_gql(gql_query)
-
-    return transform_query_result(0, query, res)
-
-
-def new_get(query, **kwargs):
-    if not ('selector' in kwargs or 'slug' in kwargs):
-        raise SanError('''
-            Invalid call of the get function,you need to either
-            give <metric>/<slug> as a first argument or give a slug
-            or selector as a key-word argument!''')
-    gql_query = '{' + san.sanbase_graphql.get_metric(0, query, **kwargs) + '}'
-    res = execute_gql(gql_query)
-
-    return transform_query_result(0, query, res)
-
-
 def get(dataset, **kwargs):
+    """
+    The old way of using the `get` funtion is to provide the metric and slug
+    as a single string. This requires string interpolation.
+    
+    Example: 
+    
+    san.get(
+        "daily_active_addresses/bitcoin"
+        from_date="2020-01-01"
+        to_date="2020-01-10")
+    
+    The new and preferred way is to provide the slug as a separate parameter.
+    
+    This allows more flexible selectors to be used instead of a single strings.
+    Examples:
+
+    san.get(
+        "daily_active_addresses",
+        slug="bitcoin",
+        from_date="2020-01-01"
+        to_date="2020-01-10")
+
+    san.get(
+        "dev_activity",
+        selector={"organization": "ethereum"},
+        from_date="utc_now-60d",
+        to_date="utc_now-40d")
+    """
     query, slug = parse_dataset(dataset)
     if slug:
-        return legacy_get(query, slug, **kwargs)
+        return __get_metric_slug_string_selector(query, slug, **kwargs)
     elif query and not slug:
-        return new_get(query, **kwargs)
+        return __get(query, **kwargs)
 
 
 def is_rate_limit_exception(exception):
@@ -97,6 +92,37 @@ def __request_api_call_data(query):
 
     return res
 
+
+def __get_metric_slug_string_selector(query, slug, **kwargs):
+    if query in DEPRECATED_QUERIES:
+        print(
+            '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
+                query, DEPRECATED_QUERIES[query]))
+    if query in CUSTOM_QUERIES:
+        return getattr(san.sanbase_graphql, query)(0, slug, **kwargs)
+    if query in QUERY_MAPPING.keys():
+        gql_query = '{' + get_gql_query(0, dataset, **kwargs) + '}'
+    else:
+        if slug != '':
+            gql_query = '{' + \
+                san.sanbase_graphql.get_metric(0, query, slug, **kwargs) + '}'
+        else:
+            raise SanError('Invalid metric!')
+    res = execute_gql(gql_query)
+
+    return transform_query_result(0, query, res)
+
+
+def __get(query, **kwargs):
+    if not ('selector' in kwargs or 'slug' in kwargs):
+        raise SanError('''
+            Invalid call of the get function,you need to either
+            give <metric>/<slug> as a first argument or give a slug
+            or selector as a key-word argument!''')
+    gql_query = '{' + san.sanbase_graphql.get_metric(0, query, **kwargs) + '}'
+    res = execute_gql(gql_query)
+
+    return transform_query_result(0, query, res)
 
 def __parse_out_calls_data(response):
     try:
