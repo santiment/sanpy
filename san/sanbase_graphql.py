@@ -353,13 +353,29 @@ def ohlcv(idx, slug, **kwargs):
     return merged
 
 
-def get_metric(idx, metric, slug, **kwargs):
+def _choose_selector_or_slug(slug, **kwargs):
+    if slug:
+        selector_or_slug = f'slug:"{slug}"'
+    else:
+        if 'slug' in kwargs:
+            selector_or_slug = kwargs['slug']
+        elif 'selector' in kwargs:
+            selector_or_slug = kwargs['selector']
+        else:
+            raise SanError('"slug" or "selector" must be provided as an argument!')
+
+    return selector_or_slug
+
+
+def get_metric(idx, metric, slug=None, **kwargs):
     kwargs = sgh.transform_query_args('get_metric', **kwargs)
+    selector_or_slug = _choose_selector_or_slug(slug, **kwargs)
+
     transform_arg = _transform_arg_helper(kwargs)
     query_str = ("""
     query_{idx}: getMetric(metric: \"{metric}\"){{
         timeseriesData(
-            slug: \"{slug}\"
+            {selector_or_slug}
             {transform_arg}
             from: \"{from_date}\"
             to: \"{to_date}\"
@@ -373,7 +389,7 @@ def get_metric(idx, metric, slug, **kwargs):
     """).format(
         idx=idx,
         metric=metric,
-        slug=slug,
+        selector_or_slug=selector_or_slug,
         transform_arg=transform_arg,
         **kwargs
     )

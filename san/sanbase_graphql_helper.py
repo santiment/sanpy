@@ -230,6 +230,24 @@ def create_query_str(query, idx, slug, **kwargs):
     return query_str
 
 
+def transform_selector(selector):
+    temp_selector = ''
+    for key, value in selector.items():
+        if (isinstance(value, str) and value.isdigit()) or isinstance(value, int):
+            temp_selector += f'{key}: {value}\n'
+        elif isinstance(value, str):
+            temp_selector += f'{key}: \"{value}\"\n'
+        elif isinstance(value, dict):
+            temp_selector += f'{key}:{{{transform_selector(value)}}}\n'
+        elif isinstance(value, bool):
+            temp_selector += (f'{key}: true\n' if value else f'{key}: false\n')
+        elif isinstance(value, list):
+            temp_value = map(lambda x: f'"{x}"', value)
+            temp_selector += f'{key}: [{",".join(temp_value)}]\n'
+
+    return temp_selector
+
+
 def transform_query_args(query, **kwargs):
     kwargs['from_date'] = kwargs['from_date'] if 'from_date' in kwargs else _default_from_date()
     kwargs['to_date'] = kwargs['to_date'] if 'to_date' in kwargs else _default_to_date()
@@ -241,6 +259,9 @@ def transform_query_args(query, **kwargs):
     kwargs['include_incomplete_data'] = kwargs['include_incomplete_data'] if 'include_incomplete_data' in kwargs else False
     # transform python booleans to strings so it's properly interpolated in the query string
     kwargs['include_incomplete_data'] = 'true' if kwargs['include_incomplete_data'] else 'false'
+    if 'selector' in kwargs:
+        kwargs['selector'] = f'selector:{{{transform_selector(kwargs["selector"])}}}'
+
     kwargs['address'] = kwargs['address'] if 'address' in kwargs else ''
     kwargs['transaction_type'] = kwargs['transaction_type'] if 'transaction_type' in kwargs else 'ALL'
 

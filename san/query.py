@@ -22,7 +22,7 @@ def get_gql_query(idx, identifier, **kwargs):
 
 
 def parse_dataset(dataset):
-    left, _separator, right = dataset.partition("/")
+    left, _separator, right = dataset.partition('/')
     return [left, right]
 
 
