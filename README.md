@@ -1,47 +1,41 @@
 # sanpy
-
+---
 [![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
 
-Santiment API python client.
+Python client for cryptocurrency data from [Santiment API](https://api.santiment.net/).
+This library provides utilities for accessing the GraphQL Santiment API endpoint
+and convert the result to pandas dataframe.
 
-## Table of contents
+More documentation regarding the API and definitions of metrics can be found on [Santiment Academy]()
 
-- [sanpy](#sanpy)
-  - [Table of contents](#table-of-contents)
+# Table of contents
+
+- [Table of contents](#table-of-contents)
   - [Installation](#installation)
   - [Upgrade to latest version](#upgrade-to-latest-version)
   - [Install extra packages](#install-extra-packages)
   - [Restricted metrics](#restricted-metrics)
   - [Configuration](#configuration)
-  - [Retrieving data from the API](#retrieving-data-from-the-api)
-    - [Fetch single metric](#fetch-single-metric)
-    - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
-    - [Batching multiple queries](#batching-multiple-queries)
-    - [Making a custom graphql query to the API](#making-a-custom-graphql-query-to-the-api)
-    - [Rate Limit Tools](#rate-limit-tools)
+  - [Getting the data](#getting-the-data)
+    - [Using the provided functions](#using-the-provided-functions)
+    - [Execute an arbitrary GraphQL request](#execute-an-arbitrary-graphql-request)
   - [Available metrics](#available-metrics)
   - [Available Metrics for Slug](#available-metrics-for-slug)
+  - [Fetch timeseries metric](#fetch-timeseries-metric)
+  - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
+  - [Batching multiple queries](#batching-multiple-queries)
+  - [Rate Limit Tools](#rate-limit-tools)
   - [Metric Complexity](#metric-complexity)
   - [Include Incomplete Data Flag](#include-incomplete-data-flag)
-  - [Available Since](#available-since)
-  - [Full list of metrics for a single project](#full-list-of-metrics-for-a-single-project)
-      - [Holder Metrics](#holder-metrics)
-      - [Social Metrics](#social-metrics)
-      - [Price Metrics](#price-metrics)
-      - [Development Metrics](#development-metrics)
-      - [Derivatives](#derivatives)
-      - [MakerDAO Metrics](#makerdao-metrics)
-      - [On-Chain Metrics](#on-chain-metrics)
-    - [Fetching lists of projects](#fetching-lists-of-projects)
-      - [All Projects](#all-projects)
-      - [ERC20 Projects](#erc20-projects)
+  - [Metric/Asset pair available cince](#metricasset-pair-available-cince)
+  - [Transform the result](#transform-the-result)
+  - [Available projects](#available-projects)
+  - [Non-standard metrics](#non-standard-metrics)
     - [Other Price metrics](#other-price-metrics)
+      - [Marketcap, Price USD, Price BTC and Trading Volume](#marketcap-price-usd-price-btc-and-trading-volume)
       - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
-    - [Gas Used](#gas-used)
-    - [Miners Balance](#miners-balance)
     - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
-    - [Price Volume Difference](#price-volume-difference)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
     - [Token Top Transactions](#token-top-transactions)
@@ -55,6 +49,7 @@ Santiment API python client.
 
 ## Installation
 
+To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
 ```bash
 pip install sanpy
 ```
@@ -67,7 +62,7 @@ pip install --upgrade sanpy
 
 ## Install extra packages
 
-There are few scripts under [extras](/san/extras) directory. To install their dependencies use:
+There are few scripts under [extras](/san/extras) directory related to backtesting and event studies. To install their dependencies use:
 
 ```bash
 pip install sanpy[extras]
@@ -79,36 +74,121 @@ In order to access real-time data or historical data for some of the metrics,
 you'll need to set the [API key](#configuration), generated from an account with
 a paid API plan.
 
-All restricted metrics are free for "santiment" token.
-
 ## Configuration
 
-Optionally you can provide an api key which gives access to some restricted metrics:
+Optionally you can provide an API key which gives access to the restricted metrics:
 
 ```python
 import san
-san.ApiConfig.api_key = 'api-key-provided-by-sanbase'
+san.ApiConfig.api_key = "your-api-key-here"
 ```
 
-To obtain an api key you should [log in to sanbase](https://app.santiment.net/login)
-and go to the `account` page - [https://app.santiment.net/account](https://app.santiment.net/account).
+To obtain an API key you should [log in to sanbase](https://app.santiment.net/login)
+and go to the `Account` page - [https://app.santiment.net/account](https://app.santiment.net/account).
 There is an `API Keys` section and a `Generate new api key` button.
 
-If the account used for generating the api key has enough SAN tokens, the api key will give you
-access to the data that requires SAN token staking. The api key can only be used to fetch data and not to execute graphql mutations.
+## Getting the data
 
-## Retrieving data from the API
+### Using the provided functions
 
-The data is fetched by providing a string in the format `query/slug` and additional parameters.
+The library provides the `get` function that is used to fetch data.
+The first argument of the `get` function is the metric name.
 
-- `query`: Available queries can be found in section: [Available metrics](#available-metrics)
-- `slug`: A list of projects with their slugs, names, etc. can be fetched like this:
+The rest of the parameters are::
 
+- `slug` - The project identificator, as seen in [the Available projects section](#available-projects)
+- `selector` - Allow for more flexible selection of the target. Some metrics are
+  computed on blockchain addresses, for others you can provide a list of slugs,
+  labels, amount of top holders. etc.
+- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.now() - 365 days` 
+- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.now()`
+- `interval` - The interval between the data points in the timeseries. Defaults to `'1d'`
+  It is represented in two different ways:
+  - a fixed range:  an integer followed by one of: `s`, `m`, `h`, `d` or `w`
+  - a function, providing some semantic or a dynamic range: `toStartOfMonth`, `toStartOfDay`, `toStartOfWeek`, `toMonday`..
+
+The returned value for time-series data is in `pandas DataFrame` and is indexed by `datetime`.
+
+For backwards compatibility, fetching the metric by providing `"metric/slug"` as
+the first instead of using a separate `'slug'`/`'selector'` continues to work,
+but it is not the recommended approach.
+
+For non-metric related data like getting the list of available assets, the data
+is fetched by providing a string in the format `query/argument` and additional
+parameters.
+
+The examples below contain some of described scenarios:
+- Fetching timeseries metric via the recommended approach with a `slug` parameter
+- Fetching timeseries metric via the recommended approach with a `selector` parameter
+- Fetching timeseries metric via the `'<metric>/<slug>'` first argument
+- Fetching non-timeseries data
+
+Fetch metric by providing `metric` as first argument and `slug` as named parameter:
+
+```python
+import san
+san.get(
+  "price_usd",
+  slug="bitcoin",
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                   value            
+2022-01-01 00:00:00+00:00  47686.811509
+2022-01-02 00:00:00+00:00  47345.220564
+2022-01-03 00:00:00+00:00  46458.116959
+2022-01-04 00:00:00+00:00  45928.661063
+2022-01-05 00:00:00+00:00  43569.003348
+```
+
+Fetch development activity of a specific Github organization:
+```python
+import san
+san.get(
+  "dev_activity",
+  selector={"organization": "google"},
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                    value     
+2022-01-01 00:00:00+00:00   176.0
+2022-01-02 00:00:00+00:00   129.0
+2022-01-03 00:00:00+00:00   562.0
+2022-01-04 00:00:00+00:00  1381.0
+2022-01-05 00:00:00+00:00  1334.0
+```
+Fetch metric by providing `metric/slug` as first argument and no `slug` as named parameter:
+
+```python
+import san
+
+san.get(
+    "daily_active_addresses/bitcoin",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+```
+```
+datetime                   value      
+2018-06-01 00:00:00+00:00  692508.0
+2018-06-02 00:00:00+00:00  521887.0
+2018-06-03 00:00:00+00:00  531464.0
+2018-06-04 00:00:00+00:00  702902.0
+2018-06-05 00:00:00+00:00  655695.0
+```
+
+Fetch non-timeseries data:
 ```python
 import san
 san.get("projects/all")
 ```
-
 ```
                 name             slug ticker   totalSupply
 0             0chain           0chain    ZCN     400000000
@@ -117,33 +197,100 @@ san.get("projects/all")
 ...
 ```
 
-Parameters:
+### Execute an arbitrary GraphQL request
 
-- `from_date`, `to_date` - A date or datetime in iso8601 format specifying the start and end datetime for the returned data or the string for ex: `2018-06-01`, or a string, representing the relative datetime `utc_now-<interval>`
-- `interval` - The interval of the returned data - an integer followed by one of: `s`, `m`, `h`, `d` or `w`
+Some of the available queries in the [Santiment API](https://api.santiment.net) do not have a 
+dedicated sanpy function. Alternatively, if the returned format needs to be parsed differently, this approach
+can be used, too. They can be fetched by providing the raw GraphQL query.
 
-Default values for parameters:
+Fetching data for many slugs at the same time. Note that this is also avaialble as `san.get_many`
+```python
+import san
+import pandas as pd
 
-- `from_date`: `datetime.now() - 365 days`
-- `to_date`: `datetime.now()`
-- `interval`: `'1d'`
+result = san.graphql.execute_gql("""
+{
+  getMetric(metric: "price_usd") {
+    timeseriesDataPerSlug(
+      selector: {slugs: ["ethereum", "bitcoin"]}
+      from: "2022-05-05T00:00:00Z"
+      to: "2022-05-08T00:00:00Z"
+      interval: "1d") {
+        datetime
+        data{
+          value
+          slug
+        }
+    }
+  }
+}
+""")
 
-The returned value for time-series data is in `pandas DataFrame` format indexed by `datetime`.
+data = result['getMetric']['timeseriesDataPerSlug']
+rows = []
+for datetime_point in data:
+    row = {'datetime': datetime_point['datetime']}
+    for slug_data in datetime_point['data']:
+        row[slug_data['slug']] = slug_data['value']
+    rows.append(row)
 
-### Fetch single metric
+df = pd.DataFrame(rows)
+df.set_index('datetime', inplace=True)
+```
+```
+datetime              bitcoin       ethereum                
+2022-05-05T00:00:00Z  36575.142133  2749.213042
+2022-05-06T00:00:00Z  36040.922350  2694.979684
+2022-05-07T00:00:00Z  35501.954144  2636.092958
+```
+
+Fetching a specific set of fields for a project:
+```python
+import san
+import pandas as pd
+
+result = san.graphql.execute_gql("""{
+  projectBySlug(slug: "santiment") {
+    slug
+    name
+    ticker
+    infrastructure
+    mainContractAddress
+    twitterLink
+  }
+}""")
+
+pd.DataFrame(result["projectBySlug"], index=[0])
+```
+
+```
+  infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
+0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
+```
+
+## Available metrics
+
+Getting all of the metrics as a list is done using the following code:
+
+```python
+san.available_metrics()
+```
+
+## Available Metrics for Slug
+
+Getting all of the metrics for a given slug is achieved with the following code:
+
+```python
+san.available_metrics_for_slug("santiment")
+```
+## Fetch timeseries metric
 
 ```python
 import san
 
 san.get(
-    "daily_active_addresses/santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
-
-san.get(
-    "prices/santiment",
+    "daily_active_addresses",
+    slug="santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -153,26 +300,26 @@ san.get(
 Using the defaults params (last 1 year of data with 1 day interval):
 
 ```python
-san.get("daily_active_addresses/santiment")
-san.get("prices/santiment")
+san.get("daily_active_addresses", slug="santiment")
+san.get("price_usd", slug="santiment")
 ```
 
-### Fetching metadata for a metric
+## Fetching metadata for a metric
 
 Fetching the metadata for an on-chain metric.
 
 ```python
 san.metadata(
     "nvt",
-    arr=['availableSlugs', 'defaultAggregation', 'humanReadableName', 'isAccessible', 'isRestricted', 'restrictedFrom', 'restrictedTo']
+    arr=["availableSlugs", "defaultAggregation", "humanReadableName", "isAccessible", "isRestricted", "restrictedFrom", "restrictedTo"]
 )
 ```
 
 Example result:
 
 ```python
-{'availableSlugs': ['0chain', '0x', '0xbtc', '0xcert', '1sg', ...],
-'defaultAggregation': 'AVG', 'humanReadableName': 'NVT (Using Circulation)', 'isAccessible': True, 'isRestricted': True, 'restrictedFrom': '2020-03-21T08:44:14Z', 'restrictedTo': '2020-06-17T08:44:14Z'}
+{"availableSlugs": ["0chain", "0x", "0xbtc", "0xcert", "1sg", ...],
+"defaultAggregation": "AVG", "humanReadableName": "NVT (Using Circulation)", "isAccessible": True, "isRestricted": True, "restrictedFrom": "2020-03-21T08:44:14Z", "restrictedTo": "2020-06-17T08:44:14Z"}
 ```
 
 - `availableSlugs` - A list of all slugs available for this metric.
@@ -189,7 +336,7 @@ Example result:
 - `restrictedFrom` - The first datetime available of that metric for your current plan.
 - `restrictedTo` - The last datetime available of that metric and your current plan.
 
-### Batching multiple queries
+## Batching multiple queries
 
 Multiple queries can be executed in a batch to speed up the performance.
 
@@ -215,14 +362,16 @@ from san import Batch
 batch = Batch()
 
 batch.get(
-    "daily_active_addresses/santiment",
+    "daily_active_addresses",
+    slug="santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
 
 batch.get(
-    "transaction_volume/santiment",
+    "transaction_volume",
+    slug="santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -251,32 +400,7 @@ batch.get(
 [daa, trx_volume] = batch.execute(max_workers=10)
 ```
 
-### Making a custom graphql query to the API
-
-```python
-from san.graphql import execute_gql
-import pandas as pd
-
-res = execute_gql("""{
-  projectBySlug(slug: "santiment") {
-    slug
-    name
-    ticker
-    infrastructure
-    mainContractAddress
-    twitterLink
-  }
-}""")
-
-pd.DataFrame(res['projectBySlug'], index=[0])
-```
-
-```
-  infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
-0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
-```
-
-### Rate Limit Tools
+## Rate Limit Tools
 
 There are two functions, which can help you in handling the rate limits:
 * ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
@@ -291,7 +415,8 @@ import san
 
 try:
   san.get(
-    "price_usd/santiment",
+    "price_usd",
+    slug="santiment",
     from_date="utc_now-30d",
     to_date="utc_now",
     interval="1d"
@@ -308,43 +433,35 @@ calls_by_day = san.api_calls_made()
 calls_remaining = san.api_calls_remaining()
 ```
 
-## Available metrics
-
-Getting all of the metrics as a list is done using the following code:
-
-```python
-san.available_metrics()
-```
-
-## Available Metrics for Slug
-
-Getting all of the metrics for a given slug is achieved with the following code:
-
-```python
-san.available_metrics_for_slug('santiment')
-```
 
 ## Metric Complexity
 
-Fetch the complexity of a metric. The complexity depends on the from/to/interval parameters, as well as the metric and the subscription plan. A request might have a maximum complexity of 20000. If a request has a higher complexity there are a few ways to solve the issue:
+Fetch the complexity of a metric. The complexity depends on the from/to/interval
+parameters, as well as the metric and the subscription plan. A request might
+have a maximum complexity of 50000. If a request has a higher complexity there
+are a few ways to solve the issue:
 
 - Break down the request into multiple requests with smaller from-to ranges.
 - Upgrade to a higher subscription plan.
 
+More about the complexity can be found on [Santiment Academy]()
 ```python
 san.metric_complexity(
-    metric='price_usd',
-    from_date='2020-01-01',
-    to_date='2020-02-20',
-    interval='1d'
+    metric="price_usd",
+    from_date="2020-01-01",
+    to_date="2020-02-20",
+    interval="1d"
 )
 ```
 
 ## Include Incomplete Data Flag
 
-Daily metrics have one value per day. For the current day, the latest computed value will not include a full day of data.
-For example, computing `daily_active_addresses` at 08:00 includes data for one third of the day. To reduce confusion, the current
-day value for metrics that have this behaviour is excluded. To force fetching the current day value, the `includeIncompleteData` flag must be used.
+Daily metrics have one value per day. For the current day, the latest computed
+value will not include a full day of data. For example, computing
+`daily_active_addresses` at 08:00 includes data for one third of the day. To
+reduce confusion, the current day value for metrics that have this behaviour is
+excluded. To force fetching the current day value, the `includeIncompleteData`
+flag must be used.
 
 ```python
 san.get(
@@ -356,37 +473,21 @@ san.get(
 )
 ```
 
-## Available Since
+## Metric/Asset pair available cince
 
 Fetch the first datetime for which a metric is available for a given slug.
 
 ```python
-san.available_metric_for_slug_since(metric='daily_active_addresses', slug='santiment')
+san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santiment")
 ```
 
-
-Below are described the available metrics and are given examples for fetching them.
-
-## Full list of metrics for a single project
-
-> NOTE: When a new metric is added to the API, `san.available_metrics()` will
-> automatically pick it up and it will be accessible with sanpy, but it might
-> take some time to be added to this documentation. The list below might not be
-> full at times.
-
-The suffixes `_<number>y` and `_<number>d` means that the metric is calculated
-only by taken into account the tokens and coins that have moved in the past
-number of years or days.
-
-All these metrics are returned as a Pandas dataframe with two columns - `datetime`
-and float `value`.
-
-All metrics that do not follow the same format are explicitly listed after that.
+## Transform the result
 
 Example usage:
 ```python
 san.get(
-  "price_usd/santiment",
+  "price_usd",
+  slug="santiment",
   from_date="2020-06-01",
   to_date="2021-06-05",
   interval="1d",
@@ -397,222 +498,15 @@ san.get(
 
 Where the parameters, that are not mentioned, are optional:
 
-``transform`` - Apply a transformation on the data. The supported transformations are:
+`transform` - Apply a transformation on the data. The supported transformations are:
 - "moving_average" - Replace every value V<sub>i</sub> with the average of the last "moving_average_base" values.
 - "consecutive_differences" - Replace every value V<sub>i</sub> with the value V<sub>i</sub> - V<sub>i-1</sub> where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
 - "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) * 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
 
-``aggregation`` - the aggregation which is used for the query results.
+`aggregation` - the aggregation which is used for the query results.
 
 
-#### Holder Metrics
-
-- amount_in_top_holders
-- amount_in_exchange_top_holders
-- amount_in_non_exchange_top_holders
-- holders_distribution_combined_balance_100k_to_1M
-- holders_distribution_0.1_to_1
-- holders_distribution_0_to_0.001
-- holders_distribution_1_to_10
-- holders_distribution_1k_to_10k
-- holders_distribution_combined_balance_0.01_to_0.1
-- holders_distribution_combined_balance_0.1_to_1
-- holders_distribution_combined_balance_1k_to_10k
-- holders_distribution_100_to_1k
-- holders_distribution_combined_balance_10k_to_100k
-- holders_distribution_10_to_100
-- holders_distribution_10k_to_100k
-- holders_distribution_total
-- holders_distribution_combined_balance_1M_to_10M
-- holders_distribution_combined_balance_10_to_100
-- holders_distribution_1M_to_10M
-- holders_distribution_0.01_to_0.1
-- holders_distribution_0.001_to_0.01
-- holders_distribution_combined_balance_1_to_10
-- holders_distribution_combined_balance_100_to_1k
-- holders_distribution_combined_balance_0_to_0.001
-- holders_distribution_combined_balance_0.001_to_0.01
-- holders_distribution_combined_balance_10M_to_inf
-- holders_distribution_100k_to_1M
-- holders_distribution_10M_to_inf
-- percent_of_total_supply_on_exchanges
-- supply_on_exchanges
-- supply_outside_exchanges
-
-#### Social Metrics
-
-- twitter_followers
-- social_dominance_telegram
-- social_dominance_reddit
-- social_dominance_total
-- social_volume_telegram
-- social_volume_reddit
-- social_volume_twitter
-- social_volume_bitcointalk
-- social_volume_total
-- community_messages_count_telegram
-- community_messages_count_total
-- sentiment_positive_total
-- sentiment_positive_telegram
-- sentiment_positive_reddit
-- sentiment_positive_twitter
-- sentiment_positive_bitcointalk
-- sentiment_negative_total
-- sentiment_negative_telegram
-- sentiment_negative_reddit
-- sentiment_negative_twitter
-- sentiment_negative_bitcointalk
-- sentiment_balance_total
-- sentiment_balance_telegram
-- sentiment_balance_reddit
-- sentiment_balance_twitter
-- sentiment_balance_bitcointalk
-- sentiment_volume_consumed_total
-- sentiment_volume_consumed_telegram
-- sentiment_volume_consumed_reddit
-- sentiment_volume_consumed_twitter
-- sentiment_volume_consumed_bitcointalk
-
-#### Price Metrics
-
-- price_usd
-- price_btc
-- price_eth
-- volume_usd
-- marketcap_usd
-- daily_avg_marketcap_usd
-- daily_avg_price_usd
-- daily_closing_marketcap_usd
-- daily_closing_price_usd
-- daily_high_price_usd
-- daily_low_price_usd
-- daily_opening_price_usd
-- daily_trading_volume_usd
-- volume_usd_change_1d
-- volume_usd_change_30d
-- volume_usd_change_7d
-- price_usd_change_1d
-- price_usd_change_30d
-- price_usd_change_7d
-
-#### Development Metrics
-
-- dev_activity
-- dev_activity_change_30d
-- dev_activity_contributors_count
-- github_activity
-- github_activity_contributors_count
-
-#### Derivatives
-
-- bitmex_perpetual_basis
-- bitmex_perpetual_funding_rate
-- bitmex_perpetual_open_interest
-- bitmex_perpetual_open_value
-
-#### MakerDAO Metrics
-
-- dai_created
-- dai_repaid
-- mcd_collat_ratio
-- mcd_collat_ratio_sai
-- mcd_collat_ratio_weth
-- mcd_dsr
-- mcd_erc20_supply
-- mcd_locked_token
-- mcd_stability_fee
-- mcd_supply
-- scd_collat_ratio
-- scd_locked_token
-
-#### On-Chain Metrics
-
-- active_addresses_24h
-- active_addresses_24h_change_1d
-- active_addresses_24h_change_30d
-- active_addresses_24h_change_7d
-- active_deposits
-- active_withdrawals
-- age_destroyed
-- circulation
-- circulation_10y
-- circulation_180d
-- circulation_1d
-- circulation_2y
-- circulation_30d
-- circulation_365d
-- circulation_3y
-- circulation_5y
-- circulation_60d
-- circulation_7d
-- circulation_90d
-- daily_active_addresses
-- deposit_transactions
-- exchange_balance
-- exchange_inflow
-- exchange_outflow
-- mean_age
-- mean_dollar_invested_age
-- mean_realized_price_usd
-- mean_realized_price_usd_10y
-- mean_realized_price_usd_180d
-- mean_realized_price_usd_1d
-- mean_realized_price_usd_2y
-- mean_realized_price_usd_30d
-- mean_realized_price_usd_365d
-- mean_realized_price_usd_3y
-- mean_realized_price_usd_5y
-- mean_realized_price_usd_60d
-- mean_realized_price_usd_7d
-- mean_realized_price_usd_90d
-- mvrv_long_short_diff_usd
-- mvrv_usd
-- mvrv_usd_10y
-- mvrv_usd_180d
-- mvrv_usd_1d
-- mvrv_usd_2y
-- mvrv_usd_30d
-- mvrv_usd_365d
-- mvrv_usd_3y
-- mvrv_usd_5y
-- mvrv_usd_60d
-- mvrv_usd_7d
-- mvrv_usd_90d
-- mvrv_usd_intraday
-- mvrv_usd_intraday_10y
-- mvrv_usd_intraday_180d
-- mvrv_usd_intraday_1d
-- mvrv_usd_intraday_2y
-- mvrv_usd_intraday_30d
-- mvrv_usd_intraday_365d
-- mvrv_usd_intraday_3y
-- mvrv_usd_intraday_5y
-- mvrv_usd_intraday_60d
-- mvrv_usd_intraday_7d
-- mvrv_usd_intraday_90d
-- network_growth
-- nvt
-- nvt_transaction_volume
-- realized_value_usd
-- realized_value_usd_10y
-- realized_value_usd_180d
-- realized_value_usd_1d
-- realized_value_usd_2y
-- realized_value_usd_30d
-- realized_value_usd_365d
-- realized_value_usd_3y
-- realized_value_usd_5y
-- realized_value_usd_60d
-- realized_value_usd_7d
-- realized_value_usd_90d
-- stock_to_flow
-- transaction_volume
-- velocity
-- withdrawal_transactions
-
-### Fetching lists of projects
-
-#### All Projects
+## Available projects
 
 Returns a DataFrame with all the projects available in the Santiment API. Not all
 metrics will be available for each of the projects.
@@ -638,40 +532,33 @@ Example result:
 ...
 ```
 
-#### ERC20 Projects
 
-Returns a DataFrame with all the ERC20 projects available in the Santiment API.
-Not all metrics will be available for all the projects. The `slug` is a unique
-identifier which can be used to retrieve most of the metrics.
+## Non-standard metrics
 
-```python
-san.get("projects/erc20")
-```
-
-Example result:
-
-```
-                      name                   slug ticker   totalSupply
-0                   0chain                 0chain    ZCN     400000000
-1                       0x                     0x    ZRX    1000000000
-2                0xBitcoin                  0xbtc  0xBTC      20999984
-3          0xcert Protocol                 0xcert    ZXC     500000000
-4                   1World                 1world    1WO      37219453
-5             AB-Chain RTB           ab-chain-rtb    RTB      27857813
-6                  Abulaba                abulaba    AAA     397000000
-7                   adbank                 adbank    ADB    1000000000
-...
-```
+Here is a list of metrics that are not part of the returned list of metrics found above.
+This is due to having different response format and semantics.
 
 ### Other Price metrics
 
+#### Marketcap, Price USD, Price BTC and Trading Volume
+
+```python
+san.get(
+    "prices",
+    slug="santiment",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+```
 #### Open, High, Close, Low Prices, Volume, Marketcap
 
 Note: this query cannot be batched!
 
 ```python
 san.get(
-    "ohlcv/santiment",
+    "ohlcv",
+    slug="santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -688,60 +575,6 @@ datetime                        openPriceUsd  closePriceUsd  highPriceUsd  lowPr
 2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528       1.18010       617451  7.604326e+07
 ```
 
-### Gas Used
-
-Returns used Gas by a blockchain. When you send tokens, interact with a contract or
-do anything else on the blockchain, you must pay for that computation.
-That payment is calculated in Gas. Currently only ETH is supported.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "gas_used/ethereum",
-    from_date="2019-06-01",
-    to_date="2019-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-datetime                       gasUsed
-2019-06-01 00:00:00+00:00  47405557702
-2019-06-02 00:00:00+00:00  44769162038
-2019-06-03 00:00:00+00:00  46415901420
-2019-06-04 00:00:00+00:00  46907686393
-2019-06-05 00:00:00+00:00  45925073341
-```
-
-### Miners Balance
-
-Returns miner balances over time. Currently only ETH is supported.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "miners_balance/ethereum",
-    from_date="2019-06-01",
-    to_date="2019-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-datetime                        balance
-2019-06-01 00:00:00+00:00  1.529488e+06
-2019-06-02 00:00:00+00:00  1.533494e+06
-2019-06-03 00:00:00+00:00  1.527438e+06
-2019-06-04 00:00:00+00:00  1.525666e+06
-2019-06-05 00:00:00+00:00  1.527563e+06
-```
-
 ### Mining Pools Distribution
 
 Returns distribution of miners between mining pools. What part of the miners are using top3, top10 and all the other pools. Currently only ETH is supported.
@@ -750,7 +583,8 @@ Returns distribution of miners between mining pools. What part of the miners are
 
 ```python
 san.get(
-    "mining_pools_distribution/ethereum",
+    "mining_pools_distribution",
+    slug="ethereum",
     from_date="2019-06-01",
     to_date="2019-06-05",
     interval="1d"
@@ -774,7 +608,8 @@ Historical balance for erc20 token or eth address. Returns the historical balanc
 
 ```python
 san.get(
-    "historical_balance/santiment",
+    "historical_balance",
+    slug="santiment",
     address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
     from_date="2019-04-18",
     to_date="2019-04-23",
@@ -793,31 +628,6 @@ datetime                     balance
 2019-04-22 00:00:00+00:00  215664.33
 ```
 
-### Price Volume Difference
-
-Fetch the price-volume difference technical indicator for a given slug, display currency and time period. This indicator measures the difference in trend between price and volume, specifically when price goes up as volume goes down.
-
-```python
-san.get(
-    "price_volume_difference/santiment",
-    from_date="2019-04-18",
-    to_date="2019-04-23",
-    interval="1d",
-    currency="USD"
-)
-```
-
-Example result:
-
-```
-datetime                   priceChange  priceVolumeDiff  volumeChange
-2019-04-18 00:00:00+00:00     0.017779         0.013606 -39908.007476
-2019-04-19 00:00:00+00:00     0.012587         0.007332 -31195.568878
-2019-04-20 00:00:00+00:00     0.009062         0.004169 -24550.100411
-2019-04-21 00:00:00+00:00     0.002573         0.001035 -19307.845911
-2019-04-22 00:00:00+00:00     0.001527         0.000703 -20317.934666
-```
-
 ### Ethereum Top Transactions
 
 Top ETH transactions for project's team wallets.
@@ -830,7 +640,8 @@ Available transaction types:
 
 ```python
 san.get(
-    "eth_top_transactions/santiment",
+    "eth_top_transactions",
+    slug="santiment",
     from_date="2019-04-18",
     to_date="2019-04-30",
     limit=5,
@@ -856,7 +667,8 @@ ETH spent for each interval from the project's team wallet and time period
 
 ```python
 san.get(
-    "eth_spent_over_time/santiment",
+    "eth_spent_over_time",
+    slug="santiment",
     from_date="2019-04-18",
     to_date="2019-04-23",
     interval="1d"
@@ -880,7 +692,8 @@ Top transactions for the token of a given project
 
 ```python
 san.get(
-    "token_top_transactions/santiment",
+    "token_top_transactions",
+    slug="santiment",
     from_date="2019-04-18",
     to_date="2019-04-30",
     limit=5
@@ -906,7 +719,8 @@ Top transfers for the token of a given project, ``address`` and ``transaction_ty
 
 ```python
 san.get(
-    "top_transfers/santiment",
+    "top_transfers",
+    slug="santiment",
     from_date="utc_now-30d",
     to_date="utc_now",
 )
@@ -926,7 +740,8 @@ datetime
 
 ```python
 san.get(
-    "top_transfers/santiment",
+    "top_transfers",
+    slug="santiment",
     address="0x26e068650ae54b6c1b149e1b926634b07e137b9f",
     transaction_type="ALL",
     from_date="utc_now-30d",
@@ -946,7 +761,7 @@ datetime
 
 ### Emerging Trends
 
-Emerging trends for a given period of time
+Emerging trends for a given period of time. 
 
 ```python
 san.get(
