@@ -380,7 +380,7 @@ def test_top_social_gainers_losers():
 
 
 @attr('integration')
-def test_get_metric():
+def test_get_metric_timeseries_data():
     get_metric_df = san.get(
         'daily_active_addresses/' + params['project_slug'],
         from_date=params['from_date'],

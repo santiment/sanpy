@@ -68,8 +68,6 @@ def __handle_success_response__(response, gql_query_str):
     elif __exist_not_empty_result(response):
         return response.json()['data']
     else:
-        print(response.headers)
-
         raise SanError(
             "Error running query, the results are empty. Status code: {}.\n {}" .format(
                 response.status_code,

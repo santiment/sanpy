@@ -2,7 +2,7 @@ import san.sanbase_graphql
 from san.sanbase_graphql_helper import QUERY_MAPPING
 from san.query import get_gql_query
 from san.graphql import execute_gql
-from san.transform import transform_query_result
+from san.transform import transform_timeseries_data_query_result
 from san.error import SanError
 
 
@@ -30,7 +30,7 @@ class Batch:
             else:
                 if slug != '':
                     batched_queries.append(
-                        san.sanbase_graphql.get_metric(
+                        san.sanbase_graphql.get_metric_timeseries_data(
                             idx, metric, slug, **query[1]))
                 else:
                     raise SanError('Invalid metric!')
@@ -43,7 +43,7 @@ class Batch:
         idxs = sorted([int(k.split('_')[1]) for k in graphql_result.keys()])
         for idx in idxs:
             query = self.queries[idx][0].split("/")[0]
-            df = transform_query_result(idx, query, graphql_result)
+            df = transform_timeseries_data_query_result(idx, query, graphql_result)
             result.append(df)
         return result
 
