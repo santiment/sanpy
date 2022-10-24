@@ -10,47 +10,48 @@ from san.error import SanError
 
 
 def task(request):
-    [idx, [identifier, kwargs]] = request
+    [idx, [get_type, identifier, kwargs]] = request
     
     metric, _separator, slug = identifier.partition("/")
 
     if metric in QUERY_MAPPING:
-        gql_string_query = get_gql_query(idx, identifier, **kwargs)
-    elif slug != '':
-        gql_string_query = san.sanbase_graphql.get_metric_timeseries_data(idx, metric, slug, **kwargs)
+        response = san.get(identifier, idx=idx, **kwargs)
+    elif get_type == 'get':
+        response = san.get(identifier, idx=idx, **kwargs)
+    elif get_type == 'get_many':
+        response = san.get_many(identifier, idx=idx, **kwargs)
     else:
         raise SanError('Invalid metric!')
                 
-    response = execute_gql("{" + gql_string_query + "}")
-    return response
+    return (idx, response)
 
 class AsyncBatch:
     def __init__(self):
         self.queries = []
 
     def get(self, dataset, **kwargs):
-        self.queries.append([dataset, kwargs])
+        self.queries.append(['get', dataset, kwargs])
+
+    def get_many(self, dataset, **kwargs):
+        self.queries.append(['get_many', dataset, kwargs])
 
     def execute(self, max_workers=10):
         graphql_result = {}
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for response in executor.map(task, enumerate(self.queries)):
-                # response is in the format {'query_0': '<value>'}
-                [(key, value)] = list(response.items())
-                
-                graphql_result[key] = value
+            for (idx, response) in executor.map(task, enumerate(self.queries)):
+                graphql_result[idx] = response
             
             result = self.__transform_batch_result(graphql_result)
             return result
 
 
-    def __transform_batch_result(self, graphql_result):
+    def __transform_batch_result(self, response_map):
         result = []
-        idxs = sorted([int(k.split('_')[1]) for k in graphql_result.keys()])
+        print(response_map)
+        idxs = sorted(idx for idx in response_map.keys())
 
         for idx in idxs:
-            query = self.queries[idx][0].split("/")[0]
-            df = transform_timeseries_data_query_result(idx, query, graphql_result)
-            result.append(df)
+            result.append(response_map[idx])
+
         return result

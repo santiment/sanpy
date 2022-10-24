@@ -30,7 +30,7 @@ class Batch:
             else:
                 if slug != '':
                     batched_queries.append(
-                        san.sanbase_graphql.get_metric_timeseries_data(
+                        san.sanbase_graphql.get_metric(
                             idx, metric, slug, **query[1]))
                 else:
                     raise SanError('Invalid metric!')

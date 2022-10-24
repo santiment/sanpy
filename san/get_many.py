@@ -24,7 +24,9 @@ def __get_many(query, **kwargs):
             Invalid call of the get function,you need to either
             give <metric>/<slug> as a first argument or give a slug
             or selector as a key-word argument!''')
-    gql_query = '{' + san.sanbase_graphql.get_metric_timeseries_data_per_slug(0, query, **kwargs) + '}'
+    idx = kwargs.pop('idx', 0)
+
+    gql_query = '{' + san.sanbase_graphql.get_metric_timeseries_data_per_slug(idx, query, **kwargs) + '}'
     res = execute_gql(gql_query)
 
-    return transform_timeseries_data_per_slug_query_result(0, query, res)
+    return transform_timeseries_data_per_slug_query_result(idx, query, res)
