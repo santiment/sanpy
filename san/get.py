@@ -126,7 +126,11 @@ def __get(query, **kwargs):
             Invalid call of the get function,you need to either
             give <metric>/<slug> as a first argument or give a slug
             or selector as a key-word argument!''')
-    gql_query = '{' + san.sanbase_graphql.get_metric(0, query, **kwargs) + '}'
+    if query in QUERY_MAPPING.keys():
+        gql_query = '{' + get_gql_query(0, query, **kwargs) + '}'
+    else:
+        gql_query = '{' + san.sanbase_graphql.get_metric(0, query, **kwargs) + '}'
+
     res = execute_gql(gql_query)
 
     return transform_query_result(0, query, res)
