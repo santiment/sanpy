@@ -91,12 +91,16 @@ There is an `API Keys` section and a `Generate new api key` button.
 
 ### Using the provided functions
 
-The library provides the `get` function that is used to fetch data.
-The first argument of the `get` function is the metric name.
+The library provides the `get` and `get_many` functions that are used to fetch data.
+`get` is used to fetch timeseries data for a single metric/asset pair.
+`get_many` is used to fetch timeseries data for a single metric, but many assets. This is counted as 1 API call.
+
+The first argument to the functions is the metric name.
 
 The rest of the parameters are::
 
-- `slug` - The project identificator, as seen in [the Available projects section](#available-projects)
+- `slug` - (for `get`) The project identificator, as seen in [the Available projects section](#available-projects)
+- `slugs` - (for `get_many`) A list of projects' identificators, as seen in [the Available projects section](#available-projects)
 - `selector` - Allow for more flexible selection of the target. Some metrics are
   computed on blockchain addresses, for others you can provide a list of slugs,
   labels, amount of top holders. etc.
@@ -107,7 +111,9 @@ The rest of the parameters are::
   - a fixed range:  an integer followed by one of: `s`, `m`, `h`, `d` or `w`
   - a function, providing some semantic or a dynamic range: `toStartOfMonth`, `toStartOfDay`, `toStartOfWeek`, `toMonday`..
 
-The returned value for time-series data is in `pandas DataFrame` and is indexed by `datetime`.
+The returned resulut for time-series data is transformed into `pandas DataFrame` and is indexed by `datetime`.
+For `get`, the value column is named `value`.
+For `get_many`, there is one column per asset queried. The asset slugs are used for the column names.
 
 For backwards compatibility, fetching the metric by providing `"metric/slug"` as
 the first instead of using a separate `'slug'`/`'selector'` continues to work,
@@ -117,11 +123,7 @@ For non-metric related data like getting the list of available assets, the data
 is fetched by providing a string in the format `query/argument` and additional
 parameters.
 
-The examples below contain some of described scenarios:
-- Fetching timeseries metric via the recommended approach with a `slug` parameter
-- Fetching timeseries metric via the recommended approach with a `selector` parameter
-- Fetching timeseries metric via the `'<metric>/<slug>'` first argument
-- Fetching non-timeseries data
+The examples below contain some of described scenarios.
 
 Fetch metric by providing `metric` as first argument and `slug` as named parameter:
 
@@ -142,6 +144,26 @@ datetime                   value
 2022-01-03 00:00:00+00:00  46458.116959
 2022-01-04 00:00:00+00:00  45928.661063
 2022-01-05 00:00:00+00:00  43569.003348
+```
+
+Fetch prices for multiple assets:
+```python
+import san
+san.get_many(
+  "price_usd",
+  slugs=["bitcoin", "ethereum", "tether"],
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                   bitcoin       ethereum     tether                                            
+2022-01-01 00:00:00+00:00  47686.811509  3769.696916  1.000500
+2022-01-02 00:00:00+00:00  47345.220564  3829.565045  1.000460
+2022-01-03 00:00:00+00:00  46458.116959  3761.380274  1.000165
+2022-01-04 00:00:00+00:00  45928.661063  3795.890130  1.000208
+2022-01-05 00:00:00+00:00  43569.003348  3550.386882  1.000122
 ```
 
 Fetch development activity of a specific Github organization:
@@ -342,15 +364,19 @@ Multiple queries can be executed in a batch to speed up the performance.
 
 There are two batch classes provided - `Batch` and `AsyncBatch`.
 
+  
+- `AsyncBatch` is the recomended batch class. It executes all the queries in
+  separate API calls. The benefit of using `AsyncBatch` over looping and
+  executing every API call is that the queries can be executed concurrently. The
+  concurrency is controlled by the `max_workers` optional parameter to the
+  `execute` function. By default the `max_workers` value is 10.
+  It also supports `get_many` function to fetch data for many assets.
+
 - `Batch` combines all the provided queries in a single GraphQL document and
-executes them in a single HTTP request. This batching technique should be used
-when lightweight queries that don't fetch a lot of data are used. The reason is
-that the [complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) of each query
-is accumulated and the batch can be rejected.
-- `AsyncBatch` executes all the queries in separate API calls. The benefit of using `AsyncBatch`
-  over looping and executing every API call is that the queries can be executed concurrently.
-  The concurrency is controlled by the `max_workers` optional parameter to the `execute` function.
-  By default the `max_workers` value is 10.
+  executes them in a single HTTP request. This batching technique should be used
+  when lightweight queries that don't fetch a lot of data are used. The reason is
+  that the [complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) of each query
+  is accumulated and the batch can be rejected.
   
 Note: If you have been using `Batch()` and want to switch to the newer `AsyncBatch()` you only need to
 change the batch initialization. The functions for adding queries and executing the batch, as well as the
@@ -386,18 +412,20 @@ from san import AsyncBatch
 batch = AsyncBatch()
 
 batch.get(
-    "daily_active_addresses/santiment",
+    "daily_active_addresses",
+    slug="santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
-batch.get(
-    "transaction_volume/santiment",
+batch.get_many(
+    "daily_active_addresses",
+    slugs=["bitcoin", "ethereum"],
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
 )
-[daa, trx_volume] = batch.execute(max_workers=10)
+[daa, daa_many] = batch.execute(max_workers=10)
 ```
 
 ## Rate Limit Tools

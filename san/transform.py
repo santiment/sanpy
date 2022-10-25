@@ -8,6 +8,7 @@ from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 from collections import OrderedDict
 from san.graphql import execute_gql
+from san.error import SanError
 from san.sanbase_graphql_helper import QUERY_MAPPING
 
 QUERY_PATH_MAP = {
@@ -15,6 +16,7 @@ QUERY_PATH_MAP = {
     'eth_spent_over_time': ['ethSpentOverTime'],
     'token_top_transactions': ['tokenTopTransactions'],
     'get_metric': ['timeseriesData'],
+    'get_metric_many': ['timeseriesDataPerSlug'],
     'topic_search': ['chartData']
 }
 
@@ -28,7 +30,7 @@ def path_to_data(idx, query, data):
             'query_' + str(idx), ] + QUERY_PATH_MAP[query], data)
 
 
-def transform_query_result(idx, query, data):
+def transform_timeseries_data_query_result(idx, query, data):
     """
     If there is a transforming function for this query, then the result is
     passed for it for another transformation
@@ -44,6 +46,23 @@ def transform_query_result(idx, query, data):
         result = globals()[query + '_transform'](result)
 
     return convert_to_datetime_idx_df(result)
+
+
+def transform_timeseries_data_per_slug_query_result(idx, query, data):
+    if query in QUERY_MAPPING or query in QUERY_MAPPING:
+        raise SanError(f'The get_many call is available only for get_metric. Called with {query}')
+
+    result = path_to_data(idx, 'get_metric_many', data)
+    rows = []
+
+    for datetime_point in result:
+        row = {'datetime': datetime_point['datetime']}
+        for slug_data in datetime_point['data']:
+            row[slug_data['slug']] = slug_data['value']
+        
+        rows.append(row)
+
+    return convert_to_datetime_idx_df(rows)
 
 
 def eth_top_transactions_transform(data):

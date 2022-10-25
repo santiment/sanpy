@@ -353,7 +353,22 @@ def ohlcv(idx, slug, **kwargs):
     return merged
 
 
-def _choose_selector_or_slug(slug, **kwargs):
+def __choose_selector_or_slugs(slugs, **kwargs):
+    if slugs:
+        # The interpolation strings will be surrounded by single quotes
+        # but the GraphQL spec requires double quotes.
+        selector_or_slugs = f'selector: {{slugs: {slugs}}}'.replace("'", '"')
+    else:
+        if 'slugs' in kwargs:
+            selector_or_slugs = kwargs['slugs']
+        elif 'selector' in kwargs:
+            selector_or_slugs = kwargs['selector']
+        else:
+            raise SanError('"slugs" or "selector" must be provided as an argument!')
+    
+    return selector_or_slugs
+
+def __choose_selector_or_slug(slug, **kwargs):
     if slug:
         selector_or_slug = f'slug:"{slug}"'
     else:
@@ -366,10 +381,9 @@ def _choose_selector_or_slug(slug, **kwargs):
 
     return selector_or_slug
 
-
-def get_metric(idx, metric, slug=None, **kwargs):
+def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
     kwargs = sgh.transform_query_args('get_metric', **kwargs)
-    selector_or_slug = _choose_selector_or_slug(slug, **kwargs)
+    selector_or_slug = __choose_selector_or_slug(slug, **kwargs)
 
     transform_arg = _transform_arg_helper(kwargs)
     query_str = ("""
@@ -396,6 +410,38 @@ def get_metric(idx, metric, slug=None, **kwargs):
 
     return query_str
 
+def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
+    kwargs = sgh.transform_query_args('get_metric', **kwargs)
+    selector_or_slugs = __choose_selector_or_slugs(slugs, **kwargs)
+
+    transform_arg = _transform_arg_helper(kwargs)
+    query_str = ("""
+    query_{idx}: getMetric(metric: \"{metric}\"){{
+        timeseriesDataPerSlug(
+            {selector_or_slugs}
+            {transform_arg}
+            from: \"{from_date}\"
+            to: \"{to_date}\"
+            interval: \"{interval}\"
+            aggregation: {aggregation}
+            includeIncompleteData: {include_incomplete_data}
+        ){{
+            datetime
+            data {{
+                slug
+                value
+            }}
+        }}
+    }}
+    """).format(
+        idx=idx,
+        metric=metric,
+        selector_or_slugs=selector_or_slugs,
+        transform_arg=transform_arg,
+        **kwargs
+    )
+
+    return query_str
 
 def _transform_arg_helper(kwargs):
     transform_arg_str = ''
