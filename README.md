@@ -100,8 +100,8 @@ The rest of the parameters are::
 - `selector` - Allow for more flexible selection of the target. Some metrics are
   computed on blockchain addresses, for others you can provide a list of slugs,
   labels, amount of top holders. etc.
-- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.now() - 365 days` 
-- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.now()`
+- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.utcnow() - 365 days` 
+- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.utcnow()`
 - `interval` - The interval between the data points in the timeseries. Defaults to `'1d'`
   It is represented in two different ways:
   - a fixed range:  an integer followed by one of: `s`, `m`, `h`, `d` or `w`
