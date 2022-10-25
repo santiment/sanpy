@@ -285,11 +285,11 @@ def transform_query_args(query, **kwargs):
 
 
 def _default_to_date():
-    return datetime.datetime.now()
+    return datetime.datetime.utcnow()
 
 
 def _default_from_date():
-    return datetime.datetime.now() - datetime.timedelta(days=365)
+    return datetime.datetime.utcnow() - datetime.timedelta(days=365)
 
 
 def _format_from_date(datetime_obj_or_str):
