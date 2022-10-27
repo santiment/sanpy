@@ -186,6 +186,26 @@ datetime                    value
 2022-01-05 00:00:00+00:00  1334.0
 ```
 
+Fetch a metric for a contract address, not a slug:
+```python
+import san
+san.get(
+  "contract_transactions_count",
+  selector={"contractAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa"},
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                   value     
+2022-01-01 00:00:00+00:00   90.0
+2022-01-02 00:00:00+00:00  339.0
+2022-01-03 00:00:00+00:00  486.0
+2022-01-04 00:00:00+00:00  314.0
+2022-01-05 00:00:00+00:00  328.0
+```
+
 Fetch top holders metric and specify the number of top holders to be counted:
 ```python
 import san
