@@ -185,8 +185,48 @@ datetime                    value
 2022-01-04 00:00:00+00:00  1381.0
 2022-01-05 00:00:00+00:00  1334.0
 ```
-Fetch metric by providing `metric/slug` as first argument and no `slug` as named parameter:
 
+Fetch top holders metric and specify the number of top holders to be counted:
+```python
+import san
+san.get(
+  "amount_in_top_holders",
+  selector={"slug": "santiment", "holdersCount": 10},
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                   value
+2022-01-01 00:00:00+00:00  7.391186e+07
+2022-01-02 00:00:00+00:00  7.391438e+07
+2022-01-03 00:00:00+00:00  7.391984e+07
+2022-01-04 00:00:00+00:00  7.391984e+07
+2022-01-05 00:00:00+00:00  7.391984e+07
+```
+
+Fetch trade volume of a given DEX for a given slug
+```python
+import san
+# This requires Santiment API PRO apikey configured
+san.get(
+  "total_trade_volume_by_dex",
+  selector={"slug": "ethereum", "label": "decentralized_exchange", "owner": "UniswapV2"},
+  from_date="2022-01-01",
+  to_date="2022-01-05",
+  interval="1d"
+)
+```
+```
+datetime                    value
+2022-01-01 00:00:00+00:00   96882.176846
+2022-01-02 00:00:00+00:00   85184.970249
+2022-01-03 00:00:00+00:00  107489.846163
+2022-01-04 00:00:00+00:00  105204.677503
+2022-01-05 00:00:00+00:00  174178.848916
+```
+Fetch metric by providing `metric/slug` as first argument and no `slug` as named parameter:
 ```python
 import san
 
