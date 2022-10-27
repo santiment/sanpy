@@ -75,7 +75,7 @@ def __get(query, **kwargs):
     if query in QUERY_MAPPING.keys():
         gql_query = '{' + get_gql_query(idx, query, **kwargs) + '}'
     else:
-        gql_query = '{' + san.sanbase_graphql.get_metric(idx, query, **kwargs) + '}'
+        gql_query = '{' + san.sanbase_graphql.get_metric_timeseries_data(idx, query, **kwargs) + '}'
 
     res = execute_gql(gql_query)
 
