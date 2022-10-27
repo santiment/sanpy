@@ -5,7 +5,7 @@ from san.graphql import execute_gql
 def available_metrics():
     sanbase_graphql_functions = inspect.getmembers(san.sanbase_graphql, inspect.isfunction)
     all_functions =  list(map(lambda x: x[0], sanbase_graphql_functions)) + execute_gql('{query: getAvailableMetrics}')['query']
-    all_functions.remove('get_metric')
+    all_functions = list(filter(lambda x: not (str.startswith(x, "get_metric" or str.startswith(x, "_"))), all_functions)) 
     return all_functions
 
 
