@@ -16,6 +16,9 @@ More documentation regarding the API and definitions of metrics can be found on 
   - [Install extra packages](#install-extra-packages)
   - [Restricted metrics](#restricted-metrics)
   - [Configuration](#configuration)
+    - [Read the API key from the environment](#read-the-api-key-from-the-environment)
+    - [Manually configure an API key](#manually-configure-an-api-key)
+    - [How to obtain an API key](#how-to-obtain-an-api-key)
   - [Getting the data](#getting-the-data)
     - [Using the provided functions](#using-the-provided-functions)
     - [Execute an arbitrary GraphQL request](#execute-an-arbitrary-graphql-request)
@@ -76,12 +79,30 @@ a paid API plan.
 
 ## Configuration
 
-Optionally you can provide an API key which gives access to the restricted metrics:
+You can provide an API key which gives access to the restricted metrics in two different ways:
+
+### Read the API key from the environment
+
+During loading of the `san` module, if the `SANPY_APIKEY` exists, its content
+is read and set as the API key.
+
+```shell
+export SANPY_APIKEY="my_apikey"
+```
+```python
+import san
+>>> san.ApiConfig.api_key
+'my_apikey'
+```
+
+### Manually configure an API key
 
 ```python
 import san
-san.ApiConfig.api_key = "your-api-key-here"
+san.ApiConfig.api_key = "my_apikey"
 ```
+
+### How to obtain an API key
 
 To obtain an API key you should [log in to sanbase](https://app.santiment.net/login)
 and go to the `Account` page - [https://app.santiment.net/account](https://app.santiment.net/account).
