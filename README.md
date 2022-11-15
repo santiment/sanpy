@@ -445,11 +445,16 @@ Multiple queries can be executed in a batch to speed up the performance.
 
 There are two batch classes provided - `Batch` and `AsyncBatch`.
 
+> Note: Batching improves the performance and the developer experience, but every
+> query put inside the batch is still counted as one separate API call.
+> To fetch a metric for multiple assets at a time take a look at `san.get_many`
   
 - `AsyncBatch` is the recomended batch class. It executes all the queries in
-  separate API calls. The benefit of using `AsyncBatch` over looping and
-  executing every API call is that the queries can be executed concurrently. The
-  concurrency is controlled by the `max_workers` optional parameter to the
+  separate HTTP requests. The benefit of using `AsyncBatch` over looping and
+  executing every API call is that the queries can be executed concurrently. 
+  Putting multiple API calls in separate HTTP calls also allows to fetch more
+  data, otherwise you might run into [Complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) issues. 
+  The concurrency is controlled by the `max_workers` optional parameter to the
   `execute` function. By default the `max_workers` value is 10.
   It also supports `get_many` function to fetch data for many assets.
 
