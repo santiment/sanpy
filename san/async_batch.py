@@ -48,7 +48,6 @@ class AsyncBatch:
 
     def __transform_batch_result(self, response_map):
         result = []
-        print(response_map)
         idxs = sorted(idx for idx in response_map.keys())
 
         for idx in idxs:
