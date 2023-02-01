@@ -132,7 +132,7 @@ The rest of the parameters are::
   - a fixed range:  an integer followed by one of: `s`, `m`, `h`, `d` or `w`
   - a function, providing some semantic or a dynamic range: `toStartOfMonth`, `toStartOfDay`, `toStartOfWeek`, `toMonday`..
 
-The returned resulut for time-series data is transformed into `pandas DataFrame` and is indexed by `datetime`.
+The returned result for time-series data is transformed into `pandas DataFrame` and is indexed by `datetime`.
 For `get`, the value column is named `value`.
 For `get_many`, there is one column per asset queried. The asset slugs are used for the column names.
 
@@ -144,7 +144,7 @@ For non-metric related data like getting the list of available assets, the data
 is fetched by providing a string in the format `query/argument` and additional
 parameters.
 
-The examples below contain some of described scenarios.
+The examples below contain some of the described scenarios.
 
 Fetch metric by providing `metric` as first argument and `slug` as named parameter:
 
@@ -306,7 +306,7 @@ Some of the available queries in the [Santiment API](https://api.santiment.net) 
 dedicated sanpy function. Alternatively, if the returned format needs to be parsed differently, this approach
 can be used, too. They can be fetched by providing the raw GraphQL query.
 
-Fetching data for many slugs at the same time. Note that this is also avaialble as `san.get_many`
+Fetching data for many slugs at the same time. Note that this is also available as `san.get_many`
 ```python
 import san
 import pandas as pd
@@ -430,8 +430,8 @@ Example result:
   this interval will be aggregated with this aggregation.
 - `humanReadableName` - A name of the metric suitable for showing to users.
 - `isAccessible` - `True` if the metric is accessible. If API key is configured, c
-  hecks the API plan subscriptions. `False` if the metric is not accessbile. For example
-  `circulation_1d` requires `PRO` plan subscription in order to be accessbile at
+  hecks the API plan subscriptions. `False` if the metric is not accessible. For example
+  `circulation_1d` requires `PRO` plan subscription in order to be accessible at
   all.
 - `isRestricted` - `True` if time restrictions apply to the metric and your
   current plan (`Free` if no API key is configured). Check `restrictedFrom` and
@@ -449,7 +449,7 @@ There are two batch classes provided - `Batch` and `AsyncBatch`.
 > query put inside the batch is still counted as one separate API call.
 > To fetch a metric for multiple assets at a time take a look at `san.get_many`
   
-- `AsyncBatch` is the recomended batch class. It executes all the queries in
+- `AsyncBatch` is the recommended batch class. It executes all the queries in
   separate HTTP requests. The benefit of using `AsyncBatch` over looping and
   executing every API call is that the queries can be executed concurrently. 
   Putting multiple API calls in separate HTTP calls also allows to fetch more
