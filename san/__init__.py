@@ -13,6 +13,7 @@ from .batch import Batch
 from .env_vars import SANPY_APIKEY
 from .get import get
 from .get_many import get_many
+from .execute_sql import execute_sql
 from .metadata import metadata
 from .metric_complexity import metric_complexity
 from .utility import (api_calls_made, api_calls_remaining,

@@ -10,6 +10,7 @@ More documentation regarding the API and definitions of metrics can be found on 
 
 # Table of contents
 
+- [sanpy](#sanpy)
 - [Table of contents](#table-of-contents)
   - [Installation](#installation)
   - [Upgrade to latest version](#upgrade-to-latest-version)
@@ -22,6 +23,7 @@ More documentation regarding the API and definitions of metrics can be found on 
   - [Getting the data](#getting-the-data)
     - [Using the provided functions](#using-the-provided-functions)
     - [Execute an arbitrary GraphQL request](#execute-an-arbitrary-graphql-request)
+  - [Execute SQL queries and get the result](#execute-sql-queries-and-get-the-result)
   - [Available metrics](#available-metrics)
   - [Available Metrics for Slug](#available-metrics-for-slug)
   - [Fetch timeseries metric](#fetch-timeseries-metric)
@@ -159,7 +161,7 @@ san.get(
 )
 ```
 ```
-datetime                   value            
+datetime                   value
 2022-01-01 00:00:00+00:00  47686.811509
 2022-01-02 00:00:00+00:00  47345.220564
 2022-01-03 00:00:00+00:00  46458.116959
@@ -369,6 +371,73 @@ pd.DataFrame(result["projectBySlug"], index=[0])
 ```
   infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
+```
+
+## Execute SQL queries and get the result
+
+One of the Santiment products is [Santiment Queries](https://academy.santiment.net/santiment-queries/). It allows you to execute SQL queries on a database hosted by Santiment. Explore the documentation in order to get familiar with the available data and how to write SQL queries.
+
+In order to execute a query you need to provide your API key.
+
+Executing a query and getting the result as a pandas DataFrame:
+```python
+import san
+san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
+```
+```
+   metric_id  asset_id                    dt  value           computed_at
+0         10      1369  2015-07-17T00:00:00Z    0.0  2020-10-21T08:48:42Z
+1         10      1369  2015-07-18T00:00:00Z    0.0  2020-10-21T08:48:42Z
+2         10      1369  2015-07-19T00:00:00Z    0.0  2020-10-21T08:48:42Z
+3         10      1369  2015-07-20T00:00:00Z    0.0  2020-10-21T08:48:42Z
+4         10      1369  2015-07-21T00:00:00Z    0.0  2020-10-21T08:48:42Z
+```
+
+In order to change the index to one of the columns, provide the `set_index` parameter:
+```python
+import san
+san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5", set_index="dt")
+```
+```
+dt                    metric_id  asset_id  value           computed_at
+2015-07-17T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
+2015-07-18T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
+2015-07-19T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
+2015-07-20T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
+2015-07-21T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
+```
+
+The queries can be parametrized. In the query the parameters are named parameters,
+surrounded by two curly brackets `{{key}}`. The parameters is a dictionary. The query
+can be a multiline string:
+
+```python
+san.execute_sql(query="""
+  SELECT
+    get_metric_name(metric_id) AS metric,
+    get_asset_name(asset_id) AS asset,
+    dt,
+    argMax(value, computed_at)
+  FROM daily_metrics_v2
+  WHERE
+    asset_id = get_asset_id({{slug}}) AND
+    metric_id = get_metric_id({{metric}}) AND
+    dt >= now() - INTERVAL {{last_n_days}} DAY
+  GROUP BY dt, metric_id, asset_id
+  ORDER BY dt ASC
+""",
+parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
+set_index="dt")
+```
+```
+dt                                         metric   asset  value                     
+2023-03-22T00:00:00Z  daily_active_addresses  bitcoin                    941446.0
+2023-03-23T00:00:00Z  daily_active_addresses  bitcoin                    913215.0
+2023-03-24T00:00:00Z  daily_active_addresses  bitcoin                    884271.0
+2023-03-25T00:00:00Z  daily_active_addresses  bitcoin                    906851.0
+2023-03-26T00:00:00Z  daily_active_addresses  bitcoin                    835596.0
+2023-03-27T00:00:00Z  daily_active_addresses  bitcoin                   1052637.0
+2023-03-28T00:00:00Z  daily_active_addresses  bitcoin                    311566.0
 ```
 
 ## Available metrics
@@ -633,7 +702,7 @@ san.get("projects/all")
 
 Example result:
 
-```csv
+```
                  name             slug ticker   totalSupply
 0              0chain           0chain    ZCN     400000000
 1                  0x               0x    ZRX    1000000000
