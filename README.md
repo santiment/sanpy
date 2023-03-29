@@ -430,14 +430,14 @@ parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days'
 set_index="dt")
 ```
 ```
-dt                                         metric   asset  value                     
-2023-03-22T00:00:00Z  daily_active_addresses  bitcoin                    941446.0
-2023-03-23T00:00:00Z  daily_active_addresses  bitcoin                    913215.0
-2023-03-24T00:00:00Z  daily_active_addresses  bitcoin                    884271.0
-2023-03-25T00:00:00Z  daily_active_addresses  bitcoin                    906851.0
-2023-03-26T00:00:00Z  daily_active_addresses  bitcoin                    835596.0
-2023-03-27T00:00:00Z  daily_active_addresses  bitcoin                   1052637.0
-2023-03-28T00:00:00Z  daily_active_addresses  bitcoin                    311566.0
+dt                                    metric    asset        value                     
+2023-03-22T00:00:00Z  daily_active_addresses  bitcoin     941446.0
+2023-03-23T00:00:00Z  daily_active_addresses  bitcoin     913215.0
+2023-03-24T00:00:00Z  daily_active_addresses  bitcoin     884271.0
+2023-03-25T00:00:00Z  daily_active_addresses  bitcoin     906851.0
+2023-03-26T00:00:00Z  daily_active_addresses  bitcoin     835596.0
+2023-03-27T00:00:00Z  daily_active_addresses  bitcoin    1052637.0
+2023-03-28T00:00:00Z  daily_active_addresses  bitcoin     311566.0
 ```
 
 ## Available metrics
