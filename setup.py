@@ -25,7 +25,8 @@ setuptools.setup(
         'pandas>=1.3.0',
         'requests',
         'iso8601',
-        'setuptools'
+        'setuptools',
+        'black',
     ],
     extras_require={
         'extras':  ['numpy', 'matplotlib', 'scipy', 'mlfinlab']
