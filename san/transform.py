@@ -9,7 +9,7 @@ from functools import reduce
 from collections import OrderedDict
 from san.graphql import execute_gql
 from san.error import SanError
-from san.sanbase_graphql_helper import QUERY_MAPPING
+from san.query_constants import QUERY_MAPPING
 
 QUERY_PATH_MAP = {
     "eth_top_transactions": ["ethTopTransactions"],

@@ -2,7 +2,7 @@ import san.sanbase_graphql
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-from san.sanbase_graphql_helper import QUERY_MAPPING
+from san.query_constants import QUERY_MAPPING
 from san.query import get_gql_query
 from san.graphql import execute_gql
 from san.transform import transform_timeseries_data_query_result
