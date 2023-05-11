@@ -23,7 +23,7 @@ if SANPY_APIKEY:
     ApiConfig.api_key = SANPY_APIKEY
 
 PROJECT = 'sanpy'
-__version__ = '0.11.6'
+__version__ = '0.11.7'
 
 def get_latest():
     url = 'https://pypi.python.org/pypi/%s/json' % (PROJECT)
