@@ -1,4 +1,5 @@
 import setuptools
+import san
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
@@ -6,7 +7,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='sanpy',
-    version='0.11.6',
+    version=getattr(san, '__version__'),
     author='Santiment',
     author_email='admin@santiment.net',
     description='Package for Santiment API access with python',
