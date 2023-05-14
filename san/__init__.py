@@ -1,6 +1,4 @@
 import json
-import os
-from warnings import warn
 
 import pkg_resources
 import requests

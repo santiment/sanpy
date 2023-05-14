@@ -6,7 +6,7 @@ def convert_to_datetime_idx_df(data):
 
     if 'datetime' in df.columns:
         df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
-        df.set_index('datetime', inplace=True)
+        df = df.set_index('datetime')
 
     return df
 

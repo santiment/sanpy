@@ -1,14 +1,20 @@
-import san.sanbase_graphql
 import pandas as pd
-from san.graphql import execute_gql, get_response_headers
-from san.query import get_gql_query, parse_dataset
-from san.transform import transform_timeseries_data_query_result
+from san.graphql import execute_gql
 from san.error import SanError
 import json
 
-def execute_sql(**kwargs):
+
+def execute_sql(query, parameters=dict(), set_index=None, **kwargs):
     """
     Execute an arbitrary SQL against Santiment's Clickhouse Database
+
+    Args:
+        query (str): GraphQL query to be executed
+        parameters Dict[str, Any]: Dictionary with arguments to be passed into GraphQL query
+        set_index (str): column of indexes to be added in result DataFrame
+
+    Returns:
+         DataFrame:
 
     Example:
         san.execute_sql(query=\"""
@@ -27,19 +33,16 @@ def execute_sql(**kwargs):
         parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
         set_index="dt")
     """
-    if 'query' in kwargs:
-        query = kwargs.pop('query')
-    else:
+    if not query:
         raise SanError("The 'query' argument is required when calling 'execute_sql'")
 
-    parameters = kwargs.pop('parameters', {})
-
-    result = __execute_sql(query, parameters, **kwargs)
+    result = __execute_sql(query, parameters, set_index, **kwargs)
     transformed_result = result
 
     return transformed_result
 
-def __execute_sql(query, parameters, **kwargs):
+
+def __execute_sql(query, parameters, set_index, **kwargs):
     idx = kwargs.pop('idx', 0)
     # Export the python dictionary parameters to a JSON string
     # where each of the quotes " is replaced with \", so when interpolated
@@ -62,24 +65,23 @@ def __execute_sql(query, parameters, **kwargs):
     }}"""
 
     res = execute_gql(gql_query)
-    res = __transform_sql_result(res, idx, **kwargs)
+    res = __transform_sql_result(res, idx, set_index, **kwargs)
 
     return res
 
-def __transform_sql_result(response, idx, **kwargs):
+
+def __transform_sql_result(response, idx, set_index, **kwargs):
     result = response[f'query_{idx}']
-    result = pd.DataFrame(result['rows'], columns=result['columns'])
 
-    set_index = kwargs.get('set_index')
-
-    if set_index == None:
-        pass
-    elif set_index not in result.columns:
+    if set_index not in result.columns:
         raise SanError(f"""
-        Index provided via \'set_index\' to \'execute_sql\' is not a column in the result.
-        Got {set_index} but expected one of {result.columns}
-        """)
-    else:
+            Index provided via \'set_index\' to \'execute_sql\' is not a column in the result.
+            Got {set_index} but expected one of {result.columns}
+            """)
+
+    result = pd.DataFrame(result['rows'], columns=result['columns'], )
+
+    if set_index:
         result = result.set_index(set_index)
 
     return result
