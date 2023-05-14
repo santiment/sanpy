@@ -14,7 +14,7 @@ def execute_sql(query, parameters=dict(), set_index=None, **kwargs):
         set_index (str): column of indexes to be added in result DataFrame
 
     Returns:
-         DataFrame:
+         DataFrame: Dataframe with final data
 
     Example:
         san.execute_sql(query=\"""
