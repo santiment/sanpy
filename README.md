@@ -39,7 +39,6 @@ More documentation regarding the API and definitions of metrics can be found on 
     - [Other Price metrics](#other-price-metrics)
       - [Marketcap, Price USD, Price BTC and Trading Volume](#marketcap-price-usd-price-btc-and-trading-volume)
       - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
-    - [Mining Pools Distribution](#mining-pools-distribution)
     - [Historical Balance](#historical-balance)
     - [Ethereum Top Transactions](#ethereum-top-transactions)
     - [Ethereum Spent Over Time](#ethereum-spent-over-time)
@@ -736,12 +735,13 @@ san.get(
 ```
 #### Open, High, Close, Low Prices, Volume, Marketcap
 
-Note: this query cannot be batched!
+Notes: 
+- This query cannot be batched.
+- The format with separate `slug`/`selector` argument is not supported
 
 ```python
 san.get(
-    "ohlcv",
-    slug="santiment",
+    "ohlcv/santiment",
     from_date="2018-06-01",
     to_date="2018-06-05",
     interval="1d"
@@ -756,33 +756,6 @@ datetime                        openPriceUsd  closePriceUsd  highPriceUsd  lowPr
 2018-06-02 00:00:00+00:00       1.26136        1.30779       1.27612       1.20958      1242520  7.864724e+07
 2018-06-03 00:00:00+00:00       1.28270        1.28357       1.24625       1.21872      1032910  7.844339e+07
 2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528       1.18010       617451  7.604326e+07
-```
-
-### Mining Pools Distribution
-
-Returns distribution of miners between mining pools. What part of the miners are using top3, top10 and all the other pools. Currently only ETH is supported.
-
-[Premium metric](#premium-metrics)
-
-```python
-san.get(
-    "mining_pools_distribution",
-    slug="ethereum",
-    from_date="2019-06-01",
-    to_date="2019-06-05",
-    interval="1d"
-)
-```
-
-Example result:
-
-```
-datetime                      other     top10      top3
-2019-06-01 00:00:00+00:00  0.129237  0.249906  0.620857
-2019-06-02 00:00:00+00:00  0.127432  0.251903  0.620666
-2019-06-03 00:00:00+00:00  0.122058  0.249603  0.628339
-2019-06-04 00:00:00+00:00  0.127726  0.254982  0.617293
-2019-06-05 00:00:00+00:00  0.120436  0.265842  0.613722
 ```
 
 ### Historical Balance
