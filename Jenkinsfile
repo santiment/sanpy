@@ -23,7 +23,7 @@ podTemplate(label: 'sanpy-builder', containers: [
         
             sh "python3 -m pip install --user --upgrade setuptools>=38.6.0 wheel>=0.31.0 twine>=1.11.0"
             sh "python3 setup.py sdist bdist_wheel"
-            sh "~/.local/bin/twine upload -u ${test_pypi_org_usr} -p ${test_pypi_org_psw} --repository-url https://test.pypi.org/legacy/ dist/*"
+            sh "~/.local/bin/twine upload -u __token__ -p ${test_pypi_org_sanpy_publishing_api_token} --repository-url https://test.pypi.org/legacy/ dist/*"
             }
         }
       }
