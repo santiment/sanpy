@@ -71,7 +71,7 @@ class Prices:
         # On the first price change is explicitly set to 1.
         price_df['price_change'] = price_df.groupby('asset').transform(
             lambda x: 1 + pd.DataFrame.pct_change(x)).fillna(1)
-        self.prices = self.prices.append(price_df)  # append new prices
+        self.prices = pd.concat([self.prices,price_df])  # append new prices
 
         # remove duplicated records. In case of duplicates leave last value. Leaving last value makes
         # possible prices updates - just set new prices.

@@ -91,7 +91,10 @@ class Backtest:
             self.portfolio = self.portfolio[~self.portfolio.index.isin(list(df.index))]
         else:
             df = df[~df.index.isin(self.portfolio.index)]
-        self.portfolio = self.portfolio.append(df).sort_index()
+
+        # Error on append in pandas version 2.
+        # Changed code to make pandas 2 compatible with previous versions
+        self.portfolio = pd.concat([self.portfolio,df]).sort_index()
 
     def add_trades(self, trades_df: pd.DataFrame, replace: bool = False):
         '''
@@ -103,7 +106,7 @@ class Backtest:
             self.trades_log = self.trades_log[~self.trades_log.index.isin(list(df.index))]
         else:
             df = df[~df.index.isin(list(self.trades_log.index))]
-        self.trades_log = self.trades_log.append(df).sort_index()
+        self.trades_log = pd.concat([self.trades_log,df]).sort_index()
 
     def add_fees(self, fees_df: pd.DataFrame):
         '''
@@ -131,7 +134,7 @@ class Backtest:
         df = prepare_df(fees_df)
         df['value'] *= self.default_transfers_limit
         self.fees = self.fees[~self.fees.index.isin(df.index)]
-        self.fees = self.fees.append(df).sort_index()
+        self.fees = pd.concat([self.fees, df]).sort_index()
 
     def update_default_transfers_limit(self, new_default_transfers_limit: int):
         '''

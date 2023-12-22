@@ -122,10 +122,10 @@ class Assets:
 
                 # Update assets in the portfolio
                 for i in range(int(len(dates) / 2)):
-                    assets = assets.append(pd.DataFrame(
+                    assets = pd.concat([assets,pd.DataFrame(
                         index=pd.date_range(start=dates[2 * i], end=dates[2 * i + 1], freq=granularity),
                         data={'asset': asset_name}
-                    ))
+                    )])
 
             return assets.reset_index().drop_duplicates().set_index('index').sort_index()
 

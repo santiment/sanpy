@@ -133,7 +133,7 @@ def plot_cumulative_returns(returns, x_ticks, events, interval_text):
     pyplot.title("Cumulative Return from Events")
     pyplot.xlabel("Time Window (t), 1t="+interval_text)
     pyplot.ylabel("Cumulative Return (r)")
-    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.grid(visible=None, which=u'major', axis=u'y')
     pyplot.legend()
 
 
@@ -148,7 +148,7 @@ def plot_average_returns(returns, benchmark_returns, x_ticks, interval_text):
     pyplot.title("Benchmark's average returns around that time to Signals_Events")
     pyplot.ylabel("% Cumulative Return")
     pyplot.xlabel("Time Window (t), 1t="+interval_text)
-    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.grid(visible=None, which=u'major', axis=u'y')
     pyplot.legend()
 
 
@@ -178,7 +178,7 @@ def plot_cumulative_abnormal_returns(returns, abnormal_returns, x_ticks, interva
     pyplot.title("Cumulative Abnormal Returns versus Cumulative Returns")
     pyplot.ylabel("% Cumulative Return")
     pyplot.xlabel("Time Window (t), 1t="+interval_text)
-    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.grid(visible=None, which=u'major', axis=u'y')
     pyplot.legend()
 
 
@@ -193,10 +193,10 @@ def plot_cumulative_return_with_errors(returns, std_devs, events):
     pyplot.errorbar(returns.index,
                     returns,
                     xerr=0,
-                    yerr=std_devs,
+                    yerr=np.abs(std_devs), # yerr is not negative
                     label="events=%s" % events,
                     color=COLOR_1)
-    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.grid(visible=None, which=u'major', axis=u'y')
     pyplot.title("Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
     pyplot.ylabel("Cumulative Return (r)")
@@ -214,14 +214,14 @@ def plot_abnormal_cumulative_return_with_errors(abnormal_volatility, abnormal_re
         abnormal_returns.index,
         abnormal_returns,
         xerr=0,
-        yerr=abnormal_volatility,
+        yerr=np.abs(abnormal_volatility), # yerr is not negative
         label="events=%s" % events,
         color=COLOR_1
     )
 
     pyplot.axvline(x=0, color='black', alpha=.3)
 
-    pyplot.grid(b=None, which=u'major', axis=u'y')
+    pyplot.grid(visible=None, which=u'major', axis=u'y')
     pyplot.title("Abnormal Cumulative Return from Events with error")
     pyplot.xlabel("Window Length (t)")
     pyplot.ylabel("Cumulative Return (r)")
@@ -260,6 +260,11 @@ def compute_return_matrix(ev_data, data, sample_size, starting_point,
     """
     for date, row in ev_data.iterrows():
         sid = row.symbol
+        # Remove time zone information
+        # If timezone information is not removed, `date not in data.index' is not compared correctly.
+        # date : Timestamp('2023-06-05 00:00:00+0000', tz='UTC') => Timestamp('2023-06-05 00:00:00')
+        # data.index[165] : Timestamp('2023-06-05 00:00:00')
+        date = date.tz_localize(None)
         if date not in data.index or sid not in data.columns:
             continue
         if sid == 'ethereum' and benchmark == 'ethereum':
@@ -325,6 +330,7 @@ def clean_data(data, events, starting_point):
 
     for date, row in events_df.iterrows():
         sid = row.symbol
+        date = date.tz_localize(None)
         if date not in data.index or sid not in data.columns:
             events_df.iloc[id, -1] = 1
             id = id+1
@@ -464,11 +470,13 @@ def compute_beta_alpha(data, ev_data, starting_point, benchmark):
     Includes beta and alpha in the event dataframe
     """
     betas_df = ev_data.copy(deep=True)
-    betas_df['beta'] = 0
-    betas_df['alpha'] = 0
+    # Explicitly specify as float type to eliminate warnings
+    betas_df['beta'] = 0.0
+    betas_df['alpha'] = 0.0
     id = 0
     for date, row in betas_df.iterrows():
         sid = row.symbol
+        date = date.tz_localize(None)
         if date not in data.index or sid not in data.columns:
             continue
         if sid == 'ethereum' and benchmark == 'ethereum':
@@ -514,7 +522,12 @@ def ab_returns_matrix(ab_returns, betas_df, starting_point):
         col_name = abnormal_returns_df.columns[0]
         row = abnormal_returns_df.loc[abnormal_returns_df[col_name] == eventdate]
         # get index of row
-        index = row.index[0]
+        # check empty to prevent errors in row.index[0] if row is empty
+        # row were sometimes empty
+        if len(row) == 0:
+            index = 0
+        else:
+            index = row.index[0]
         # select starting_point plus and starting_point minus around that row
         my_sample = abnormal_returns_df.loc[(index - starting_point):(index + starting_point), sid].reset_index(drop=True)
         # add to new set
