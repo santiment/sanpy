@@ -137,7 +137,7 @@ class Strategy:
         assert 'value' in proportions_df.columns, 'value column not found.'
 
         # update according to value provided at last
-        self.asset_shares = self.asset_shares.append(proportions_df)
+        self.asset_shares = pd.concat([self.asset_shares,proportions_df])
         self.asset_shares = self.asset_shares.groupby(['dt', 'asset']).last().reset_index('asset').sort_index()
 
     def compute_asset_shares_for_dt(self, dt: str or datetime.datetime, assets: list = []):
@@ -276,7 +276,7 @@ class Strategy:
                 logging.warning(f'The asset shares sum on {dt} is equal to {df["share"].sum()}'
                                 ' - The prices df may contain errors.')
 
-            self.portfolio = self.portfolio.append(df)
+            self.portfolio = pd.concat([self.portfolio,df])
             self.portfolio = self.portfolio.reset_index().drop_duplicates().set_index('dt').sort_index()
 
         def _get_signals(dt):
@@ -377,7 +377,7 @@ class Strategy:
             result_df.set_index('dt', inplace=True)
 
             self.portfolio = self.portfolio[self.portfolio.index != dt]
-            self.portfolio = self.portfolio.append(result_df).sort_index()
+            self.portfolio = pd.concat(self.portfolio,result_df).sort_index()
 
         if rebuild:
             # discard part of the portfolio. loc[] cant be used as start_dt should be excluded as well

@@ -94,7 +94,7 @@ class Signals:
             df.set_index(df.index.ceil(freq=self._granularity), inplace=True)
 
             # df = df['dt', 'signal', 'asset', 'decision_delay', 'trade_percantage']
-            return signals.append(df)
+            return pd.concat([signals,df])
 
         df = signals_df.copy()
         if signal_type.lower() in ('buy', 'b'):
