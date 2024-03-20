@@ -47,8 +47,9 @@ def __get_metric_slug_string_selector(query, slug, dataset, **kwargs):
 
     if query in DEPRECATED_QUERIES:
         print(
-            '**NOTICE**\n{} will be deprecated in version 0.9.0, please use {} instead'.format(
+            '**NOTICE**\n{} will be deprecated in a future version, please use {} instead'.format(
                 query, DEPRECATED_QUERIES[query]))
+
     if query in CUSTOM_QUERIES:
         return getattr(san.sanbase_graphql, query)(idx, slug, **kwargs)
     if query in QUERY_MAPPING.keys():
