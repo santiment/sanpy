@@ -9,3 +9,4 @@ build
 .vscode/
 .tool-versions
 **/.ipynb_checkpoints
+.DS_Store

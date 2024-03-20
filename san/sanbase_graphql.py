@@ -4,94 +4,20 @@ from san.batch import Batch
 from san.error import SanError
 
 
-# to be removed
-
-
-def burn_rate(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('burn_rate', idx, slug, **kwargs)
-
-    return query_str
-
-
-def token_age_consumed(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('token_age_consumed', idx, slug, **kwargs)
-
-    return query_str
-
-
-def average_token_age_consumed_in_days(idx, slug, **kwargs):
-    query_str = sgh.create_query_str(
-        'average_token_age_consumed_in_days', idx, slug, **kwargs)
-
-    return query_str
-
-
 def prices(idx, slug, **kwargs):
     query_str = sgh.create_query_str('prices', idx, slug, **kwargs)
 
     return query_str
-
-
-def token_velocity(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('token_velocity', idx, slug, **kwargs)
-
-    return query_str
-
-
-def token_circulation(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('token_circulation', idx, slug, **kwargs)
-
-    return query_str
-
-
-def realized_value(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('realized_value', idx, slug, **kwargs)
-
-    return query_str
-
-
-def mvrv_ratio(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('mvrv_ratio', idx, slug, **kwargs)
-
-    return query_str
-
-
-def nvt_ratio(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('nvt_ratio', idx, slug, **kwargs)
-
-    return query_str
-
-
-def daily_active_deposits(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('daily_active_deposits', idx, slug, **kwargs)
-
-    return query_str
-
 
 def ohlc(idx, slug, **kwargs):
     query_str = sgh.create_query_str('ohlc', idx, slug, **kwargs)
 
     return query_str
 
-
-def gas_used(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('gas_used', idx, slug, **kwargs)
-
-    return query_str
-
-
 def miners_balance(idx, slug, **kwargs):
     query_str = sgh.create_query_str('miners_balance', idx, slug, **kwargs)
 
     return query_str
-
-
-def mining_pools_distribution(idx, slug, **kwargs):
-    query_str = sgh.create_query_str(
-        'mining_pools_distribution', idx, slug, **kwargs)
-
-    return query_str
-
 
 def historical_balance(idx, slug, **kwargs):
     kwargs = sgh.transform_query_args('historical_balance', **kwargs)
@@ -112,27 +38,6 @@ def historical_balance(idx, slug, **kwargs):
 
     return query_str
 
-
-def social_dominance(idx, slug, **kwargs):
-    kwargs = sgh.transform_query_args('social_dominance', **kwargs)
-
-    query_str = ("""
-    query_{idx}: socialDominance (
-        slug: \"{slug}\",
-        from: \"{from_date}\",
-        to: \"{to_date}\",
-        interval: \"{interval}\",
-        source: {source}
-    ){{
-    """ + ' '.join(kwargs['return_fields']) + '}}').format(
-        idx=idx,
-        slug=slug,
-        **kwargs
-    )
-
-    return query_str
-
-
 def top_holders_percent_of_total_supply(idx, slug, **kwargs):
     kwargs = sgh.transform_query_args('top_holders_percent_of_total_supply', **kwargs)
 
@@ -142,32 +47,6 @@ def top_holders_percent_of_total_supply(idx, slug, **kwargs):
         numberOfHolders: {number_of_holders},
         from: \"{from_date}\",
         to: \"{to_date}\"
-    ){{
-    """ + ' '.join(kwargs['return_fields']) + '}}').format(
-        idx=idx,
-        slug=slug,
-        **kwargs
-    )
-
-    return query_str
-
-
-def history_twitter_data(idx, slug, **kwargs):
-    query_str = sgh.create_query_str('history_twitter_data', idx, slug, **kwargs)
-
-    return query_str
-
-
-def price_volume_difference(idx, slug, **kwargs):
-    kwargs = sgh.transform_query_args('price_volume_difference', **kwargs)
-
-    query_str = ("""
-    query_{idx}: priceVolumeDiff (
-        slug: \"{slug}\",
-        from: \"{from_date}\",
-        to: \"{to_date}\",
-        interval: \"{interval}\",
-        currency: \"{currency}\"
     ){{
     """ + ' '.join(kwargs['return_fields']) + '}}').format(
         idx=idx,
@@ -207,26 +86,6 @@ def eth_top_transactions(idx, slug, **kwargs):
             """ + ' '.join(kwargs['return_fields']) + '}}}}').format(
         idx=idx,
         slug=slug,
-        **kwargs
-    )
-
-    return query_str
-
-
-def news(idx, tag, **kwargs):
-    print('WARNING! This metric is going to be removed in version 0.8.0')
-    kwargs = sgh.transform_query_args('news', **kwargs)
-
-    query_str = ("""
-    query_{idx}: news(
-        tag: \"{tag}\",
-        from: \"{from_date}\",
-        to: \"{to_date}\",
-        size: {size}
-    ){{
-    """ + ' '.join(kwargs['return_fields']) + '}}').format(
-        idx=idx,
-        tag=tag,
         **kwargs
     )
 
@@ -298,27 +157,6 @@ def emerging_trends(idx, **kwargs):
         size: {size},
         interval: \"{interval}\"
     ){{""" + ' '.join(kwargs['return_fields']) + """
-    }}
-    """).format(
-        idx=idx,
-        **kwargs
-    )
-
-    return query_str
-
-
-def top_social_gainers_losers(idx, **kwargs):
-    kwargs = sgh.transform_query_args('top_social_gainers_losers', **kwargs)
-
-    query_str = ("""
-    query_{idx}: topSocialGainersLosers(
-                    from: \"{from_date}\",
-                    to: \"{to_date}\",
-                    status: {status},
-                    size: {size},
-                    timeWindow: \"{time_window}\"
-                ){{
-    """ + ' '.join(kwargs['return_fields']) + """
     }}
     """).format(
         idx=idx,

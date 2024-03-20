@@ -45,7 +45,6 @@ More documentation regarding the API and definitions of metrics can be found on 
     - [Token Top Transactions](#token-top-transactions)
     - [Top Transfers](#top-transfers)
     - [Emerging Trends](#emerging-trends)
-    - [Top Social Gainers Losers](#top-social-gainers-losers)
   - [Extras](#extras)
   - [Development](#development)
   - [Running tests](#running-tests)
@@ -943,38 +942,6 @@ datetime                        score    word
 2019-07-02 00:00:00+00:00  116.842801     bat
 2019-07-02 00:00:00+00:00   98.517600  bottom
 2019-07-02 00:00:00+00:00   89.309975   haiku
-```
-
-### Top Social Gainers Losers
-
-Top social gainers/losers returns the social volume changes for crypto projects.
-
-```python
-san.get(
-    "top_social_gainers_losers",
-    from_date="2019-07-18",
-    to_date="2019-07-30",
-    size=5,
-    time_window="2d",
-    status="ALL"
-)
-```
-
-Example result:
-
-**The result is shortened for convenience**
-
-```
-datetime                              slug     change    status
-2019-07-28 01:00:00+00:00     libra-credit  21.000000    GAINER
-2019-07-28 01:00:00+00:00             aeon  -1.000000     LOSER
-2019-07-28 01:00:00+00:00    thunder-token   5.000000  NEWCOMER
-2019-07-28 02:00:00+00:00     libra-credit  43.000000    GAINER
-...                                    ...        ...       ...
-2019-07-30 07:00:00+00:00            storj  12.000000  NEWCOMER
-2019-07-30 11:00:00+00:00            storj  21.000000    GAINER
-2019-07-30 11:00:00+00:00            aergo  -1.000000     LOSER
-2019-07-30 11:00:00+00:00            litex   8.000000  NEWCOMER
 ```
 
 ## Extras

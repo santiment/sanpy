@@ -15,30 +15,13 @@ params = {
 # Metrics, which are made with _create_query_string, excluding the ones
 # using ETHEREUM
 METRICS_EQUAL_FORMAT = [
-    'daily_active_addresses',
-    'burn_rate',
-    'transaction_volume',
-    'token_age_consumed',
-    'average_token_age_consumed_in_days',
-    'github_activity',
-    'dev_activity',
-    'network_growth',
     'prices',
-    'token_velocity',
-    'token_circulation',
-    'realized_value',
-    'mvrv_ratio',
-    'nvt_ratio',
-    'daily_active_deposits',
     'ohlc',
-    'history_twitter_data',
     'exchange_funds_flow',
 ]
+
 # Metrics, which are made with _create_query_string, using ETHEREUM
-METRICS_USING_ETHEREUM = [
-    'gas_used',
-    'mining_pools_distribution'
-]
+METRICS_USING_ETHEREUM = ['gas_used']
 
 
 def _test_ordinary_function(
@@ -112,43 +95,6 @@ def test_erc20_projects():
     assert result.empty == False
     assert len(result[result.slug == 'bitcoin']) == 0
 
-
-@attr('integration')
-def test_daily_active_addresses():
-    _test_ordinary_function('daily_active_addresses')
-
-
-@attr('integration')
-def test_burn_rate():
-    _test_ordinary_function('burn_rate')
-
-
-@attr('integration')
-def test_gas_used():
-    _test_ordinary_function('gas_used', 'ethereum')
-
-
-@attr('integration')
-def test_token_age_consumed():
-    _test_ordinary_function('token_age_consumed')
-
-
-@attr('integration')
-def test_average_token_age_consumed_in_days():
-    _test_ordinary_function(
-        'average_token_age_consumed_in_days')
-
-
-@attr('integration')
-def test_transaction_volume():
-    _test_ordinary_function('transaction_volume')
-
-
-@attr('integration')
-def test_network_growth():
-    _test_ordinary_function('network_growth')
-
-
 @attr('integration')
 def test_prices():
     _test_ordinary_function('prices')
@@ -162,48 +108,6 @@ def test_ohlc():
 @attr('integration')
 def test_exchange_funds_flow():
     _test_ordinary_function('exchange_funds_flow')
-
-
-@attr('integration')
-def test_token_velocity():
-    _test_ordinary_function('token_velocity')
-
-
-@attr('integration')
-def test_token_circulation():
-    _test_ordinary_function('token_circulation')
-
-
-@attr('integration')
-def test_realized_value():
-    _test_ordinary_function('realized_value')
-
-
-@attr('integration')
-def test_mvrv_ratio():
-    _test_ordinary_function('mvrv_ratio')
-
-
-@attr('integration')
-def test_nvt_ratio():
-    _test_ordinary_function('nvt_ratio')
-
-
-@attr('integration')
-def test_daily_active_deposits():
-    _test_ordinary_function('daily_active_deposits')
-
-
-@attr('integration')
-def test_mining_pools_distribution():
-    _test_ordinary_function(
-        'mining_pools_distribution',
-        'ethereum')
-
-
-@attr('integration')
-def test_history_twitter_data():
-    _test_ordinary_function('history_twitter_data')
 
 
 @attr('integration')
@@ -251,21 +155,6 @@ def test_top_holders_percent_of_total_supply():
 
 
 @attr('integration')
-def test_price_volume_difference():
-    currencies = ['USD', 'BTC']
-    for item in currencies:
-        result = san.get('price_volume_difference/' + params['project_slug'],
-                         from_date=params['from_date'],
-                         to_date=params['to_date'],
-                         interval=params['interval'],
-                         currency=item
-                         )
-        assert len(result.index) >= 1
-        assert 'DatetimeIndex' in str(type(result.index))
-        assert result.empty == False
-
-
-@attr('integration')
 def test_eth_top_transactions():
     transaction_types = ['ALL', 'IN', 'OUT']
     for item in transaction_types:
@@ -278,18 +167,6 @@ def test_eth_top_transactions():
         assert len(result.index) >= 1
         assert 'DatetimeIndex' in str(type(result.index))
         assert result.empty == False
-
-
-@attr('integration')
-def test_news():
-    result = san.get('news/' + params['project_slug'],
-                     from_date='2019-04-18',
-                     to_date='2019-07-11',
-                     size=5
-                     )
-    assert len(result.index) >= 1
-    assert 'DatetimeIndex' in str(type(result.index))
-    assert result.empty == False
 
 
 @attr('integration')
@@ -333,23 +210,6 @@ def test_social_volume_projects():
 
 
 @attr('integration')
-def test_social_volume():
-    social_volume_types = [
-        'TELEGRAM_CHATS_OVERVIEW',
-        'TELEGRAM_DISCUSSION_OVERVIEW']
-    for item in social_volume_types:
-        result = san.get('social_volume/' + params['project_slug'],
-                         from_date=params['from_date'],
-                         to_date=params['to_date'],
-                         interval=params['interval'],
-                         social_volume_type=item
-                         )
-        assert len(result.index) >= 1
-        assert 'DatetimeIndex' in str(type(result.index))
-        assert result.empty == False
-
-
-@attr('integration')
 def test_ohlcv():
     ohlcv_df = san.get(
         "{}/{}".format('ohlcv', params['project_slug']),
@@ -361,22 +221,6 @@ def test_ohlcv():
     assert len(ohlcv_df.index) >= 1
     assert 'DatetimeIndex' in str(type(ohlcv_df.index))
     assert ohlcv_df.empty == False
-
-
-@attr('integration')
-def test_top_social_gainers_losers():
-    tsgl_df = san.get(
-        'top_social_gainers_losers',
-        from_date=params['from_date'],
-        to_date=params['to_date'],
-        size=5,
-        time_window='2d',
-        status='ALL'
-    )
-
-    assert len(tsgl_df) >= 1
-    assert 'DatetimeIndex' in str(type(tsgl_df.index))
-    assert tsgl_df.empty == False
 
 
 @attr('integration')

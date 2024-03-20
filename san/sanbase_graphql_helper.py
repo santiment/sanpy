@@ -7,18 +7,6 @@ _DEFAULT_SOURCE = 'TELEGRAM'
 _DEFAULT_SEARCH_TEXT = ''
 
 QUERY_MAPPING = {
-    'burn_rate': {  # to be removed
-        'query': 'burnRate',
-        'return_fields': ['datetime', 'burnRate']
-    },
-    'token_age_consumed': {
-        'query': 'tokenAgeConsumed',
-        'return_fields': ['datetime', 'tokenAgeConsumed']
-    },
-    'average_token_age_consumed_in_days': {
-        'query': 'averageTokenAgeConsumedInDays',
-        'return_fields': ['datetime', 'tokenAge']
-    },
     'prices': {
         'query': 'historyPrice',
         'return_fields': ['datetime', 'priceUsd', 'priceBtc', 'marketcap', 'volume']
@@ -31,36 +19,6 @@ QUERY_MAPPING = {
         'query': 'exchangeFundsFlow',
         'return_fields': ['datetime', 'inOutDifference']
     },
-    # OLD
-    'token_velocity': {
-        'query': 'tokenVelocity',
-        'return_fields': ['datetime', 'tokenVelocity']
-    },
-    # OLD
-    'token_circulation': {
-        'query': 'tokenCirculation',
-        'return_fields': ['datetime', 'tokenCirculation']
-    },
-    # OLD
-    'realized_value': {
-        'query': 'realizedValue',
-        'return_fields': ['datetime', 'realizedValue']
-    },
-    # OLD
-    'mvrv_ratio': {
-        'query': 'mvrvRatio',
-        'return_fields': ['datetime', 'ratio']
-    },
-    # OLD
-    'nvt_ratio': {
-        'query': 'nvtRatio',
-        'return_fields': ['datetime', 'nvtRatioCirculation', 'nvtRatioTxVolume']
-    },
-    # OLD
-    'daily_active_deposits': {
-        'query': 'dailyActiveDeposits',
-        'return_fields': ['datetime', 'activeDeposits']
-    },
     'gas_used': {
         'query': 'gasUsed',
         'return_fields': ['datetime', 'gasUsed']
@@ -69,22 +27,9 @@ QUERY_MAPPING = {
         'query': 'minersBalance',
         'return_fields': ['balance', 'datetime']
     },
-    'mining_pools_distribution': {
-        'query': 'miningPoolsDistribution',
-        'return_fields': ['datetime', 'other', 'top10', 'top3']
-    },
-    'history_twitter_data': {
-        'query': 'historyTwitterData',
-        'return_fields': ['datetime', 'followers_count']
-    },
     'historical_balance': {
         'query': 'historicalBalance',
         'return_fields': ['datetime', 'balance']
-    },
-    # OLD
-    'social_dominance': {
-        'query': 'socialDominance',
-        'return_fields': ['datetime', 'dominance']
     },
     'top_holders_percent_of_total_supply': {
         'query': 'topHoldersPercentOfTotalSupply',
@@ -99,12 +44,6 @@ QUERY_MAPPING = {
         'return_fields': [
             'datetime',
             'value'
-        ]
-    },
-    'topic_search': {
-        'query': 'topicSearch',
-        'return_fields': [
-            ('chartData', ['datetime, ''mentionsCount'])
         ]
     },
     'top_transfers': {
@@ -142,40 +81,6 @@ QUERY_MAPPING = {
         'return_fields': [
             'datetime',
             'ethSpent'
-        ]
-    },
-    'news': {
-        'query': 'news',
-        'return_fields': [
-            'datetime',
-            'title',
-            'sourceName',
-            'url',
-            'description'
-        ]
-    },
-    'price_volume_difference': {
-        'query': 'priceVolumeDiff',
-        'return_fields': [
-            'datetime',
-            'priceChange',
-            'priceVolumeDiff',
-            'volumeChange'
-        ]
-    },
-    # OLD
-    'social_volume': {
-        'query': 'socialVolume',
-        'return_fields': [
-            'datetime',
-            'mentionsCount'
-        ]
-    },
-    'top_social_gainers_losers': {
-        'query': 'topSocialGainersLosers',
-        'return_fields': [
-            'datetime',
-            ('projects', ['change', 'slug', 'status'])
         ]
     },
     'emerging_trends': {
