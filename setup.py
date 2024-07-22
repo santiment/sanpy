@@ -14,8 +14,6 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     license='MIT',
     url='https://github.com/santiment/sanpy',
-    test_suite='nose.collector',
-    tests_require=['nose'],
     packages=setuptools.find_packages(),
     setup_requires=[
         'numpy',
@@ -28,6 +26,7 @@ setuptools.setup(
         'setuptools'
     ],
     extras_require={
-        'extras':  ['numpy', 'matplotlib', 'scipy', 'mlfinlab']
+        'extras':  ['numpy', 'matplotlib', 'scipy', 'mlfinlab'],
+        'dev': ['ruff', 'pytest'],
     }
 )

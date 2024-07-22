@@ -964,20 +964,51 @@ Install main dependencies:
 pipenv run pip install -e .
 ```
 
+Install dev dependencies:
+
+```bash
+pipenv run pip install -e '.[dev]'
+```
+
 Install extra dependencies:
 
 ```bash
 pipenv run pip install -e '.[extras]'
 ```
 
+Running tests:
+```bash
+pipenv run pytest
+```
+
+Running integration tests:
+```bash
+pipenv run pytest -m integration
+```
+
 ## Running tests
 
 ```bash
-python setup.py test
+pytest
 ```
 
 ## Running integration tests
 
 ```bash
-python setup.py nosetests -a integration
+pytest -m integration
+```
+
+## Linting
+
+```bash
+pip install '.[dev]'
+```
+or just
+
+```bash
+pip install ruff
+```
+
+```bash
+ruff check
 ```

@@ -15,14 +15,6 @@ QUERY_MAPPING = {
         'query': 'ohlc',
         'return_fields': ['datetime', 'openPriceUsd', 'closePriceUsd', 'highPriceUsd', 'lowPriceUsd']
     },
-    'exchange_funds_flow': {
-        'query': 'exchangeFundsFlow',
-        'return_fields': ['datetime', 'inOutDifference']
-    },
-    'gas_used': {
-        'query': 'gasUsed',
-        'return_fields': ['datetime', 'gasUsed']
-    },
     'miners_balance': {
         'query': 'minersBalance',
         'return_fields': ['balance', 'datetime']
@@ -219,7 +211,7 @@ def _format_to_date(datetime_obj_or_str):
         datetime.datetime.strptime(datetime_obj_or_str, '%Y-%m-%d')
         dt = iso8601.parse_date(datetime_obj_or_str) + \
             datetime.timedelta(hours=23, minutes=59, seconds=59)
-    except:
+    except Exception as _e:
         dt = iso8601.parse_date(datetime_obj_or_str)
     
     return dt.isoformat()

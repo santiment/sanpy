@@ -2,10 +2,28 @@ podTemplate(label: 'sanpy-builder', containers: [
     containerTemplate(name: 'python', image: 'python:3.8-buster', command: 'cat', ttyEnabled: true)
 ]) {
   node('sanpy-builder') {
+    stage('Checkout') {
+      container('python') {
+        checkout scm
+      }
+    }
+
+    stage('Install Dependencies') {
+      container('python') {
+        sh "pip install pipenv"
+        sh "pipenv install --dev"
+      }
+    }
+
+    stage('Run Linter') {
+      container('python') {
+        sh "pipenv run ruff check ."
+      }
+    }
+
     stage('Run Tests') {
       container('python') {
-        def scmVars = checkout scm
-        sh "python3 setup.py test" 
+        sh "pipenv run pytest"
       }
     }
 

@@ -4,6 +4,7 @@ import logging
 from san.extras.strategy.prices import Prices
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from san.extras.utils import str_to_ts
+from typing import Union
 
 
 def prepare_df(source_df: pd.DataFrame):
@@ -17,7 +18,7 @@ def prepare_df(source_df: pd.DataFrame):
             df['dt'] = df['dt'].apply(lambda x: str_to_ts(x))
         df.set_index('dt', inplace=True)
     else:
-        if type(df.index) != pd.core.indexes.datetimes.DatetimeIndex:
+        if type(df.index) is not pd.core.indexes.datetimes.DatetimeIndex:
             logging.error('Please provide a df with datetime index or index data using column named "dt"')
             return
         else:
@@ -38,9 +39,9 @@ class Backtest:
     some components may be provided from the Strategy-inherited entity
     which contains the strategy supposed to be backtested.
     '''
-
+    
     def __init__(self,
-                 start_dt: str or datetime.datetime,
+                 start_dt: Union[str, datetime.datetime],
                  initial_investment: float = 10**6,
                  default_transfers_limit: int = 1,
                  accuracy: float = 3*10**(-6),
@@ -206,10 +207,10 @@ class Backtest:
         from the provided dataframe
         '''
 
-        dt1 = start_dt if type(start_dt) == datetime.datetime else str_to_ts(start_dt)
+        dt1 = start_dt if type(start_dt) is datetime.datetime else str_to_ts(start_dt)
 
         if end_dt:
-            dt2 = end_dt if end_dt and type(end_dt) == datetime.datetime else str_to_ts(end_dt)
+            dt2 = end_dt if end_dt and type(end_dt) is datetime.datetime else str_to_ts(end_dt)
             return list(df[(df.index >= dt1) & (df.index <= dt2)].index.unique())
         else:
             return list(df[df.index >= dt1].index.unique())
@@ -260,9 +261,11 @@ class Backtest:
             self.net_returns = self.net_returns[self.net_returns.index != dt]
             self.net_returns.loc[dt] = {'value': dt_price_change}
 
+    from typing import Union
+    
     def build_portfolio_price(self,
-                              start_dt: str or datetime,
-                              end_dt: str or datetime or None = None,
+                              start_dt: Union[str, datetime.datetime],
+                              end_dt: Union[str, datetime.datetime, None] = None,
                               rebuild: bool = False):
         '''
         Calculates the portfolio price in the range from the start_dt to the end_dt.

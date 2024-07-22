@@ -1,12 +1,11 @@
 from san import Batch
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
-from san.tests.utils import TestResponse
 
 
 @patch('san.graphql.requests.post')
-def test_batch(mock):
+def test_batch(mock, test_response):
     expected = {'query_0': [{'balance': 212664.33000000002,
                              'datetime': '2019-05-18T00:00:00Z'},
                             {'balance': 212664.33000000002,
@@ -23,7 +22,7 @@ def test_batch(mock):
                              'datetime': '2019-05-24T00:00:00Z'},
                             {'balance': 212664.33000000002,
                              'datetime': '2019-05-25T00:00:00Z'}]}
-    mock.return_value = TestResponse(status_code=200, data=expected)
+    mock.return_value = test_response(status_code=200, data=expected)
 
     batch = Batch()
     batch.get(

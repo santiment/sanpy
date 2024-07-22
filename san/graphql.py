@@ -1,4 +1,3 @@
-import json
 import requests
 from san.api_config import ApiConfig
 from san.env_vars import SANBASE_GQL_HOST

@@ -1,8 +1,5 @@
-import san.sanbase_graphql
 import pandas as pd
-from san.graphql import execute_gql, get_response_headers
-from san.query import get_gql_query, parse_dataset
-from san.transform import transform_timeseries_data_query_result
+from san.graphql import execute_gql
 from san.error import SanError
 import json
 
@@ -72,7 +69,7 @@ def __transform_sql_result(response, idx, **kwargs):
 
     set_index = kwargs.get('set_index')
 
-    if set_index == None:
+    if set_index is None:
         pass
     elif set_index not in result.columns:
         raise SanError(f"""

@@ -1,14 +1,15 @@
 import re
 import datetime
 import pandas as pd
+from typing import Union
 
 
 def convert_dt(timestamp_string, postfix=' 00:00:00'):
 
-    if type(timestamp_string) == datetime.date:
+    if type(timestamp_string) is datetime.date:
         timestamp_string = timestamp_string.strftime('%Y-%m-%d')
 
-    if type(timestamp_string) == datetime.datetime:
+    if type(timestamp_string) is datetime.datetime:
         timestamp_string = timestamp_string.strftime('%Y-%m-a%d %H:%M:%S')
 
     timestamp_string = timestamp_string.replace('Z', '').replace('T', ' ')
@@ -42,9 +43,9 @@ def parse_str_to_timedelta(time_str):
 
 
 def resample_dataframe(source_df: pd.DataFrame,
-                       resample_interval: str or datetime.timedelta,
+                       resample_interval: Union[str, datetime.timedelta],
                        values_column_name: str,
-                       grouping_column_name: str or None = None,
+                       grouping_column_name: Union[str, None] = None,
                        resample_function: str = 'pad'
                        ):
 
