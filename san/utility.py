@@ -26,9 +26,12 @@ def api_calls_made():
 
 
 def __request_api_call_data(query):
+    print("Echooooooooooooo")
     try:
         res = execute_gql(query)['currentUser']['apiCallsHistory']
+        print(res)
     except Exception as exc:
+        print(str(exc))
         if 'the results are empty' in str(exc):
             raise SanError('No API Key detected...')
         else:
@@ -42,7 +45,7 @@ def __parse_out_calls_data(response):
         api_calls = list(map(
             lambda x: (x['datetime'], x['apiCallsCount']), response
         ))
-    except:
+    except Exception as _exc:
         raise SanError('An error has occured, please contact our support...')
 
     return api_calls
@@ -55,5 +58,5 @@ def __get_headers_remaining(data):
             'hour_remaining': data['x-ratelimit-remaining-hour'],
             'minute_remaining': data['x-ratelimit-remaining-minute']
         }
-    except KeyError as exc:
+    except KeyError:
         raise SanError('There are no limits for this API Key.')

@@ -18,7 +18,7 @@ def month_ago():
 
 
 class TestResponse:
-    def __init__(self, **kwargs):
+    def setup(self, **kwargs):
         self.status_code = kwargs['status_code']
         if 'errors' in kwargs['data']:
             self.data = kwargs['data']
@@ -28,5 +28,5 @@ class TestResponse:
     def json(self):
         return self.data
 
-    def status_code(self):
+    def get_status_code(self):
         return self.status_code

@@ -61,7 +61,7 @@ def plot(prices, labels,pt_sl = [1, 2], num_days=5, lookback=50):
     slug=labels['slug'][0]
     project_prices = prices[slug]
     plt.rcParams["figure.figsize"] = (20,3)
-    fig = plt.figure()
+    plt.figure()
     ax = plt.subplot()
     ax.plot(prices[slug].index, project_prices, color='g', label='price')
     ax1 = plt.subplot()     

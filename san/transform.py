@@ -3,11 +3,9 @@ In order to have metrics, which require different order, we need to have transfo
  functions, which reorder or make different dictionaries in general.
 """
 import operator
-import pandas as pd
 from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
 from collections import OrderedDict
-from san.graphql import execute_gql
 from san.error import SanError
 from san.sanbase_graphql_helper import QUERY_MAPPING
 

@@ -973,11 +973,26 @@ pipenv run pip install -e '.[extras]'
 ## Running tests
 
 ```bash
-python setup.py test
+pytest
 ```
 
 ## Running integration tests
 
 ```bash
-python setup.py nosetests -a integration
+pytest -m integration
+```
+
+## Linting
+
+```bash
+pip install '.[dev]'
+```
+or just
+
+```bash
+pip install ruff
+```
+
+```bash
+ruff check
 ```

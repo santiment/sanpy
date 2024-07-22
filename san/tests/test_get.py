@@ -2,23 +2,22 @@ import san
 import pandas as pd
 import pandas.testing as pdt
 from san.error import SanError
-from nose.tools import assert_raises
-from unittest.mock import Mock, patch
+import pytest
+from unittest.mock import patch
 from san.pandas_utils import convert_to_datetime_idx_df
-from san.tests.utils import TestResponse
 from copy import deepcopy
 from san.batch import Batch
 
 
 @patch('san.graphql.requests.post')
-def test_get(mock):
+def test_get(mock, test_response):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-23T00:00:00Z'},
                                    {'balance': 212664.33000000002,
                                     'datetime': '2019-05-24T00:00:00Z'},
                                    {'balance': 212664.33000000002,
                                     'datetime': '2019-05-25T00:00:00Z'}]}
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
@@ -33,7 +32,7 @@ def test_get(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_prices(mock):
+def test_prices(mock, test_response):
     api_call_result = {
         'query_0':
             [
@@ -59,8 +58,8 @@ def test_prices(mock):
                 }
             ]
     }
-    mock.return_value = TestResponse(
-        status_code=200, data=deepcopy(api_call_result))
+    response = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock.return_value = response
 
     res = san.get(
         "prices/santiment_usd",
@@ -72,14 +71,13 @@ def test_prices(mock):
     df = convert_to_datetime_idx_df(api_call_result['query_0'])
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
-
 @patch('san.graphql.requests.post')
-def test_error_response(mock):
-    mock.return_value = TestResponse(
+def test_error_response(mock, test_response):
+    mock.return_value = test_response(
         status_code=500, data={
             'errors': {
                 'details': 'Internal server error'}})
-    with assert_raises(SanError):
+    with pytest.raises(SanError):
         san.get(
             "prices/santiment_usd",
             from_date="2018-06-01",
@@ -89,7 +87,7 @@ def test_error_response(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_get_without_transform(mock):
+def test_get_without_transform(mock, test_response):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-23T00:00:00Z'},
                                    {'balance': 212664.33000000002,
@@ -99,7 +97,7 @@ def test_get_without_transform(mock):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
@@ -114,7 +112,7 @@ def test_get_without_transform(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_get_with_transform(mock):
+def test_get_with_transform(mock, test_response):
     api_call_result = {
         'query_0': {
             'ethTopTransactions': [
@@ -141,7 +139,7 @@ def test_get_with_transform(mock):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     result = san.get(
@@ -175,7 +173,7 @@ def test_get_with_transform(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_batch_only_with_nontransform_queries(mock):
+def test_batch_only_with_nontransform_queries(mock, test_response):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-18T00:00:00Z'},
                                    {'balance': 212664.33000000002,
@@ -195,7 +193,7 @@ def test_batch_only_with_nontransform_queries(mock):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     expected = api_call_result
@@ -240,7 +238,7 @@ def test_batch_only_with_nontransform_queries(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_batch_only_with_transform_queries(mock):
+def test_batch_only_with_transform_queries(mock, test_response):
     api_call_result = {
         'query_0': {
             'ethTopTransactions': [
@@ -289,7 +287,7 @@ def test_batch_only_with_transform_queries(mock):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     batch = Batch()
@@ -362,7 +360,7 @@ def test_batch_only_with_transform_queries(mock):
 
 
 @patch('san.graphql.requests.post')
-def test_batch_with_mixed_queries(mock):
+def test_batch_with_mixed_queries(mock, test_response):
     api_call_result = {'query_0': [{'balance': 212664.33000000002,
                                     'datetime': '2019-05-18T00:00:00Z'},
                                    {'balance': 212664.33000000002,
@@ -390,7 +388,7 @@ def test_batch_with_mixed_queries(mock):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = TestResponse(
+    mock.return_value = test_response(
         status_code=200, data=deepcopy(api_call_result))
 
     expected = [[{'balance': 212664.33000000002,
@@ -459,12 +457,12 @@ def test_batch_with_mixed_queries(mock):
 
 
 def test_invalid_request():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         san.get("invalid_request")
 
 
 def test_invalid_method():
-    with assert_raises(SanError):
+    with pytest.raises(SanError):
         san.get("invalid_method/slug")
 
 
@@ -476,7 +474,8 @@ def test_rate_limits():
 
 
 def test_api_calls_made_exception_without_key():
-    with assert_raises(SanError):
+    san.ApiConfig.api_key = None
+    with pytest.raises(SanError):
         san.api_calls_made()
 
 

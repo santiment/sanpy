@@ -1,6 +1,4 @@
 import json
-import os
-from warnings import warn
 
 import pkg_resources
 import requests
@@ -29,5 +27,23 @@ def get_latest():
     try:
         response = requests.get(url).text
         return json.loads(response)['info']['version']
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         return pkg_resources.get_distribution(PROJECT).version
+
+__all__ = [
+    "ApiConfig", 
+    "AsyncBatch", 
+    "available_metric_for_slug_since", 
+    "available_metrics", 
+    "available_metrics_for_slug", 
+    "Batch", 
+    "get", 
+    "get_many", 
+    "execute_sql", 
+    "metadata",
+    "metric_complexity", 
+    "api_calls_made", 
+    "api_calls_remaining", 
+    "is_rate_limit_exception", 
+    "rate_limit_time_left"
+]

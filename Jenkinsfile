@@ -5,7 +5,12 @@ podTemplate(label: 'sanpy-builder', containers: [
     stage('Run Tests') {
       container('python') {
         def scmVars = checkout scm
-        sh "python3 setup.py test" 
+
+        sh "pip install pipenv"
+        sh "pipenv install --dev"
+
+        // Run pytest
+        sh "pipenv run pytest"
       }
     }
 
