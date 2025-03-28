@@ -3,6 +3,7 @@ from san.graphql import execute_gql
 from san.error import SanError
 import json
 
+
 def execute_sql(**kwargs):
     """
     Execute an arbitrary SQL against Santiment's Clickhouse Database
@@ -24,20 +25,21 @@ def execute_sql(**kwargs):
         parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
         set_index="dt")
     """
-    if 'query' in kwargs:
-        query = kwargs.pop('query')
+    if "query" in kwargs:
+        query = kwargs.pop("query")
     else:
         raise SanError("The 'query' argument is required when calling 'execute_sql'")
 
-    parameters = kwargs.pop('parameters', {})
+    parameters = kwargs.pop("parameters", {})
 
     result = __execute_sql(query, parameters, **kwargs)
     transformed_result = result
 
     return transformed_result
 
+
 def __execute_sql(query, parameters, **kwargs):
-    idx = kwargs.pop('idx', 0)
+    idx = kwargs.pop("idx", 0)
     # Export the python dictionary parameters to a JSON string
     # where each of the quotes " is replaced with \", so when interpolated
     # in the GraphQL parameters field it is properly escaped
@@ -45,12 +47,12 @@ def __execute_sql(query, parameters, **kwargs):
 
     # Replace the new lines with explicit new lines \\n. Othewise the
     # GraphQL query is malformed as it does not support multiline strings
-    query = query.replace('\n', '\\n')
+    query = query.replace("\n", "\\n")
 
     gql_query = f"""{{
-        query_{idx}:  computeRawClickhouseQuery(
-            query: "{query}"
-            parameters: "{parameters}"
+        query_{idx}:  runRawSqlQuery(
+            sqlQueryText: "{query}"
+            sqlQueryParameters: "{parameters}"
         ){{
             columns
             columnTypes
@@ -63,11 +65,12 @@ def __execute_sql(query, parameters, **kwargs):
 
     return res
 
-def __transform_sql_result(response, idx, **kwargs):
-    result = response[f'query_{idx}']
-    result = pd.DataFrame(result['rows'], columns=result['columns'])
 
-    set_index = kwargs.get('set_index')
+def __transform_sql_result(response, idx, **kwargs):
+    result = response[f"query_{idx}"]
+    result = pd.DataFrame(result["rows"], columns=result["columns"])
+
+    set_index = kwargs.get("set_index")
 
     if set_index is None:
         pass
@@ -80,3 +83,4 @@ def __transform_sql_result(response, idx, **kwargs):
         result = result.set_index(set_index)
 
     return result
+
