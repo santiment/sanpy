@@ -1,32 +1,24 @@
 import setuptools
 
-with open('README.md', 'r') as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
 setuptools.setup(
-    name='sanpy',
-    version='0.12.0',
-    author='Santiment',
-    author_email='admin@santiment.net',
-    description='Package for Santiment API access with python',
+    name="sanpy",
+    version="0.12.1",
+    author="Santiment",
+    author_email="admin@santiment.net",
+    description="Package for Santiment API access with python",
     long_description=long_description,
-    long_description_content_type='text/markdown',
-    license='MIT',
-    url='https://github.com/santiment/sanpy',
+    long_description_content_type="text/markdown",
+    license="MIT",
+    url="https://github.com/santiment/sanpy",
     packages=setuptools.find_packages(),
-    setup_requires=[
-        'numpy',
-        'Cython'
-    ],
-    install_requires=[
-        'pandas>=1.3.0',
-        'requests',
-        'iso8601',
-        'setuptools'
-    ],
+    setup_requires=["numpy", "Cython"],
+    install_requires=["pandas>=1.3.0", "requests", "iso8601", "setuptools"],
     extras_require={
-        'extras':  ['numpy', 'matplotlib', 'scipy', 'mlfinlab'],
-        'dev': ['ruff', 'pytest'],
-    }
+        "extras": ["numpy", "matplotlib", "scipy", "mlfinlab"],
+        "dev": ["ruff", "pytest"],
+    },
 )
