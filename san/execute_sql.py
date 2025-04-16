@@ -83,4 +83,3 @@ def __transform_sql_result(response, idx, **kwargs):
         result = result.set_index(set_index)
 
     return result
-
