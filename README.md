@@ -1,5 +1,7 @@
 # sanpy
+
 ---
+
 [![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
 
 Python client for cryptocurrency data from [Santiment API](https://api.santiment.net/).
@@ -53,6 +55,7 @@ More documentation regarding the API and definitions of metrics can be found on 
 ## Installation
 
 To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
+
 ```bash
 pip install sanpy
 ```
@@ -89,6 +92,7 @@ is read and set as the API key.
 ```shell
 export SANPY_APIKEY="my_apikey"
 ```
+
 ```python
 import san
 >>> san.ApiConfig.api_key
@@ -125,11 +129,11 @@ The rest of the parameters are::
 - `selector` - Allow for more flexible selection of the target. Some metrics are
   computed on blockchain addresses, for others you can provide a list of slugs,
   labels, amount of top holders. etc.
-- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.utcnow() - 365 days` 
+- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.utcnow() - 365 days`
 - `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.utcnow()`
 - `interval` - The interval between the data points in the timeseries. Defaults to `'1d'`
   It is represented in two different ways:
-  - a fixed range:  an integer followed by one of: `s`, `m`, `h`, `d` or `w`
+  - a fixed range: an integer followed by one of: `s`, `m`, `h`, `d` or `w`
   - a function, providing some semantic or a dynamic range: `toStartOfMonth`, `toStartOfDay`, `toStartOfWeek`, `toMonday`..
 
 The returned result for time-series data is transformed into `pandas DataFrame` and is indexed by `datetime`.
@@ -158,6 +162,7 @@ san.get(
   interval="1d"
 )
 ```
+
 ```
 datetime                   value
 2022-01-01 00:00:00+00:00  47686.811509
@@ -168,6 +173,7 @@ datetime                   value
 ```
 
 Fetch prices for multiple assets:
+
 ```python
 import san
 san.get_many(
@@ -178,8 +184,9 @@ san.get_many(
   interval="1d"
 )
 ```
+
 ```
-datetime                   bitcoin       ethereum     tether                                            
+datetime                   bitcoin       ethereum     tether
 2022-01-01 00:00:00+00:00  47686.811509  3769.696916  1.000500
 2022-01-02 00:00:00+00:00  47345.220564  3829.565045  1.000460
 2022-01-03 00:00:00+00:00  46458.116959  3761.380274  1.000165
@@ -188,6 +195,7 @@ datetime                   bitcoin       ethereum     tether
 ```
 
 Fetch development activity of a specific Github organization:
+
 ```python
 import san
 san.get(
@@ -198,8 +206,9 @@ san.get(
   interval="1d"
 )
 ```
+
 ```
-datetime                    value     
+datetime                    value
 2022-01-01 00:00:00+00:00   176.0
 2022-01-02 00:00:00+00:00   129.0
 2022-01-03 00:00:00+00:00   562.0
@@ -208,6 +217,7 @@ datetime                    value
 ```
 
 Fetch a metric for a contract address, not a slug:
+
 ```python
 import san
 san.get(
@@ -218,8 +228,9 @@ san.get(
   interval="1d"
 )
 ```
+
 ```
-datetime                   value     
+datetime                   value
 2022-01-01 00:00:00+00:00   90.0
 2022-01-02 00:00:00+00:00  339.0
 2022-01-03 00:00:00+00:00  486.0
@@ -228,6 +239,7 @@ datetime                   value
 ```
 
 Fetch top holders metric and specify the number of top holders to be counted:
+
 ```python
 import san
 san.get(
@@ -238,6 +250,7 @@ san.get(
   interval="1d"
 )
 ```
+
 ```
 datetime                   value
 2022-01-01 00:00:00+00:00  7.391186e+07
@@ -248,6 +261,7 @@ datetime                   value
 ```
 
 Fetch trade volume of a given DEX for a given slug
+
 ```python
 import san
 # This requires Santiment API PRO apikey configured
@@ -259,6 +273,7 @@ san.get(
   interval="1d"
 )
 ```
+
 ```
 datetime                    value
 2022-01-01 00:00:00+00:00   96882.176846
@@ -267,7 +282,9 @@ datetime                    value
 2022-01-04 00:00:00+00:00  105204.677503
 2022-01-05 00:00:00+00:00  174178.848916
 ```
+
 Fetch metric by providing `metric/slug` as first argument and no `slug` as named parameter:
+
 ```python
 import san
 
@@ -278,8 +295,9 @@ san.get(
     interval="1d"
 )
 ```
+
 ```
-datetime                   value      
+datetime                   value
 2018-06-01 00:00:00+00:00  692508.0
 2018-06-02 00:00:00+00:00  521887.0
 2018-06-03 00:00:00+00:00  531464.0
@@ -288,10 +306,12 @@ datetime                   value
 ```
 
 Fetch non-timeseries data:
+
 ```python
 import san
 san.get("projects/all")
 ```
+
 ```
                 name             slug ticker   totalSupply
 0             0chain           0chain    ZCN     400000000
@@ -302,11 +322,12 @@ san.get("projects/all")
 
 ### Execute an arbitrary GraphQL request
 
-Some of the available queries in the [Santiment API](https://api.santiment.net) do not have a 
+Some of the available queries in the [Santiment API](https://api.santiment.net) do not have a
 dedicated sanpy function. Alternatively, if the returned format needs to be parsed differently, this approach
 can be used, too. They can be fetched by providing the raw GraphQL query.
 
 Fetching data for many slugs at the same time. Note that this is also available as `san.get_many`
+
 ```python
 import san
 import pandas as pd
@@ -340,14 +361,16 @@ for datetime_point in data:
 df = pd.DataFrame(rows)
 df.set_index('datetime', inplace=True)
 ```
+
 ```
-datetime              bitcoin       ethereum                
+datetime              bitcoin       ethereum
 2022-05-05T00:00:00Z  36575.142133  2749.213042
 2022-05-06T00:00:00Z  36040.922350  2694.979684
 2022-05-07T00:00:00Z  35501.954144  2636.092958
 ```
 
 Fetching a specific set of fields for a project:
+
 ```python
 import san
 import pandas as pd
@@ -378,10 +401,12 @@ One of the Santiment products is [Santiment Queries](https://academy.santiment.n
 In order to execute a query you need to provide your API key.
 
 Executing a query and getting the result as a pandas DataFrame:
+
 ```python
 import san
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
 ```
+
 ```
    metric_id  asset_id                    dt  value           computed_at
 0         10      1369  2015-07-17T00:00:00Z    0.0  2020-10-21T08:48:42Z
@@ -392,10 +417,12 @@ san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
 ```
 
 In order to change the index to one of the columns, provide the `set_index` parameter:
+
 ```python
 import san
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5", set_index="dt")
 ```
+
 ```
 dt                    metric_id  asset_id  value           computed_at
 2015-07-17T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
@@ -427,8 +454,9 @@ san.execute_sql(query="""
 parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
 set_index="dt")
 ```
+
 ```
-dt                                    metric    asset        value                     
+dt                                    metric    asset        value
 2023-03-22T00:00:00Z  daily_active_addresses  bitcoin     941446.0
 2023-03-23T00:00:00Z  daily_active_addresses  bitcoin     913215.0
 2023-03-24T00:00:00Z  daily_active_addresses  bitcoin     884271.0
@@ -453,6 +481,7 @@ Getting all of the metrics for a given slug is achieved with the following code:
 ```python
 san.available_metrics_for_slug("santiment")
 ```
+
 ## Fetch timeseries metric
 
 ```python
@@ -515,12 +544,12 @@ There are two batch classes provided - `Batch` and `AsyncBatch`.
 > Note: Batching improves the performance and the developer experience, but every
 > query put inside the batch is still counted as one separate API call.
 > To fetch a metric for multiple assets at a time take a look at `san.get_many`
-  
+
 - `AsyncBatch` is the recommended batch class. It executes all the queries in
   separate HTTP requests. The benefit of using `AsyncBatch` over looping and
-  executing every API call is that the queries can be executed concurrently. 
+  executing every API call is that the queries can be executed concurrently.
   Putting multiple API calls in separate HTTP calls also allows to fetch more
-  data, otherwise you might run into [Complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) issues. 
+  data, otherwise you might run into [Complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) issues.
   The concurrency is controlled by the `max_workers` optional parameter to the
   `execute` function. By default the `max_workers` value is 10.
   It also supports `get_many` function to fetch data for many assets.
@@ -530,7 +559,7 @@ There are two batch classes provided - `Batch` and `AsyncBatch`.
   when lightweight queries that don't fetch a lot of data are used. The reason is
   that the [complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) of each query
   is accumulated and the batch can be rejected.
-  
+
 Note: If you have been using `Batch()` and want to switch to the newer `AsyncBatch()` you only need to
 change the batch initialization. The functions for adding queries and executing the batch, as well as the
 format of the response, are the same.
@@ -584,12 +613,14 @@ batch.get_many(
 ## Rate Limit Tools
 
 There are two functions, which can help you in handling the rate limits:
-* ``is_rate_limit_exception`` - Returns whether the exception caught is because of rate limitation
-* ``rate_limit_time_left`` - Returns the time left before the rate limit expires
-* ``api_calls_made`` - Returns the API calls for each day in which it was used
-* ``api_calls_remaining`` - Returns the API calls remaining for the month, hour and minute
+
+- `is_rate_limit_exception` - Returns whether the exception caught is because of rate limitation
+- `rate_limit_time_left` - Returns the time left before the rate limit expires
+- `api_calls_made` - Returns the API calls for each day in which it was used
+- `api_calls_remaining` - Returns the API calls remaining for the month, hour and minute
 
 Example:
+
 ```python
 import time
 import san
@@ -614,7 +645,6 @@ calls_by_day = san.api_calls_made()
 calls_remaining = san.api_calls_remaining()
 ```
 
-
 ## Metric Complexity
 
 Fetch the complexity of a metric. The complexity depends on the from/to/interval
@@ -626,6 +656,7 @@ are a few ways to solve the issue:
 - Upgrade to a higher subscription plan.
 
 More about the complexity can be found on [Santiment Academy]()
+
 ```python
 san.metric_complexity(
     metric="price_usd",
@@ -665,6 +696,7 @@ san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santi
 ## Transform the result
 
 Example usage:
+
 ```python
 san.get(
   "price_usd",
@@ -680,12 +712,12 @@ san.get(
 Where the parameters, that are not mentioned, are optional:
 
 `transform` - Apply a transformation on the data. The supported transformations are:
+
 - "moving_average" - Replace every value V<sub>i</sub> with the average of the last "moving_average_base" values.
 - "consecutive_differences" - Replace every value V<sub>i</sub> with the value V<sub>i</sub> - V<sub>i-1</sub> where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
-- "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) * 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
+- "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) \* 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
 
 `aggregation` - the aggregation which is used for the query results.
-
 
 ## Available projects
 
@@ -713,7 +745,6 @@ Example result:
 ...
 ```
 
-
 ## Non-standard metrics
 
 Here is a list of metrics that are not part of the returned list of metrics found above.
@@ -732,9 +763,11 @@ san.get(
     interval="1d"
 )
 ```
+
 #### Open, High, Close, Low Prices, Volume, Marketcap
 
-Notes: 
+Notes:
+
 - This query cannot be batched.
 - The format with separate `slug`/`selector` argument is not supported
 
@@ -870,7 +903,7 @@ datetime                           fromAddress  fromAddressInExchange           
 
 ### Top Transfers
 
-Top transfers for the token of a given project, ``address`` and ``transaction_type`` arguments can be added as well, in the form of a key-value pair. The ``transaction_type`` parameter can have one of these three values: ``ALL``, ``OUT``, ``IN``.
+Top transfers for the token of a given project, `address` and `transaction_type` arguments can be added as well, in the form of a key-value pair. The `transaction_type` parameter can have one of these three values: `ALL`, `OUT`, `IN`.
 
 ```python
 san.get(
@@ -884,9 +917,10 @@ san.get(
 **The result is shortened for convenience**
 
 Example result:
+
 ```
                           fromAddress   toAddress     trxHash       trxValue
-datetime                                                                                                                                                                                                                          
+datetime
 2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
 2021-06-17 00:10:05+00:00  0xbd3c2...  0x876ea...  0x732a5...  117339.779890
 2021-06-19 21:36:03+00:00  0x59646...  0x0d45b...  0x5de31...  112336.882707
@@ -905,9 +939,10 @@ san.get(
 ```
 
 Example result:
+
 ```
                           fromAddress  toAddress    trxHash   trxValue
-datetime                                                                                                                                                                                        
+datetime
 2021-06-13 09:14:01+00:00  0x26e06...  0xfd3d...  0x4af6...  69854.528
 2021-06-13 09:13:01+00:00  0x876ea...  0x26e0...  0x18c1...  69854.528
 2021-06-14 08:54:52+00:00  0x876ea...  0x26e0...  0xdceb...  59920.591
@@ -916,7 +951,7 @@ datetime
 
 ### Emerging Trends
 
-Emerging trends for a given period of time. 
+Emerging trends for a given period of time.
 
 ```python
 san.get(
@@ -977,11 +1012,13 @@ pipenv run pip install -e '.[extras]'
 ```
 
 Running tests:
+
 ```bash
 pipenv run pytest
 ```
 
 Running integration tests:
+
 ```bash
 pipenv run pytest -m integration
 ```
@@ -998,11 +1035,22 @@ pytest
 pytest -m integration
 ```
 
+## transformations
+
+```sh
+pip install ruff
+```
+
+```python
+ruff format
+```
+
 ## Linting
 
 ```bash
 pip install '.[dev]'
 ```
+
 or just
 
 ```bash
