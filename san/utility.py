@@ -29,7 +29,6 @@ def api_calls_made():
 
 
 def __request_api_call_data(query):
-    print("Echooooooooooooo")
     try:
         res = execute_gql(query)["currentUser"]["apiCallsHistory"]
         print(res)

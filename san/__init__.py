@@ -1,7 +1,7 @@
 import json
 
-import pkg_resources
 import requests
+from importlib.metadata import version, PackageNotFoundError
 
 from .api_config import ApiConfig
 from .async_batch import AsyncBatch
@@ -27,7 +27,10 @@ def get_latest():
         response = requests.get(url).text
         return json.loads(response)["info"]["version"]
     except requests.exceptions.RequestException:
-        return pkg_resources.get_distribution(PROJECT).version
+        try:
+            return version(PROJECT)
+        except PackageNotFoundError:
+            return "unknown"
 
 
 __all__ = [
