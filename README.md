@@ -57,7 +57,8 @@ More documentation regarding the API and definitions of metrics can be found on 
 To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
 
 ```bash
-pip install sanpy
+# Install the latest version
+pip install sanpy==0.12.3
 ```
 
 ## Upgrade to latest version
