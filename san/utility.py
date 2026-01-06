@@ -33,7 +33,7 @@ def __request_api_call_data(query):
         res = execute_gql(query)["currentUser"]["apiCallsHistory"]
     except Exception as exc:
         if "the results are empty" in str(exc):
-            raise SanError("No API Key detected...")
+            raise SanError("No API Key detected...") from exc
         raise SanError(str(exc)) from exc
 
     return res
