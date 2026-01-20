@@ -30,7 +30,6 @@ class Batch:
                     batched_queries.append(san.sanbase_graphql.get_metric_timeseries_data(idx, metric, slug, **query[1]))
                 else:
                     raise SanError("Invalid metric!")
-        self.__batch_gql_queries(batched_queries)
         return self.__batch_gql_queries(batched_queries)
 
     def __transform_batch_result(self, graphql_result):

@@ -20,6 +20,11 @@ if SANPY_APIKEY:
 
 PROJECT = "sanpy"
 
+try:
+    __version__ = version(PROJECT)
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 
 def get_latest():
     url = "https://pypi.python.org/pypi/%s/json" % (PROJECT)
@@ -34,6 +39,7 @@ def get_latest():
 
 
 __all__ = [
+    "__version__",
     "ApiConfig",
     "AsyncBatch",
     "available_metric_for_slug_since",

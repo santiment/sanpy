@@ -31,13 +31,10 @@ def api_calls_made():
 def __request_api_call_data(query):
     try:
         res = execute_gql(query)["currentUser"]["apiCallsHistory"]
-        print(res)
     except Exception as exc:
-        print(str(exc))
         if "the results are empty" in str(exc):
-            raise SanError("No API Key detected...")
-        else:
-            raise SanError(exc)
+            raise SanError("No API Key detected...") from exc
+        raise SanError(str(exc)) from exc
 
     return res
 
@@ -45,8 +42,8 @@ def __request_api_call_data(query):
 def __parse_out_calls_data(response):
     try:
         api_calls = list(map(lambda x: (x["datetime"], x["apiCallsCount"]), response))
-    except Exception as _exc:
-        raise SanError("An error has occured, please contact our support...")
+    except (KeyError, TypeError) as exc:
+        raise SanError(f"Error parsing API response: {exc}") from exc
 
     return api_calls
 

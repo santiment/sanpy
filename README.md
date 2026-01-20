@@ -58,7 +58,7 @@ To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
 
 ```bash
 # Install the latest version
-pip install sanpy==0.12.3
+pip install sanpy==0.12.4
 ```
 
 ## Upgrade to latest version
