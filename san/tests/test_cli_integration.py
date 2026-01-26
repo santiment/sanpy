@@ -6,6 +6,8 @@ Run with: pytest -m integration
 """
 
 import json
+import re
+
 import pytest
 from typer.testing import CliRunner
 
@@ -93,8 +95,12 @@ def test_get_price_integration():
         ],
     )
     assert result.exit_code == 0
-    # Should have some data rows
-    assert "value" in result.stdout or "2" in result.stdout  # Either column name or data
+    # Verify column header is present
+    assert "value" in result.stdout, "Expected 'value' column header in output"
+    # Verify actual numeric data rows exist (decimal values, not just dates)
+    # Using regex to match standalone decimal numbers (e.g., "12345.67")
+    # This avoids false positives from dates like "2024-01-20"
+    assert re.search(r"\b\d+\.\d+\b", result.stdout), "Expected numeric data rows with decimal values"
 
 
 @pytest.mark.integration

@@ -4,6 +4,8 @@ Output formatters for sanpy CLI.
 Supports JSON, CSV, and table (human-readable) output formats.
 """
 
+import csv
+import io
 import json
 import sys
 from typing import List
@@ -66,11 +68,13 @@ def format_dict(data: dict, fmt: str = "table") -> str:
     if fmt == "json":
         return json.dumps(data, indent=2, default=str)
     elif fmt == "csv":
-        # Simple key,value CSV
-        lines = ["key,value"]
+        # Use csv module for proper escaping of commas, quotes, and newlines
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(["key", "value"])
         for k, v in data.items():
-            lines.append(f"{k},{v}")
-        return "\n".join(lines)
+            writer.writerow([k, v])
+        return buffer.getvalue()
     else:  # table
         max_key_len = max(len(str(k)) for k in data.keys()) if data else 0
         lines = []

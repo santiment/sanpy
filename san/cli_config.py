@@ -12,6 +12,15 @@ from pathlib import Path
 from typing import Optional
 
 
+class ConfigError(Exception):
+    """Exception raised when configuration operations fail.
+    
+    This exception provides user-friendly error messages for configuration
+    issues such as permission errors, disk full, or invalid configuration data.
+    """
+    pass
+
+
 def get_config_dir() -> Path:
     """Get the platform-appropriate config directory."""
     if os.name == "nt":  # Windows
@@ -29,9 +38,19 @@ def get_config_path() -> Path:
 
 
 def _ensure_config_dir() -> None:
-    """Create config directory if it doesn't exist."""
+    """Create config directory if it doesn't exist.
+    
+    Raises:
+        ConfigError: If the directory cannot be created due to permission
+            issues or other filesystem errors.
+    """
     config_dir = get_config_dir()
-    config_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        config_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise ConfigError(
+            f"Cannot create configuration directory '{config_dir}': {e.strerror}"
+        ) from e
 
 
 def _load_config() -> dict:
@@ -47,11 +66,26 @@ def _load_config() -> dict:
 
 
 def _save_config(config: dict) -> None:
-    """Save config to file."""
+    """Save config to file.
+    
+    Raises:
+        ConfigError: If the configuration cannot be saved due to permission
+            issues, disk full, or JSON encoding errors.
+    """
     _ensure_config_dir()
     config_path = get_config_path()
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=2)
+    try:
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=2)
+    except (OSError, IOError) as e:
+        raise ConfigError(
+            f"Cannot write configuration file '{config_path}': {e.strerror}"
+        ) from e
+    except (TypeError, ValueError) as e:
+        # TypeError/ValueError are raised by json.dump for non-serializable data
+        raise ConfigError(
+            f"Cannot encode configuration as JSON: {e}"
+        ) from e
 
 
 def get_api_key() -> Optional[str]:
