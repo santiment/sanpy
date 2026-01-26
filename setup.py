@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sanpy",
-    version="0.12.4",
+    version="0.13.0",
     author="Santiment",
     author_email="admin@santiment.net",
     description="Package for Santiment API access with python",
@@ -16,9 +16,14 @@ setuptools.setup(
     url="https://github.com/santiment/sanpy",
     packages=setuptools.find_packages(),
     setup_requires=["numpy", "Cython"],
-    install_requires=["pandas>=1.3.0", "requests", "iso8601", "setuptools"],
+    install_requires=["pandas>=1.3.0", "requests", "iso8601", "setuptools", "typer>=0.9.0"],
     extras_require={
         "extras": ["numpy", "matplotlib", "scipy", "mlfinlab"],
         "dev": ["ruff", "pytest"],
+    },
+    entry_points={
+        "console_scripts": [
+            "san=san.cli:app",
+        ],
     },
 )
