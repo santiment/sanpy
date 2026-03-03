@@ -1,8 +1,8 @@
-import san
-from san import Batch, available_metric_for_slug_since
-from san.tests.utils import two_days_ago, month_ago
 import pytest
 
+import san
+from san import Batch, available_metric_for_slug_since
+from san.tests.utils import month_ago, two_days_ago
 
 params = {
     "project_slug": "santiment",

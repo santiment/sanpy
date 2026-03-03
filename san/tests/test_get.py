@@ -1,15 +1,17 @@
-import san
+from copy import deepcopy
+from unittest.mock import patch
+
 import pandas as pd
 import pandas.testing as pdt
-from san.error import SanError
 import pytest
-from unittest.mock import patch
-from san.pandas_utils import convert_to_datetime_idx_df
-from copy import deepcopy
+
+import san
 from san.batch import Batch
+from san.error import SanError
+from san.pandas_utils import convert_to_datetime_idx_df
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_get(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -31,7 +33,7 @@ def test_get(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_prices(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -50,14 +52,14 @@ def test_prices(mock, test_response):
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_error_response(mock, test_response):
     mock.return_value = test_response(status_code=500, data={"errors": {"details": "Internal server error"}})
     with pytest.raises(SanError):
         san.get("prices/santiment_usd", from_date="2018-06-01", to_date="2018-06-05", interval="1d")
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_get_without_transform(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -82,7 +84,7 @@ def test_get_without_transform(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_get_with_transform(mock, test_response):
     api_call_result = {
         "query_0": {
@@ -140,7 +142,7 @@ def test_get_with_transform(mock, test_response):
     pdt.assert_frame_equal(result, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_batch_only_with_nontransform_queries(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -199,7 +201,7 @@ def test_batch_only_with_nontransform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_batch_only_with_transform_queries(mock, test_response):
     api_call_result = {
         "query_0": {
@@ -312,7 +314,7 @@ def test_batch_only_with_transform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.graphql.httpx.post")
 def test_batch_with_mixed_queries(mock, test_response):
     api_call_result = {
         "query_0": [

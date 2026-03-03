@@ -1,5 +1,5 @@
-from san.sanbase_graphql_helper import _format_from_date, _format_to_date
 from san.graphql import execute_gql
+from san.sanbase_graphql_helper import _format_from_date, _format_to_date
 
 
 def metric_complexity(metric, from_date, to_date, interval):

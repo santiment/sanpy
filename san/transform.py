@@ -4,10 +4,10 @@ In order to have metrics, which require different order, we need to have transfo
 """
 
 import operator
-from san.pandas_utils import convert_to_datetime_idx_df
 from functools import reduce
-from collections import OrderedDict
+
 from san.error import SanError
+from san.pandas_utils import convert_to_datetime_idx_df
 from san.sanbase_graphql_helper import QUERY_MAPPING
 
 QUERY_PATH_MAP = {
@@ -70,72 +70,60 @@ def transform_timeseries_data_per_slug_query_result(idx, query, data):
     return convert_to_datetime_idx_df(rows)
 
 
-def eth_top_transactions_transform(data):
-    return list(
-        map(
-            lambda column: {
-                "datetime": column["datetime"],
-                "fromAddress": column["fromAddress"]["address"],
-                "fromAddressIsExchange": column["fromAddress"]["isExchange"],
-                "toAddress": column["toAddress"]["address"],
-                "toAddressIsExchange": column["toAddress"]["isExchange"],
-                "trxHash": column["trxHash"],
-                "trxValue": column["trxValue"],
-            },
-            data,
-        )
-    )
+def eth_top_transactions_transform(data: list[dict]) -> list[dict]:
+    return [
+        {
+            "datetime": column["datetime"],
+            "fromAddress": column["fromAddress"]["address"],
+            "fromAddressIsExchange": column["fromAddress"]["isExchange"],
+            "toAddress": column["toAddress"]["address"],
+            "toAddressIsExchange": column["toAddress"]["isExchange"],
+            "trxHash": column["trxHash"],
+            "trxValue": column["trxValue"],
+        }
+        for column in data
+    ]
 
 
-def top_transfers_transform(data):
-    return list(
-        map(
-            lambda column: {
-                "datetime": column["datetime"],
-                "fromAddress": column["fromAddress"]["address"],
-                "toAddress": column["toAddress"]["address"],
-                "trxHash": column["trxHash"],
-                "trxValue": column["trxValue"],
-            },
-            data,
-        )
-    )
+def top_transfers_transform(data: list[dict]) -> list[dict]:
+    return [
+        {
+            "datetime": column["datetime"],
+            "fromAddress": column["fromAddress"]["address"],
+            "toAddress": column["toAddress"]["address"],
+            "trxHash": column["trxHash"],
+            "trxValue": column["trxValue"],
+        }
+        for column in data
+    ]
 
 
-def news_transform(data):
-    result = list(
-        map(
-            lambda column: OrderedDict(
-                {
-                    "datetime": column["datetime"],
-                    "title": column["title"],
-                    "description": column["description"],
-                    "sourceName": column["sourceName"],
-                    "url": column["url"],
-                }
-            ),
-            data,
-        )
-    )
-
-    return result
+def news_transform(data: list[dict]) -> list[dict]:
+    return [
+        {
+            "datetime": column["datetime"],
+            "title": column["title"],
+            "description": column["description"],
+            "sourceName": column["sourceName"],
+            "url": column["url"],
+        }
+        for column in data
+    ]
 
 
-def token_top_transactions_transform(data):
-    return list(
-        map(
-            lambda column: {
-                "datetime": column["datetime"],
-                "fromAddress": column["fromAddress"]["address"],
-                "fromAddressIsExchange": column["fromAddress"]["isExchange"],
-                "toAddress": column["toAddress"]["address"],
-                "toAddressIsExchange": column["toAddress"]["isExchange"],
-                "trxHash": column["trxHash"],
-                "trxValue": column["trxValue"],
-            },
-            data,
-        )
-    )
+def token_top_transactions_transform(data: list[dict]) -> list[dict]:
+    return [
+        {
+            "datetime": column["datetime"],
+            "fromAddress": column["fromAddress"]["address"],
+            "fromAddressIsExchange": column["fromAddress"]["isExchange"],
+            "toAddress": column["toAddress"]["address"],
+            "toAddressIsExchange": column["toAddress"]["isExchange"],
+            "trxHash": column["trxHash"],
+            "trxValue": column["trxValue"],
+        }
+        for column in data
+    ]
 
 
 def emerging_trends_transform(data):
@@ -150,26 +138,17 @@ def emerging_trends_transform(data):
     return result
 
 
-def top_social_gainers_losers_transform(data):
+def top_social_gainers_losers_transform(data: list[dict]) -> list[dict]:
     result = []
     for column in data:
-        for i in range(0, len(column["projects"])):
+        for project in column["projects"]:
             result.append(
                 {
                     "datetime": column["datetime"],
-                    "slug": column["projects"][i]["slug"],
-                    "change": column["projects"][i]["change"],
-                    "status": column["projects"][i]["status"],
+                    "slug": project["slug"],
+                    "change": project["change"],
+                    "status": project["status"],
                 }
             )
-
-    result = list(
-        map(
-            lambda column: OrderedDict(
-                {"datetime": column["datetime"], "slug": column["slug"], "change": column["change"], "status": column["status"]}
-            ),
-            result,
-        )
-    )
 
     return result

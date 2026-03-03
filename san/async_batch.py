@@ -1,21 +1,21 @@
-import san.sanbase_graphql
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
-from san.sanbase_graphql_helper import QUERY_MAPPING
+import san
 from san.error import SanError
+from san.sanbase_graphql_helper import QUERY_MAPPING
 
 
-def task(request):
-    [idx, [get_type, identifier, kwargs]] = request
+async def task(request):
+    idx, [get_type, identifier, kwargs] = request
 
     metric, _separator, slug = identifier.partition("/")
 
     if metric in QUERY_MAPPING:
-        response = san.get(identifier, idx=idx, **kwargs)
+        response = await san.get_async(identifier, idx=idx, **kwargs)
     elif get_type == "get":
-        response = san.get(identifier, idx=idx, **kwargs)
+        response = await san.get_async(identifier, idx=idx, **kwargs)
     elif get_type == "get_many":
-        response = san.get_many(identifier, idx=idx, **kwargs)
+        response = await san.get_many_async(identifier, idx=idx, **kwargs)
     else:
         raise SanError("Invalid metric!")
 
@@ -33,18 +33,28 @@ class AsyncBatch:
         self.queries.append(["get_many", dataset, kwargs])
 
     def execute(self, max_workers=10):
+        return asyncio.run(self.execute_async(max_workers))
+
+    async def execute_async(self, max_workers=10):
         graphql_result = {}
+        sem = asyncio.Semaphore(max_workers)
 
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for idx, response in executor.map(task, enumerate(self.queries)):
-                graphql_result[idx] = response
+        async def bounded_task(request):
+            async with sem:
+                return await task(request)
 
-            result = self.__transform_batch_result(graphql_result)
-            return result
+        tasks = [bounded_task(req) for req in enumerate(self.queries)]
+        results = await asyncio.gather(*tasks)
+
+        for idx, response in results:
+            graphql_result[idx] = response
+
+        result = self.__transform_batch_result(graphql_result)
+        return result
 
     def __transform_batch_result(self, response_map):
         result = []
-        idxs = sorted(idx for idx in response_map.keys())
+        idxs = sorted(response_map.keys())
 
         for idx in idxs:
             result.append(response_map[idx])

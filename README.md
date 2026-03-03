@@ -67,13 +67,6 @@ pip install sanpy==0.12.4
 pip install --upgrade sanpy
 ```
 
-## Install extra packages
-
-There are few scripts under [extras](/san/extras) directory related to backtesting and event studies. To install their dependencies use:
-
-```bash
-pip install sanpy[extras]
-```
 
 ## Restricted metrics
 
@@ -105,6 +98,15 @@ import san
 ```python
 import san
 san.ApiConfig.api_key = "my_apikey"
+```
+
+### Configure a custom User-Agent
+
+By default, sanpy sends requests using a standard python user-agent identifier. You can override this to identify your bot/pipeline to the Santiment API:
+
+```python
+import san
+san.ApiConfig.user_agent = "MyTradingBot/1.0"
 ```
 
 ### How to obtain an API key
@@ -980,84 +982,52 @@ datetime                        score    word
 2019-07-02 00:00:00+00:00   89.309975   haiku
 ```
 
-## Extras
-
-Take a look at the [examples](/examples/extras) folder.
-
 ## Development
 
-It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing your local environment.
+This repository relies heavily on [`uv`](https://github.com/astral-sh/uv) and modern Python standards (>=3.10) for dependency management and testing. 
 
 Setup project:
 
 ```bash
-pipenv install
+uv sync --all-extras
 ```
 
-Install main dependencies:
+Running tests (Docker approach recommended for clean isolation):
 
 ```bash
-pipenv run pip install -e .
+docker run --rm -v "$(pwd):/app" -w /app ghcr.io/astral-sh/uv:python3.11-bookworm-slim bash -c "uv sync --all-extras && uv run pytest"
 ```
 
-Install dev dependencies:
+Alternatively, run tests locally via `uv`:
 
 ```bash
-pipenv run pip install -e '.[dev]'
-```
-
-Install extra dependencies:
-
-```bash
-pipenv run pip install -e '.[extras]'
-```
-
-Running tests:
-
-```bash
-pipenv run pytest
+uv run pytest
 ```
 
 Running integration tests:
 
 ```bash
-pipenv run pytest -m integration
+uv run pytest -m integration
 ```
 
-## Running tests
+## Formatting and Linting
+
+Sanpy utilizes `ruff` as an ultra-fast linter and formatter.
+
+To format code:
 
 ```bash
-pytest
+uv run ruff format .
 ```
 
-## Running integration tests
+To run lint checks:
 
 ```bash
-pytest -m integration
+uv run ruff check .
 ```
 
-## transformations
-
-```sh
-pip install ruff
-```
-
-```python
-ruff format
-```
-
-## Linting
+To auto-fix basic linting errors:
 
 ```bash
-pip install '.[dev]'
-```
-
-or just
-
-```bash
-pip install ruff
-```
-
-```bash
-ruff check
+uv run ruff check --fix .
 ```

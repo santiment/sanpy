@@ -1,10 +1,12 @@
-from san import Batch
 from unittest.mock import patch
-from san.pandas_utils import convert_to_datetime_idx_df
+
 import pandas.testing as pdt
 
+from san import Batch
+from san.pandas_utils import convert_to_datetime_idx_df
 
-@patch("san.graphql.requests.post")
+
+@patch("san.graphql.httpx.post")
 def test_batch(mock, test_response):
     expected = {
         "query_0": [

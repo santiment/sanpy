@@ -1,2 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sanpy"
+version = "0.12.4"
+description = "Package for Santiment API access with python"
+readme = "README.md"
+authors = [
+    { name = "Santiment", email = "admin@santiment.net" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.10, <3.13"
+dependencies = [
+    "pandas>=2.0.0",
+    "iso8601",
+    "httpx>=0.28.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/santiment/sanpy"
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest", "pytest-cov", "pytest-mock"]
+
+[tool.uv]
+environments = [
+    "sys_platform == 'linux'",
+    "sys_platform == 'darwin'",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["san"]
+
+[tool.mypy]
+files = ["san"]
+strict = false
+
 [tool.ruff]
 line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = []
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=san --cov-report=term-missing --cov-fail-under=60"
+markers = [
+    "integration: mark test as an integration test against the live sanity API"
+]
+testpaths = [
+    "san/tests",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pandas-stubs>=2.3.3.260113",
+]
+
+[tool.coverage.run]
+omit = ["san/tests/*"]

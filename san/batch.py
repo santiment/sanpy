@@ -1,9 +1,9 @@
 import san.sanbase_graphql
-from san.sanbase_graphql_helper import QUERY_MAPPING
-from san.query import get_gql_query
-from san.graphql import execute_gql
-from san.transform import transform_timeseries_data_query_result
 from san.error import SanError
+from san.graphql import execute_gql
+from san.query import get_gql_query
+from san.sanbase_graphql_helper import QUERY_MAPPING
+from san.transform import transform_timeseries_data_query_result
 
 
 class Batch:

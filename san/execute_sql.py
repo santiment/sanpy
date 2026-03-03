@@ -1,7 +1,9 @@
-import pandas as pd
-from san.graphql import execute_gql
-from san.error import SanError
 import json
+
+import pandas as pd
+
+from san.error import SanError
+from san.graphql import execute_gql
 
 
 def execute_sql(**kwargs):

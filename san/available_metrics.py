@@ -1,4 +1,5 @@
 import inspect
+
 import san.sanbase_graphql
 from san.graphql import execute_gql
 

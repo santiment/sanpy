@@ -1,5 +1,6 @@
-import iso8601
 import datetime
+
+import iso8601
 
 _DEFAULT_INTERVAL = "1d"
 _DEFAULT_SOCIAL_VOLUME_TYPE = "TELEGRAM_CHATS_OVERVIEW"

@@ -1,6 +1,6 @@
 import san.sanbase_graphql
-from san.graphql import execute_gql, get_response_headers
 from san.error import SanError
+from san.graphql import execute_gql, get_response_headers
 
 
 def is_rate_limit_exception(exception):
