@@ -29,6 +29,7 @@ More documentation regarding the API and definitions of metrics can be found on 
   - [Available metrics](#available-metrics)
   - [Available Metrics for Slug](#available-metrics-for-slug)
   - [Fetch timeseries metric](#fetch-timeseries-metric)
+  - [Versioned metrics](#versioned-metrics)
   - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
   - [Batching multiple queries](#batching-multiple-queries)
   - [Rate Limit Tools](#rate-limit-tools)
@@ -502,6 +503,39 @@ Using the defaults params (last 1 year of data with 1 day interval):
 ```python
 san.get("daily_active_addresses", slug="santiment")
 san.get("price_usd", slug="santiment")
+```
+
+## Versioned metrics
+
+Some metrics support multiple versions (for example `"1.0"` and `"2.0"`).
+When needed, pass `version` to `san.get` and `san.get_many`.
+
+```python
+import san
+
+san.get(
+    "social_dominance_total",
+    slug="bitcoin",
+    from_date="2026-01-01",
+    to_date="2026-01-10",
+    interval="1d",
+    version="2.0"
+)
+
+san.get_many(
+    "social_dominance_total",
+    slugs=["bitcoin", "ethereum"],
+    from_date="2026-01-01",
+    to_date="2026-01-10",
+    interval="1d",
+    version="2.0"
+)
+```
+
+Before selecting a version, check what is available in metric metadata:
+
+```python
+san.metadata("social_dominance_total", arr=["availableVersions { version }"])
 ```
 
 ## Fetching metadata for a metric

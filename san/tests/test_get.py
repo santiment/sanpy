@@ -444,3 +444,59 @@ def test_transform_arg_transform_given():
 def test_transform_arg_no_transform_given():
     kwargs = {"from_date": "utc_now-30d", "to_date": "utc_now", "slug": "bitcoin", "interval": "1d"}
     assert san.sanbase_graphql._transform_arg_helper(kwargs) == ""
+
+
+@patch("san.graphql.requests.post")
+def test_get_metric_with_version_in_query(mock, test_response):
+    api_call_result = {
+        "query_0": {
+            "timeseriesDataJson": [
+                {"datetime": "2026-01-01T00:00:00Z", "value": 1.0},
+                {"datetime": "2026-01-02T00:00:00Z", "value": 2.0},
+            ]
+        }
+    }
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.get(
+        "price_usd",
+        slug="bitcoin",
+        from_date="2026-01-01",
+        to_date="2026-01-02",
+        interval="1d",
+        version="2.0",
+    )
+
+    query = mock.call_args.kwargs["json"]["query"]
+    assert 'getMetric(metric: "price_usd", version: "2.0")' in query
+
+
+@patch("san.graphql.requests.post")
+def test_get_many_metric_with_version_in_query(mock, test_response):
+    api_call_result = {
+        "query_0": {
+            "timeseriesDataPerSlugJson": [
+                {
+                    "datetime": "2026-01-01T00:00:00Z",
+                    "data": [{"slug": "bitcoin", "value": 1.0}, {"slug": "ethereum", "value": 2.0}],
+                },
+                {
+                    "datetime": "2026-01-02T00:00:00Z",
+                    "data": [{"slug": "bitcoin", "value": 3.0}, {"slug": "ethereum", "value": 4.0}],
+                },
+            ]
+        }
+    }
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.get_many(
+        "price_usd",
+        slugs=["bitcoin", "ethereum"],
+        from_date="2026-01-01",
+        to_date="2026-01-02",
+        interval="1d",
+        version="2.0",
+    )
+
+    query = mock.call_args.kwargs["json"]["query"]
+    assert 'getMetric(metric: "price_usd", version: "2.0")' in query

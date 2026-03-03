@@ -213,11 +213,12 @@ def __choose_selector_or_slug(slug, **kwargs):
 def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
     kwargs = sgh.transform_query_args("get_metric", **kwargs)
     selector_or_slug = __choose_selector_or_slug(slug, **kwargs)
+    version_arg = _version_arg_helper(kwargs)
 
     transform_arg = _transform_arg_helper(kwargs)
     query_str = (
         """
-    query_{idx}: getMetric(metric: \"{metric}\"){{
+    query_{idx}: getMetric(metric: \"{metric}\"{version_arg}){{
         timeseriesDataJson(
             {selector_or_slug}
             {transform_arg}
@@ -229,7 +230,9 @@ def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
         )
     }}
     """
-    ).format(idx=idx, metric=metric, selector_or_slug=selector_or_slug, transform_arg=transform_arg, **kwargs)
+    ).format(
+        idx=idx, metric=metric, version_arg=version_arg, selector_or_slug=selector_or_slug, transform_arg=transform_arg, **kwargs
+    )
 
     return query_str
 
@@ -237,11 +240,12 @@ def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
 def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
     kwargs = sgh.transform_query_args("get_metric", **kwargs)
     selector_or_slugs = __choose_selector_or_slugs(slugs, **kwargs)
+    version_arg = _version_arg_helper(kwargs)
 
     transform_arg = _transform_arg_helper(kwargs)
     query_str = (
         """
-    query_{idx}: getMetric(metric: \"{metric}\"){{
+    query_{idx}: getMetric(metric: \"{metric}\"{version_arg}){{
         timeseriesDataPerSlugJson(
             {selector_or_slugs}
             {transform_arg}
@@ -253,9 +257,23 @@ def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
         )
     }}
     """
-    ).format(idx=idx, metric=metric, selector_or_slugs=selector_or_slugs, transform_arg=transform_arg, **kwargs)
+    ).format(
+        idx=idx,
+        metric=metric,
+        version_arg=version_arg,
+        selector_or_slugs=selector_or_slugs,
+        transform_arg=transform_arg,
+        **kwargs,
+    )
 
     return query_str
+
+
+def _version_arg_helper(kwargs):
+    if "version" in kwargs and kwargs["version"] is not None:
+        return f', version: "{kwargs["version"]}"'
+
+    return ""
 
 
 def _transform_arg_helper(kwargs):
