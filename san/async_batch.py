@@ -26,6 +26,15 @@ async def task(request: tuple[int, list[Any]]) -> tuple[int, pd.DataFrame]:
 
 
 class AsyncBatch:
+    """Execute multiple queries concurrently using asyncio.
+
+    Each query is sent as a separate HTTP request and executed
+    concurrently, controlled by the ``max_workers`` parameter.
+    Supports both :meth:`get` and :meth:`get_many` queries.
+
+    Each query still counts as a separate API call for rate-limiting.
+    """
+
     def __init__(self) -> None:
         self.queries: list[list[Any]] = []
 

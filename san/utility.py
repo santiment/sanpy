@@ -4,10 +4,12 @@ from san.graphql import execute_gql, get_response_headers
 
 
 def is_rate_limit_exception(exception: Exception) -> bool:
+    """Return ``True`` if *exception* indicates an API rate limit."""
     return isinstance(exception, SanRateLimitError) or "API Rate Limit Reached" in str(exception)
 
 
 def rate_limit_time_left(exception: Exception) -> int:
+    """Extract seconds remaining until the rate limit resets."""
     words = str(exception).split()
     return int(
         list(filter(lambda x: x.isnumeric(), words))[0]
@@ -15,12 +17,21 @@ def rate_limit_time_left(exception: Exception) -> int:
 
 
 def api_calls_remaining() -> dict[str, str]:
+    """Return remaining API calls for the current key.
+
+    Returns a dict with ``month_remaining``, ``hour_remaining``,
+    and ``minute_remaining`` keys. Requires a valid API key.
+    """
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
     res = get_response_headers(gql_query_str)
     return __get_headers_remaining(res)
 
 
 def api_calls_made() -> list[tuple[str, int]]:
+    """Return API call history as ``(datetime, count)`` tuples.
+
+    Requires a valid API key.
+    """
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
     res = __request_api_call_data(gql_query_str)
     api_calls = __parse_out_calls_data(res)

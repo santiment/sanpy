@@ -11,6 +11,15 @@ from san.transform import transform_timeseries_data_query_result
 
 
 class Batch:
+    """Combine multiple queries into a single GraphQL HTTP request.
+
+    All queued queries are merged into one GraphQL document and executed
+    in a single round-trip. For heavy workloads, prefer :class:`AsyncBatch`
+    which sends separate concurrent requests and avoids complexity limits.
+
+    Each query still counts as a separate API call for rate-limiting.
+    """
+
     def __init__(self) -> None:
         self.queries: list[list[Any]] = []
 

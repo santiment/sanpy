@@ -7,6 +7,11 @@ from san.sanitize import sanitize_gql_string
 
 
 def available_metrics() -> list[str]:
+    """Return a list of all available metric names.
+
+    Results are cached for 300 seconds. Use :func:`san.clear_cache` to
+    force a fresh fetch.
+    """
     cached = _metadata_cache.get("available_metrics")
     if cached is not None:
         return cached
@@ -20,6 +25,10 @@ def available_metrics() -> list[str]:
 
 
 def available_metrics_for_slug(slug: str) -> list[str]:
+    """Return metrics available for a specific project *slug*.
+
+    Results are cached for 300 seconds per slug.
+    """
     cache_key = f"available_metrics_for_slug:{slug}"
     cached = _metadata_cache.get(cache_key)
     if cached is not None:
@@ -41,6 +50,10 @@ def available_metrics_for_slug(slug: str) -> list[str]:
 
 
 def available_metric_for_slug_since(metric: str, slug: str) -> str | None:
+    """Return the earliest datetime a *metric* is available for *slug*.
+
+    Returns an ISO 8601 string or ``None`` if unavailable.
+    """
     metric = sanitize_gql_string(metric)
     slug = sanitize_gql_string(slug)
     query_str = (

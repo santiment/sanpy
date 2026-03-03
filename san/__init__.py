@@ -13,6 +13,7 @@ from .error import SanAuthError, SanError, SanQueryError, SanRateLimitError, San
 from .execute_sql import execute_sql
 from .get import get, get_async
 from .get_many import get_many, get_many_async
+from .graphql import close_client
 from .metadata import metadata
 from .metric_complexity import metric_complexity
 from .utility import api_calls_made, api_calls_remaining, is_rate_limit_exception, rate_limit_time_left
@@ -65,4 +66,5 @@ __all__ = [
     "SanAuthError",
     "SanQueryError",
     "clear_cache",
+    "close_client",
 ]

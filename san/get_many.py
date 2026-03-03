@@ -36,6 +36,7 @@ def __get_many(query: str, **kwargs: Any) -> pd.DataFrame:
 
 
 async def get_many_async(dataset: str, **kwargs: Any) -> pd.DataFrame:
+    """Async version of :func:`get_many`. Same arguments and return type."""
     query, slug = parse_dataset(dataset)
     return await __get_many_async(query, **kwargs)
 

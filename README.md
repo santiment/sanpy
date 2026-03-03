@@ -16,15 +16,17 @@ More documentation regarding the API and definitions of metrics can be found on 
 - [Table of contents](#table-of-contents)
   - [Installation](#installation)
   - [Upgrade to latest version](#upgrade-to-latest-version)
-  - [Install extra packages](#install-extra-packages)
   - [Restricted metrics](#restricted-metrics)
   - [Configuration](#configuration)
     - [Read the API key from the environment](#read-the-api-key-from-the-environment)
     - [Manually configure an API key](#manually-configure-an-api-key)
+    - [Configure a custom User-Agent](#configure-a-custom-user-agent)
+    - [Configure retry and timeout behavior](#configure-retry-and-timeout-behavior)
     - [How to obtain an API key](#how-to-obtain-an-api-key)
   - [Getting the data](#getting-the-data)
     - [Using the provided functions](#using-the-provided-functions)
     - [Execute an arbitrary GraphQL request](#execute-an-arbitrary-graphql-request)
+  - [Async API](#async-api)
   - [Execute SQL queries and get the result](#execute-sql-queries-and-get-the-result)
   - [Available metrics](#available-metrics)
   - [Available Metrics for Slug](#available-metrics-for-slug)
@@ -32,9 +34,12 @@ More documentation regarding the API and definitions of metrics can be found on 
   - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
   - [Batching multiple queries](#batching-multiple-queries)
   - [Rate Limit Tools](#rate-limit-tools)
+  - [Error Handling](#error-handling)
+  - [Caching](#caching)
+  - [Connection Management](#connection-management)
   - [Metric Complexity](#metric-complexity)
   - [Include Incomplete Data Flag](#include-incomplete-data-flag)
-  - [Metric/Asset pair available cince](#metricasset-pair-available-cince)
+  - [Metric/Asset pair available since](#metricasset-pair-available-since)
   - [Transform the result](#transform-the-result)
   - [Available projects](#available-projects)
   - [Non-standard metrics](#non-standard-metrics)
@@ -47,7 +52,6 @@ More documentation regarding the API and definitions of metrics can be found on 
     - [Token Top Transactions](#token-top-transactions)
     - [Top Transfers](#top-transfers)
     - [Emerging Trends](#emerging-trends)
-  - [Extras](#extras)
   - [Development](#development)
   - [Running tests](#running-tests)
   - [Running integration tests](#running-integration-tests)
@@ -57,8 +61,7 @@ More documentation regarding the API and definitions of metrics can be found on 
 To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
 
 ```bash
-# Install the latest version
-pip install sanpy==0.12.4
+pip install sanpy
 ```
 
 ## Upgrade to latest version
@@ -109,6 +112,25 @@ import san
 san.ApiConfig.user_agent = "MyTradingBot/1.0"
 ```
 
+### Configure retry and timeout behavior
+
+Transient failures (rate limits, 5xx errors, network issues) are automatically
+retried with exponential backoff. You can tune these settings:
+
+```python
+import san
+
+# HTTP request timeout in seconds (default: 60)
+san.ApiConfig.request_timeout = 30.0
+
+# Maximum retry attempts for transient failures (default: 3)
+san.ApiConfig.max_retries = 5
+
+# Base delay for exponential backoff in seconds (default: 1.0)
+# Actual delay = retry_base_delay * 2^attempt
+san.ApiConfig.retry_base_delay = 2.0
+```
+
 ### How to obtain an API key
 
 To obtain an API key you should [log in to sanbase](https://app.santiment.net/login)
@@ -119,9 +141,10 @@ There is an `API Keys` section and a `Generate new api key` button.
 
 ### Using the provided functions
 
-The library provides the `get` and `get_many` functions that are used to fetch data.
+The library provides `get`, `get_async`, `get_many`, and `get_many_async` functions.
 `get` is used to fetch timeseries data for a single metric/asset pair.
 `get_many` is used to fetch timeseries data for a single metric, but many assets. This is counted as 1 API call.
+The `_async` variants have the same interface but return coroutines for use with `asyncio` (see [Async API](#async-api)).
 
 The first argument to the functions is the metric name.
 
@@ -132,8 +155,8 @@ The rest of the parameters are::
 - `selector` - Allow for more flexible selection of the target. Some metrics are
   computed on blockchain addresses, for others you can provide a list of slugs,
   labels, amount of top holders. etc.
-- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.utcnow() - 365 days`
-- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.utcnow()`
+- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.now(timezone.utc) - 365 days`
+- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.now(timezone.utc)`
 - `interval` - The interval between the data points in the timeseries. Defaults to `'1d'`
   It is represented in two different ways:
   - a fixed range: an integer followed by one of: `s`, `m`, `h`, `d` or `w`
@@ -397,6 +420,44 @@ pd.DataFrame(result["projectBySlug"], index=[0])
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
 
+## Async API
+
+All data-fetching functions have async variants for use with `asyncio`:
+
+```python
+import asyncio
+import san
+
+async def main():
+    # Single async fetch
+    df = await san.get_async(
+        "price_usd",
+        slug="bitcoin",
+        from_date="2022-01-01",
+        to_date="2022-01-05",
+        interval="1d",
+    )
+
+    # Concurrent fetches with asyncio.gather
+    btc, eth = await asyncio.gather(
+        san.get_async("price_usd", slug="bitcoin", from_date="2022-01-01", to_date="2022-01-05", interval="1d"),
+        san.get_async("price_usd", slug="ethereum", from_date="2022-01-01", to_date="2022-01-05", interval="1d"),
+    )
+
+    # Async multi-asset fetch (single API call)
+    multi = await san.get_many_async(
+        "price_usd",
+        slugs=["bitcoin", "ethereum"],
+        from_date="2022-01-01",
+        to_date="2022-01-05",
+        interval="1d",
+    )
+
+asyncio.run(main())
+```
+
+For batch async operations, see [Batching multiple queries](#batching-multiple-queries) — `AsyncBatch` uses asyncio internally.
+
 ## Execute SQL queries and get the result
 
 One of the Santiment products is [Santiment Queries](https://academy.santiment.net/santiment-queries/). It allows you to execute SQL queries on a database hosted by Santiment. Explore the documentation in order to get familiar with the available data and how to write SQL queries.
@@ -648,6 +709,71 @@ calls_by_day = san.api_calls_made()
 calls_remaining = san.api_calls_remaining()
 ```
 
+## Error Handling
+
+sanpy raises specific exception types so you can handle different failure modes:
+
+```
+SanError (base — inherits ValueError)
+├── SanValidationError   — invalid inputs before the API call
+├── SanRateLimitError    — 429 / rate limit (has .seconds_left attribute)
+├── SanAuthError         — 401/403 / missing or invalid API key
+└── SanQueryError        — server-side failures (has .status_code attribute)
+```
+
+All exception classes are importable directly from `san`:
+
+```python
+import san
+from san import SanRateLimitError, SanAuthError, SanQueryError
+
+try:
+    df = san.get("price_usd", slug="bitcoin", from_date="2022-01-01", to_date="2022-01-05")
+except SanRateLimitError as e:
+    print(f"Rate limited. Retry after {e.seconds_left} seconds")
+except SanAuthError as e:
+    print(f"Auth problem: {e}")
+except SanQueryError as e:
+    print(f"Query failed (status {e.status_code}): {e}")
+```
+
+> Note: Transient errors (rate limits, 5xx, network errors) are automatically
+> retried up to `ApiConfig.max_retries` times with exponential backoff before
+> the exception is raised. See [Configure retry and timeout behavior](#configure-retry-and-timeout-behavior).
+
+## Caching
+
+Metadata queries (`available_metrics`, `available_metrics_for_slug`) are cached
+with a 300-second TTL to avoid redundant API calls. Data-fetching queries
+(`get`, `get_many`, etc.) are **not** cached.
+
+```python
+import san
+
+# First call hits the API; subsequent calls return cached results for 300s
+metrics = san.available_metrics()
+
+# Force a fresh fetch by clearing the cache
+san.clear_cache()
+metrics = san.available_metrics()
+```
+
+## Connection Management
+
+sanpy uses persistent HTTP connection pooling via `httpx` for better
+performance. Connections are lazily created on the first API call.
+
+For clean shutdown in long-running applications:
+
+```python
+import san
+
+# ... make API calls ...
+
+# Close the persistent HTTP clients
+san.close_client()
+```
+
 ## Metric Complexity
 
 Fetch the complexity of a metric. The complexity depends on the from/to/interval
@@ -688,7 +814,7 @@ san.get(
 )
 ```
 
-## Metric/Asset pair available cince
+## Metric/Asset pair available since
 
 Fetch the first datetime for which a metric is available for a given slug.
 
@@ -1010,24 +1136,23 @@ Running integration tests:
 uv run pytest -m integration
 ```
 
-## Formatting and Linting
+## Formatting, Linting, and Code Quality
 
-Sanpy utilizes `ruff` as an ultra-fast linter and formatter.
-
-To format code:
+Sanpy uses `ruff` for linting/formatting, `mypy` for type checking, and `bandit` for security scanning.
 
 ```bash
+# Format code
 uv run ruff format .
-```
 
-To run lint checks:
-
-```bash
+# Lint
 uv run ruff check .
-```
 
-To auto-fix basic linting errors:
-
-```bash
+# Auto-fix lint errors
 uv run ruff check --fix .
+
+# Type check
+uv run mypy san
+
+# Security scan
+uv run bandit -r san/ -x san/tests --severity-level medium
 ```

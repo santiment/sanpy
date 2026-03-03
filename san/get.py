@@ -92,6 +92,7 @@ def __get(query: str, **kwargs: Any) -> pd.DataFrame:
 
 
 async def get_async(dataset: str, **kwargs: Any) -> pd.DataFrame:
+    """Async version of :func:`get`. Same arguments and return type."""
     query, slug = parse_dataset(dataset)
     if slug or query in NO_SLUG_QUERIES:
         return await __get_metric_slug_string_selector_async(query, slug, dataset, **kwargs)
