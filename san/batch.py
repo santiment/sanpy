@@ -1,5 +1,9 @@
+from typing import Any
+
+import pandas as pd
+
 import san.sanbase_graphql
-from san.error import SanError
+from san.error import SanValidationError
 from san.graphql import execute_gql
 from san.query import get_gql_query
 from san.sanbase_graphql_helper import QUERY_MAPPING
@@ -7,13 +11,13 @@ from san.transform import transform_timeseries_data_query_result
 
 
 class Batch:
-    def __init__(self):
-        self.queries = []
+    def __init__(self) -> None:
+        self.queries: list[list[Any]] = []
 
-    def get(self, dataset, **kwargs):
+    def get(self, dataset: str, **kwargs: Any) -> None:
         self.queries.append([dataset, kwargs])
 
-    def execute(self):
+    def execute(self) -> list[pd.DataFrame]:
         graphql_string = self.__create_batched_query_string()
         result = execute_gql(graphql_string)
         return self.__transform_batch_result(result)
@@ -29,7 +33,7 @@ class Batch:
                 if slug != "":
                     batched_queries.append(san.sanbase_graphql.get_metric_timeseries_data(idx, metric, slug, **query[1]))
                 else:
-                    raise SanError("Invalid metric!")
+                    raise SanValidationError("Invalid metric!")
         return self.__batch_gql_queries(batched_queries)
 
     def __transform_batch_result(self, graphql_result):

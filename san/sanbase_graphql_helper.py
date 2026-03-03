@@ -1,6 +1,6 @@
 import datetime
 
-import iso8601
+from san.sanitize import sanitize_gql_string, validate_address, validate_positive_int
 
 _DEFAULT_INTERVAL = "1d"
 _DEFAULT_SOCIAL_VOLUME_TYPE = "TELEGRAM_CHATS_OVERVIEW"
@@ -48,6 +48,21 @@ QUERY_MAPPING = {
 }
 
 
+def _parse_iso_date(date_string: str) -> datetime.datetime:
+    """Parse an ISO 8601 date string, always returning a timezone-aware datetime.
+
+    Handles the ``Z`` timezone suffix for Python 3.10 compatibility, where
+    ``datetime.fromisoformat()`` does not yet support it.  Naive results
+    (e.g. from date-only strings like ``"2024-01-01"``) are assumed UTC.
+    """
+    if date_string.endswith("Z"):
+        date_string = date_string[:-1] + "+00:00"
+    dt = datetime.datetime.fromisoformat(date_string)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+    return dt
+
+
 def all_projects(idx, **kwargs):
     kwargs = transform_query_args("projects", **kwargs)
     query_str = (
@@ -78,6 +93,7 @@ def erc20_projects(idx, **kwargs):
 
 def create_query_str(query, idx, slug, **kwargs):
     kwargs = transform_query_args(query, **kwargs)
+    slug = sanitize_gql_string(slug)
 
     query_str = (
         """
@@ -98,17 +114,18 @@ def create_query_str(query, idx, slug, **kwargs):
 def transform_selector(selector):
     temp_selector = ""
     for key, value in selector.items():
+        sanitized_key = sanitize_gql_string(str(key))
         if (isinstance(value, str) and value.isdigit()) or isinstance(value, int):
-            temp_selector += f"{key}: {value}\n"
+            temp_selector += f"{sanitized_key}: {int(value)}\n"
         elif isinstance(value, str):
-            temp_selector += f'{key}: "{value}"\n'
+            temp_selector += f'{sanitized_key}: "{sanitize_gql_string(value)}"\n'
         elif isinstance(value, dict):
-            temp_selector += f"{key}:{{{transform_selector(value)}}}\n"
+            temp_selector += f"{sanitized_key}:{{{transform_selector(value)}}}\n"
         elif isinstance(value, bool):
-            temp_selector += f"{key}: true\n" if value else f"{key}: false\n"
+            temp_selector += f"{sanitized_key}: true\n" if value else f"{sanitized_key}: false\n"
         elif isinstance(value, list):
-            temp_value = map(lambda x: f'"{x}"', value)
-            temp_selector += f"{key}: [{','.join(temp_value)}]\n"
+            temp_value = (f'"{sanitize_gql_string(str(x))}"' for x in value)
+            temp_selector += f"{sanitized_key}: [{','.join(temp_value)}]\n"
 
     return temp_selector
 
@@ -124,19 +141,45 @@ def transform_query_args(query, **kwargs):
     kwargs["include_incomplete_data"] = kwargs["include_incomplete_data"] if "include_incomplete_data" in kwargs else False
     # transform python booleans to strings so it's properly interpolated in the query string
     kwargs["include_incomplete_data"] = "true" if kwargs["include_incomplete_data"] else "false"
+
+    # Sanitize interval
+    if isinstance(kwargs["interval"], str):
+        kwargs["interval"] = sanitize_gql_string(kwargs["interval"])
+
+    # Sanitize search_text
+    if isinstance(kwargs["search_text"], str):
+        kwargs["search_text"] = sanitize_gql_string(kwargs["search_text"])
+
     if "selector" in kwargs:
         kwargs["selector"] = f"selector:{{{transform_selector(kwargs['selector'])}}}"
 
     kwargs["address"] = kwargs["address"] if "address" in kwargs else ""
     kwargs["transaction_type"] = kwargs["transaction_type"] if "transaction_type" in kwargs else "ALL"
 
+    # Validate address if provided
     if kwargs["address"] != "":
+        validate_address(kwargs["address"])
+
+    # Validate limit if provided
+    if "limit" in kwargs:
+        kwargs["limit"] = validate_positive_int(kwargs["limit"], "limit")
+
+    # Validate number_of_holders if provided
+    if "number_of_holders" in kwargs:
+        kwargs["number_of_holders"] = validate_positive_int(kwargs["number_of_holders"], "number_of_holders")
+
+    # Validate size if provided
+    if "size" in kwargs:
+        kwargs["size"] = validate_positive_int(kwargs["size"], "size")
+
+    if kwargs["address"] != "":
+        address = sanitize_gql_string(kwargs["address"])
         if kwargs["transaction_type"] != "":
             kwargs["address_selector"] = (
-                f'addressSelector:{{address:"{kwargs["address"]}", transactionType: {kwargs["transaction_type"]}}},'
+                f'addressSelector:{{address:"{address}", transactionType: {kwargs["transaction_type"]}}},'
             )
         else:
-            kwargs["address_selector"] = f'addressSelector:{{address:"{kwargs["address"]}"}},'
+            kwargs["address_selector"] = f'addressSelector:{{address:"{address}"}},'
     else:
         kwargs["address_selector"] = ""
 
@@ -152,11 +195,11 @@ def transform_query_args(query, **kwargs):
 
 
 def _default_to_date():
-    return datetime.datetime.utcnow()
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 def _default_from_date():
-    return datetime.datetime.utcnow() - datetime.timedelta(days=365)
+    return datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=365)
 
 
 def _format_from_date(datetime_obj_or_str):
@@ -166,7 +209,7 @@ def _format_from_date(datetime_obj_or_str):
     if isinstance(datetime_obj_or_str, datetime.datetime):
         datetime_obj_or_str = datetime_obj_or_str.isoformat()
 
-    return iso8601.parse_date(datetime_obj_or_str).isoformat()
+    return _parse_iso_date(datetime_obj_or_str).isoformat()
 
 
 def _format_to_date(datetime_obj_or_str):
@@ -174,14 +217,14 @@ def _format_to_date(datetime_obj_or_str):
         return datetime_obj_or_str
 
     if isinstance(datetime_obj_or_str, datetime.datetime):
-        return iso8601.parse_date(datetime_obj_or_str.isoformat())
+        return _parse_iso_date(datetime_obj_or_str.isoformat()).isoformat()
 
     try:
-        # Throw if the string is not date-formated, parse as date otherwise
+        # Throw if the string is not date-formatted, parse as date otherwise
         datetime.datetime.strptime(datetime_obj_or_str, "%Y-%m-%d")
-        dt = iso8601.parse_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
-    except Exception as _e:
-        dt = iso8601.parse_date(datetime_obj_or_str)
+        dt = _parse_iso_date(datetime_obj_or_str) + datetime.timedelta(hours=23, minutes=59, seconds=59)
+    except ValueError:
+        dt = _parse_iso_date(datetime_obj_or_str)
 
     return dt.isoformat()
 

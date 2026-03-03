@@ -1,7 +1,11 @@
+from typing import Any
+
 from .graphql import execute_gql
+from .sanitize import sanitize_gql_string
 
 
-def metadata(metric, arr):
+def metadata(metric: str, arr: list[str]) -> dict[str, Any]:
+    metric = sanitize_gql_string(metric)
     query_str = (
         """{{
     getMetric (metric: \"{metric}\") {{

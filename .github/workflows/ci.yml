@@ -35,5 +35,8 @@ jobs:
     - name: Type check with mypy
       run: uv run mypy san
 
+    - name: Security lint with Bandit
+      run: uv run bandit -r san/ -x san/tests --severity-level medium
+
     - name: Test with pytest
       run: uv run pytest

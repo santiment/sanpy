@@ -5,8 +5,11 @@ In order to have metrics, which require different order, we need to have transfo
 
 import operator
 from functools import reduce
+from typing import Any
 
-from san.error import SanError
+import pandas as pd
+
+from san.error import SanValidationError
 from san.pandas_utils import convert_to_datetime_idx_df
 from san.sanbase_graphql_helper import QUERY_MAPPING
 
@@ -20,7 +23,7 @@ QUERY_PATH_MAP = {
 }
 
 
-def path_to_data(idx, query, data):
+def path_to_data(idx: int, query: str, data: dict[str, Any]) -> Any:
     """
     With this function we jump straight onto the key from the dataframe,
     that we want and start from there. We use our future starting points from the QUERY_PATH_MAP.
@@ -35,7 +38,7 @@ def path_to_data(idx, query, data):
     )
 
 
-def transform_timeseries_data_query_result(idx, query, data):
+def transform_timeseries_data_query_result(idx: int, query: str, data: dict[str, Any]) -> pd.DataFrame:
     """
     If there is a transforming function for this query, then the result is
     passed for it for another transformation
@@ -53,9 +56,9 @@ def transform_timeseries_data_query_result(idx, query, data):
     return convert_to_datetime_idx_df(result)
 
 
-def transform_timeseries_data_per_slug_query_result(idx, query, data):
+def transform_timeseries_data_per_slug_query_result(idx: int, query: str, data: dict[str, Any]) -> pd.DataFrame:
     if query in QUERY_MAPPING:
-        raise SanError(f"The get_many call is available only for get_metric. Called with {query}")
+        raise SanValidationError(f"The get_many call is available only for get_metric. Called with {query}")
 
     result = path_to_data(idx, "get_metric_many", data)
     rows = []
@@ -126,7 +129,7 @@ def token_top_transactions_transform(data: list[dict]) -> list[dict]:
     ]
 
 
-def emerging_trends_transform(data):
+def emerging_trends_transform(data: list[dict]) -> list[dict]:
     result = []
     for column in data:
         for i in range(0, len(column["topWords"])):

@@ -1,11 +1,15 @@
+from typing import Any
+
+import pandas as pd
+
 import san.sanbase_graphql
-from san.error import SanError
+from san.error import SanValidationError
 from san.graphql import execute_gql
 from san.query import parse_dataset
 from san.transform import transform_timeseries_data_per_slug_query_result
 
 
-def get_many(dataset, **kwargs):
+def get_many(dataset: str, **kwargs: Any) -> pd.DataFrame:
     """
     san.get_many(
         "daily_active_addresses",
@@ -17,9 +21,9 @@ def get_many(dataset, **kwargs):
     return __get_many(query, **kwargs)
 
 
-def __get_many(query, **kwargs):
+def __get_many(query: str, **kwargs: Any) -> pd.DataFrame:
     if not ("selector" in kwargs or "slugs" in kwargs):
-        raise SanError("""
+        raise SanValidationError("""
             Invalid call of the get function,you need to either
             give <metric>/<slug> as a first argument or give a slug
             or selector as a key-word argument!""")
@@ -31,15 +35,15 @@ def __get_many(query, **kwargs):
     return transform_timeseries_data_per_slug_query_result(idx, query, res)
 
 
-async def get_many_async(dataset, **kwargs):
+async def get_many_async(dataset: str, **kwargs: Any) -> pd.DataFrame:
     query, slug = parse_dataset(dataset)
     return await __get_many_async(query, **kwargs)
 
 
-async def __get_many_async(query, **kwargs):
+async def __get_many_async(query: str, **kwargs: Any) -> pd.DataFrame:
     from san.graphql import execute_gql_async
     if not ("selector" in kwargs or "slugs" in kwargs):
-        raise SanError("""
+        raise SanValidationError("""
             Invalid call of the get function,you need to either
             give <metric>/<slug> as a first argument or give a slug
             or selector as a key-word argument!""")

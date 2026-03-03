@@ -14,7 +14,6 @@ license = { text = "MIT" }
 requires-python = ">=3.10, <3.13"
 dependencies = [
     "pandas>=2.0.0",
-    "iso8601",
     "httpx>=0.28.1",
 ]
 
@@ -22,7 +21,7 @@ dependencies = [
 Homepage = "https://github.com/santiment/sanpy"
 
 [project.optional-dependencies]
-dev = ["ruff", "pytest", "pytest-cov", "pytest-mock"]
+dev = ["ruff", "pytest", "pytest-cov", "pytest-mock", "bandit"]
 
 [tool.uv]
 environments = [

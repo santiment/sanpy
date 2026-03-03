@@ -1,26 +1,26 @@
 import san.sanbase_graphql
-from san.error import SanError
+from san.error import SanAuthError, SanError, SanRateLimitError
 from san.graphql import execute_gql, get_response_headers
 
 
-def is_rate_limit_exception(exception):
-    return "API Rate Limit Reached" in str(exception)
+def is_rate_limit_exception(exception: Exception) -> bool:
+    return isinstance(exception, SanRateLimitError) or "API Rate Limit Reached" in str(exception)
 
 
-def rate_limit_time_left(exception):
+def rate_limit_time_left(exception: Exception) -> int:
     words = str(exception).split()
     return int(
         list(filter(lambda x: x.isnumeric(), words))[0]
     )  # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)
 
 
-def api_calls_remaining():
+def api_calls_remaining() -> dict[str, str]:
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
     res = get_response_headers(gql_query_str)
     return __get_headers_remaining(res)
 
 
-def api_calls_made():
+def api_calls_made() -> list[tuple[str, int]]:
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
     res = __request_api_call_data(gql_query_str)
     api_calls = __parse_out_calls_data(res)
@@ -31,10 +31,12 @@ def api_calls_made():
 def __request_api_call_data(query):
     try:
         res = execute_gql(query)["currentUser"]["apiCallsHistory"]
-    except Exception as exc:
+    except SanError as exc:
         if "the results are empty" in str(exc):
-            raise SanError("No API Key detected...") from exc
-        raise SanError(str(exc)) from exc
+            raise SanAuthError("No API Key detected...") from exc
+        raise
+    except (KeyError, TypeError) as exc:
+        raise SanError(f"Unexpected API response structure: {exc}") from exc
 
     return res
 
@@ -56,4 +58,4 @@ def __get_headers_remaining(data):
             "minute_remaining": data["x-ratelimit-remaining-minute"],
         }
     except KeyError:
-        raise SanError("There are no limits for this API Key.")
+        raise SanAuthError("There are no limits for this API Key.")

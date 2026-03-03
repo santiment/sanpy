@@ -1,5 +1,4 @@
 from copy import deepcopy
-from unittest.mock import patch
 
 import pandas as pd
 import pandas.testing as pdt
@@ -11,8 +10,7 @@ from san.error import SanError
 from san.pandas_utils import convert_to_datetime_idx_df
 
 
-@patch("san.graphql.httpx.post")
-def test_get(mock, test_response):
+def test_get(mock_gql_post, test_response):
     api_call_result = {
         "query_0": [
             {"balance": 212664.33000000002, "datetime": "2019-05-23T00:00:00Z"},
@@ -20,7 +18,7 @@ def test_get(mock, test_response):
             {"balance": 212664.33000000002, "datetime": "2019-05-25T00:00:00Z"},
         ]
     }
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
         "historical_balance/santiment",
@@ -33,8 +31,7 @@ def test_get(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_prices(mock, test_response):
+def test_prices(mock_gql_post, test_response):
     api_call_result = {
         "query_0": [
             {"priceUsd": "1.234634930555555", "priceBtc": "0.0001649780416666666", "datetime": "2018-06-01T00:00:00Z"},
@@ -43,8 +40,7 @@ def test_prices(mock, test_response):
             {"priceUsd": "1.2135782638888888", "priceBtc": "0.0001600935277777778", "datetime": "2018-06-04T00:00:00Z"},
         ]
     }
-    response = test_response(status_code=200, data=deepcopy(api_call_result))
-    mock.return_value = response
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     res = san.get("prices/santiment_usd", from_date="2018-06-01", to_date="2018-06-05", interval="1d")
 
@@ -52,15 +48,13 @@ def test_prices(mock, test_response):
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_error_response(mock, test_response):
-    mock.return_value = test_response(status_code=500, data={"errors": {"details": "Internal server error"}})
+def test_error_response(mock_gql_post, test_response):
+    mock_gql_post.return_value = test_response(status_code=500, data={"errors": {"details": "Internal server error"}})
     with pytest.raises(SanError):
         san.get("prices/santiment_usd", from_date="2018-06-01", to_date="2018-06-05", interval="1d")
 
 
-@patch("san.graphql.httpx.post")
-def test_get_without_transform(mock, test_response):
+def test_get_without_transform(mock_gql_post, test_response):
     api_call_result = {
         "query_0": [
             {"balance": 212664.33000000002, "datetime": "2019-05-23T00:00:00Z"},
@@ -71,7 +65,7 @@ def test_get_without_transform(mock, test_response):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     res = san.get(
         "historical_balance/santiment",
@@ -84,8 +78,7 @@ def test_get_without_transform(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_get_with_transform(mock, test_response):
+def test_get_with_transform(mock_gql_post, test_response):
     api_call_result = {
         "query_0": {
             "ethTopTransactions": [
@@ -109,7 +102,7 @@ def test_get_with_transform(mock, test_response):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     result = san.get(
         "eth_top_transactions/santiment", from_date="2019-04-18", to_date="2019-04-22", limit=5, transaction_type="ALL"
@@ -142,8 +135,7 @@ def test_get_with_transform(mock, test_response):
     pdt.assert_frame_equal(result, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_batch_only_with_nontransform_queries(mock, test_response):
+def test_batch_only_with_nontransform_queries(mock_gql_post, test_response):
     api_call_result = {
         "query_0": [
             {"balance": 212664.33000000002, "datetime": "2019-05-18T00:00:00Z"},
@@ -161,7 +153,7 @@ def test_batch_only_with_nontransform_queries(mock, test_response):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     expected = api_call_result
 
@@ -201,8 +193,7 @@ def test_batch_only_with_nontransform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_batch_only_with_transform_queries(mock, test_response):
+def test_batch_only_with_transform_queries(mock_gql_post, test_response):
     api_call_result = {
         "query_0": {
             "ethTopTransactions": [
@@ -244,7 +235,7 @@ def test_batch_only_with_transform_queries(mock, test_response):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     batch = Batch()
 
@@ -314,8 +305,7 @@ def test_batch_only_with_transform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.httpx.post")
-def test_batch_with_mixed_queries(mock, test_response):
+def test_batch_with_mixed_queries(mock_gql_post, test_response):
     api_call_result = {
         "query_0": [
             {"balance": 212664.33000000002, "datetime": "2019-05-18T00:00:00Z"},
@@ -346,7 +336,7 @@ def test_batch_with_mixed_queries(mock, test_response):
 
     # The value is passed by refference, that's why deepcopy is used for
     # expected
-    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+    mock_gql_post.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
 
     expected = [
         [

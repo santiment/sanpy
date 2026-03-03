@@ -1,12 +1,13 @@
 import json
+from typing import Any
 
 import pandas as pd
 
-from san.error import SanError
+from san.error import SanValidationError
 from san.graphql import execute_gql
 
 
-def execute_sql(**kwargs):
+def execute_sql(**kwargs: Any) -> pd.DataFrame:
     """
     Execute an arbitrary SQL against Santiment's Clickhouse Database
 
@@ -30,7 +31,7 @@ def execute_sql(**kwargs):
     if "query" in kwargs:
         query = kwargs.pop("query")
     else:
-        raise SanError("The 'query' argument is required when calling 'execute_sql'")
+        raise SanValidationError("The 'query' argument is required when calling 'execute_sql'")
 
     parameters = kwargs.pop("parameters", {})
 
@@ -47,9 +48,12 @@ def __execute_sql(query, parameters, **kwargs):
     # in the GraphQL parameters field it is properly escaped
     parameters = json.dumps(parameters).replace('"', '\\"')
 
-    # Replace the new lines with explicit new lines \\n. Othewise the
-    # GraphQL query is malformed as it does not support multiline strings
+    # Sanitize the SQL query for embedding in a GraphQL double-quoted string:
+    # escape backslashes first, then double quotes, then newlines/carriage returns
+    query = query.replace("\\", "\\\\")
+    query = query.replace('"', '\\"')
     query = query.replace("\n", "\\n")
+    query = query.replace("\r", "\\r")
 
     gql_query = f"""{{
         query_{idx}:  runRawSqlQuery(
@@ -77,7 +81,7 @@ def __transform_sql_result(response, idx, **kwargs):
     if set_index is None:
         pass
     elif set_index not in result.columns:
-        raise SanError(f"""
+        raise SanValidationError(f"""
         Index provided via \'set_index\' to \'execute_sql\' is not a column in the result.
         Got {set_index} but expected one of {result.columns}
         """)

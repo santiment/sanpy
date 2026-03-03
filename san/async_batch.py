@@ -1,11 +1,14 @@
 import asyncio
+from typing import Any
+
+import pandas as pd
 
 import san
-from san.error import SanError
+from san.error import SanValidationError
 from san.sanbase_graphql_helper import QUERY_MAPPING
 
 
-async def task(request):
+async def task(request: tuple[int, list[Any]]) -> tuple[int, pd.DataFrame]:
     idx, [get_type, identifier, kwargs] = request
 
     metric, _separator, slug = identifier.partition("/")
@@ -17,29 +20,29 @@ async def task(request):
     elif get_type == "get_many":
         response = await san.get_many_async(identifier, idx=idx, **kwargs)
     else:
-        raise SanError("Invalid metric!")
+        raise SanValidationError("Invalid metric!")
 
     return (idx, response)
 
 
 class AsyncBatch:
-    def __init__(self):
-        self.queries = []
+    def __init__(self) -> None:
+        self.queries: list[list[Any]] = []
 
-    def get(self, dataset, **kwargs):
+    def get(self, dataset: str, **kwargs: Any) -> None:
         self.queries.append(["get", dataset, kwargs])
 
-    def get_many(self, dataset, **kwargs):
+    def get_many(self, dataset: str, **kwargs: Any) -> None:
         self.queries.append(["get_many", dataset, kwargs])
 
-    def execute(self, max_workers=10):
+    def execute(self, max_workers: int = 10) -> list[pd.DataFrame]:
         return asyncio.run(self.execute_async(max_workers))
 
-    async def execute_async(self, max_workers=10):
-        graphql_result = {}
+    async def execute_async(self, max_workers: int = 10) -> list[pd.DataFrame]:
+        graphql_result: dict[int, pd.DataFrame] = {}
         sem = asyncio.Semaphore(max_workers)
 
-        async def bounded_task(request):
+        async def bounded_task(request: tuple[int, list[Any]]) -> tuple[int, pd.DataFrame]:
             async with sem:
                 return await task(request)
 
@@ -52,7 +55,7 @@ class AsyncBatch:
         result = self.__transform_batch_result(graphql_result)
         return result
 
-    def __transform_batch_result(self, response_map):
+    def __transform_batch_result(self, response_map: dict[int, pd.DataFrame]) -> list[pd.DataFrame]:
         result = []
         idxs = sorted(response_map.keys())
 

@@ -7,7 +7,9 @@ from .api_config import ApiConfig
 from .async_batch import AsyncBatch
 from .available_metrics import available_metric_for_slug_since, available_metrics, available_metrics_for_slug
 from .batch import Batch
+from .cache import clear_cache
 from .env_vars import SANPY_APIKEY
+from .error import SanAuthError, SanError, SanQueryError, SanRateLimitError, SanValidationError
 from .execute_sql import execute_sql
 from .get import get, get_async
 from .get_many import get_many, get_many_async
@@ -57,4 +59,10 @@ __all__ = [
     "api_calls_remaining",
     "is_rate_limit_exception",
     "rate_limit_time_left",
+    "SanError",
+    "SanValidationError",
+    "SanRateLimitError",
+    "SanAuthError",
+    "SanQueryError",
+    "clear_cache",
 ]
