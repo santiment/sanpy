@@ -10,3 +10,8 @@ build
 .tool-versions
 **/.ipynb_checkpoints
 .DS_Store
+
+# Testing and Coverage
+.coverage
+.pytest_cache/
+.ruff_cache/
