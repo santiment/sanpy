@@ -11,6 +11,7 @@ from san.error import (
     SanAuthError,
     SanEmptyResultError,
     SanNetworkError,
+    SanPartialResultWarning,
     SanQueryError,
     SanRateLimitError,
     SanServerError,
@@ -48,6 +49,7 @@ def restore_api_config():
 @pytest.mark.parametrize(
     ("status_code", "error_payload", "expected_error"),
     [
+        (400, {"errors": {"details": "Invalid apikey"}}, SanAuthError),
         (401, {"errors": {"details": "Unauthorized"}}, SanAuthError),
         (429, {"errors": {"details": "API Rate Limit Reached. Try again in 5 seconds"}}, SanRateLimitError),
         (503, {"errors": {"details": "Service unavailable"}}, SanServerError),
@@ -70,11 +72,33 @@ def test_transport_maps_graphql_rate_limit_error(test_response, monkeypatch):
 
 
 def test_transport_maps_graphql_query_error(test_response, monkeypatch):
-    response = test_response(status_code=200, data={"errors": {"details": "Unknown field"}})
+    response = test_response(status_code=200, data={"errors": [{"message": "Unknown field", "locations": [{"line": 1, "column": 2}]}]})
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
     with pytest.raises(SanQueryError):
         execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_maps_graphql_auth_error(test_response, monkeypatch):
+    response = test_response(status_code=200, data={"errors": [{"message": "unauthorized"}]})
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanAuthError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_returns_data_and_warns_on_partial_success(test_response, monkeypatch):
+    partial_response = {
+        "data": {"query_0": [{"slug": "bitcoin"}], "query_1": None},
+        "errors": [{"message": "Field failed", "path": ["query_1"]}],
+    }
+    response = test_response(status_code=200, data=partial_response)
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.warns(SanPartialResultWarning):
+        result = execute_gql("{ query_0: projectsAll { slug } query_1: getMetric(metric: \"bad\") { metadata { metric } } }")
+
+    assert result == partial_response["data"]
 
 
 def test_transport_raises_empty_result_error(test_response, monkeypatch):

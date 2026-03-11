@@ -32,3 +32,7 @@ class SanQueryError(SanError):
 
 class SanEmptyResultError(SanError):
     pass
+
+
+class SanPartialResultWarning(UserWarning):
+    pass
