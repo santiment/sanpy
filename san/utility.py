@@ -1,10 +1,10 @@
 import san.sanbase_graphql
 from san.graphql import execute_gql, get_response_headers
-from san.error import SanError
+from san.error import SanError, SanRateLimitError
 
 
 def is_rate_limit_exception(exception):
-    return "API Rate Limit Reached" in str(exception)
+    return isinstance(exception, SanRateLimitError) or "API Rate Limit Reached" in str(exception)
 
 
 def rate_limit_time_left(exception):

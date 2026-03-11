@@ -1,2 +1,34 @@
 class SanError(ValueError):
     pass
+
+
+class SanTransportError(SanError):
+    pass
+
+
+class SanNetworkError(SanTransportError):
+    pass
+
+
+class SanTimeoutError(SanNetworkError):
+    pass
+
+
+class SanAuthError(SanError):
+    pass
+
+
+class SanRateLimitError(SanError):
+    pass
+
+
+class SanServerError(SanError):
+    pass
+
+
+class SanQueryError(SanError):
+    pass
+
+
+class SanEmptyResultError(SanError):
+    pass

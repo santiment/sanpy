@@ -1,67 +1,83 @@
-import requests
 from san.api_config import ApiConfig
-from san.env_vars import SANBASE_GQL_HOST
-from san.error import SanError
+from san.error import SanAuthError, SanEmptyResultError, SanQueryError, SanRateLimitError, SanServerError
+from san.transport import RequestsTransport
+
+DEFAULT_TRANSPORT = RequestsTransport()
 
 
 def execute_gql(gql_query_str):
-    headers = {}
-    if ApiConfig.api_key:
-        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
-
-    try:
-        response = requests.post(SANBASE_GQL_HOST, json={"query": gql_query_str}, headers=headers)
-    except requests.exceptions.RequestException as e:
-        raise SanError("Error running query: ({})".format(e))
+    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
-    else:
-        if __result_has_gql_errors__(response):
-            error_response = response.json()["errors"]["details"]
-        else:
-            error_response = ""
-        raise SanError(
-            "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
-        )
+    __raise_response_error__(response, gql_query_str)
 
 
 def get_response_headers(gql_query_str):
-    headers = {}
-    if ApiConfig.api_key:
-        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
-
-    try:
-        response = requests.post(SANBASE_GQL_HOST, json={"query": gql_query_str}, headers=headers)
-    except requests.exceptions.RequestException as e:
-        raise SanError("Error running query: ({})".format(e))
+    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
 
     if response.status_code == 200:
         return response.headers
-    else:
-        if __result_has_gql_errors__(response):
-            error_response = response.json()["errors"]["details"]
-        else:
-            error_response = ""
-        raise SanError(
-            "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
-        )
+    __raise_response_error__(response, gql_query_str)
 
 
 def __handle_success_response__(response, gql_query_str):
-    if __result_has_gql_errors__(response):
-        raise SanError("GraphQL error occured running query {} \n errors: {}".format(gql_query_str, response.json()["errors"]))
-    elif __exist_not_empty_result(response):
-        return response.json()["data"]
-    else:
-        raise SanError(
-            "Error running query, the results are empty. Status code: {}.\n {}".format(response.status_code, gql_query_str)
-        )
+    response_json = __json_response__(response)
+    if __result_has_gql_errors__(response_json):
+        errors = response_json["errors"]
+        message = "GraphQL error occured running query {} \n errors: {}".format(gql_query_str, errors)
+        if __is_rate_limit_error__(errors):
+            raise SanRateLimitError(message)
+        raise SanQueryError(message)
+    if __exist_not_empty_result(response_json):
+        return response_json["data"]
+    raise SanEmptyResultError(
+        "Error running query, the results are empty. Status code: {}.\n {}".format(response.status_code, gql_query_str)
+    )
 
 
-def __result_has_gql_errors__(response):
-    return "errors" in response.json().keys()
+def __build_headers():
+    headers = {}
+    if ApiConfig.api_key:
+        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
+    return headers
 
 
-def __exist_not_empty_result(response):
-    return "data" in response.json().keys() and len(list(filter(lambda x: x is not None, response.json()["data"].values()))) > 0
+def __raise_response_error__(response, gql_query_str):
+    response_json = __json_response__(response)
+    error_response = __extract_error_details__(response_json)
+    message = "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
+
+    if response.status_code in (401, 403):
+        raise SanAuthError(message)
+    if response.status_code == 429 or __is_rate_limit_error__(error_response):
+        raise SanRateLimitError(message)
+    if response.status_code >= 500:
+        raise SanServerError(message)
+    raise SanQueryError(message)
+
+
+def __json_response__(response):
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise SanQueryError(f"Invalid JSON response received from API: {exc}") from exc
+
+
+def __result_has_gql_errors__(response_json):
+    return "errors" in response_json.keys()
+
+
+def __exist_not_empty_result(response_json):
+    return "data" in response_json.keys() and len(list(filter(lambda x: x is not None, response_json["data"].values()))) > 0
+
+
+def __extract_error_details__(response_json):
+    errors = response_json.get("errors", "")
+    if isinstance(errors, dict) and "details" in errors:
+        return errors["details"]
+    return errors
+
+
+def __is_rate_limit_error__(error_response):
+    return "API Rate Limit Reached" in str(error_response)
