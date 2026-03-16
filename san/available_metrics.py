@@ -23,6 +23,25 @@ def available_metrics_for_slug(slug):
     return execute_gql(query_str)["projectBySlug"]["availableMetrics"]
 
 
+def available_metric_versions(metric):
+    query_str = (
+        """{{
+        getMetric(metric: \"{metric}\"){{
+            metadata{{
+                availableVersions{{ version }}
+            }}
+        }}
+    }}
+    """
+    ).format(metric=metric)
+
+    result = execute_gql(query_str)
+    get_metric = result.get("getMetric") or {}
+    metadata = get_metric.get("metadata") or {}
+    versions = metadata.get("availableVersions") or []
+    return [v["version"] for v in versions]
+
+
 def available_metric_for_slug_since(metric, slug):
     query_str = (
         """{{
