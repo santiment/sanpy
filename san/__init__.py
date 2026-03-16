@@ -5,7 +5,7 @@ from importlib.metadata import version, PackageNotFoundError
 
 from .api_config import ApiConfig
 from .async_batch import AsyncBatch
-from .available_metrics import available_metric_for_slug_since, available_metrics, available_metrics_for_slug
+from .available_metrics import available_metric_for_slug_since, available_metric_versions, available_metrics, available_metrics_for_slug
 from .batch import Batch
 from .env_vars import SANPY_APIKEY
 from .get import get
@@ -43,6 +43,7 @@ __all__ = [
     "ApiConfig",
     "AsyncBatch",
     "available_metric_for_slug_since",
+    "available_metric_versions",
     "available_metrics",
     "available_metrics_for_slug",
     "Batch",
