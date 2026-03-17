@@ -1,171 +1,131 @@
 # sanpy
 
----
-
 [![PyPI version](https://badge.fury.io/py/sanpy.svg)](https://badge.fury.io/py/sanpy)
 
-Python client for cryptocurrency data from [Santiment API](https://api.santiment.net/).
-This library provides utilities for accessing the GraphQL Santiment API endpoint
-and convert the result to pandas dataframe.
+Python client library for the [Santiment API](https://api.santiment.net/) — access on-chain, social, development, and price metrics for 3000+ crypto assets. Results are returned as pandas DataFrames with datetime indexing.
 
-More documentation regarding the API and definitions of metrics can be found on [Santiment Academy]()
+For full API documentation and metric definitions, see [Santiment Academy](https://academy.santiment.net/sanapi/).
 
-# Table of contents
+## Table of contents
 
-- [sanpy](#sanpy)
-- [Table of contents](#table-of-contents)
-  - [Installation](#installation)
-  - [Upgrade to latest version](#upgrade-to-latest-version)
-  - [Install extra packages](#install-extra-packages)
-  - [Restricted metrics](#restricted-metrics)
-  - [Configuration](#configuration)
-    - [Read the API key from the environment](#read-the-api-key-from-the-environment)
-    - [Manually configure an API key](#manually-configure-an-api-key)
-    - [How to obtain an API key](#how-to-obtain-an-api-key)
-  - [Getting the data](#getting-the-data)
-    - [Using the provided functions](#using-the-provided-functions)
-    - [Execute an arbitrary GraphQL request](#execute-an-arbitrary-graphql-request)
-  - [Execute SQL queries and get the result](#execute-sql-queries-and-get-the-result)
+- [Installation](#installation)
+  - [Extra packages](#extra-packages)
+- [Configuration](#configuration)
+  - [Environment variable](#environment-variable)
+  - [Programmatic](#programmatic)
+  - [Obtaining an API key](#obtaining-an-api-key)
+- [Fetching data](#fetching-data)
+  - [Single asset](#single-asset)
+  - [Multiple assets](#multiple-assets)
+  - [Using selectors](#using-selectors)
+  - [Legacy metric/slug format](#legacy-metricslug-format)
+  - [Non-timeseries endpoints](#non-timeseries-endpoints)
+  - [Raw GraphQL queries](#raw-graphql-queries)
+- [SQL queries (Santiment Queries)](#sql-queries-santiment-queries)
+- [Metric discovery](#metric-discovery)
   - [Available metrics](#available-metrics)
-  - [Available Metrics for Slug](#available-metrics-for-slug)
-  - [Fetch timeseries metric](#fetch-timeseries-metric)
+  - [Available metrics for a slug](#available-metrics-for-a-slug)
+  - [Metric/asset availability since](#metricasset-availability-since)
   - [Versioned metrics](#versioned-metrics)
-  - [Fetching metadata for a metric](#fetching-metadata-for-a-metric)
-  - [Batching multiple queries](#batching-multiple-queries)
-  - [Rate Limit Tools](#rate-limit-tools)
-  - [Metric Complexity](#metric-complexity)
-  - [Include Incomplete Data Flag](#include-incomplete-data-flag)
-  - [Metric/Asset pair available cince](#metricasset-pair-available-cince)
-  - [Transform the result](#transform-the-result)
-  - [Available projects](#available-projects)
-  - [Non-standard metrics](#non-standard-metrics)
-    - [Other Price metrics](#other-price-metrics)
-      - [Marketcap, Price USD, Price BTC and Trading Volume](#marketcap-price-usd-price-btc-and-trading-volume)
-      - [Open, High, Close, Low Prices, Volume, Marketcap](#open-high-close-low-prices-volume-marketcap)
-    - [Historical Balance](#historical-balance)
-    - [Ethereum Top Transactions](#ethereum-top-transactions)
-    - [Ethereum Spent Over Time](#ethereum-spent-over-time)
-    - [Token Top Transactions](#token-top-transactions)
-    - [Top Transfers](#top-transfers)
-    - [Emerging Trends](#emerging-trends)
-  - [Extras](#extras)
-  - [Development](#development)
-  - [Running tests](#running-tests)
-  - [Running integration tests](#running-integration-tests)
+  - [Metric metadata](#metric-metadata)
+  - [Metric complexity](#metric-complexity)
+- [Batching queries](#batching-queries)
+- [Transforms and aggregation](#transforms-and-aggregation)
+- [Include incomplete data](#include-incomplete-data)
+- [Rate limit tools](#rate-limit-tools)
+- [Assets discovery](#assets-discovery)
+- [Non-standard metrics](#non-standard-metrics)
+- [Extras](#extras)
+- [Development](#development)
 
 ## Installation
 
-To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
+Install from [PyPI](https://pypi.org/project/sanpy/):
 
 ```bash
-# Install the latest version
-pip install sanpy==0.12.6
+pip install sanpy
 ```
 
-## Upgrade to latest version
+Upgrade to the latest version:
 
 ```bash
 pip install --upgrade sanpy
 ```
 
-## Install extra packages
+### Extra packages
 
-There are few scripts under [extras](/san/extras) directory related to backtesting and event studies. To install their dependencies use:
+There are a few utilities in the `san/extras/` directory for backtesting and event studies. To install their dependencies:
 
 ```bash
-pip install sanpy[extras]
+pip install 'sanpy[extras]'
 ```
-
-## Restricted metrics
-
-In order to access real-time data or historical data for some of the metrics,
-you'll need to set the [API key](#configuration), generated from an account with
-a paid API plan.
 
 ## Configuration
 
-You can provide an API key which gives access to the restricted metrics in two different ways:
+Some metrics require a paid [SanAPI plan](https://academy.santiment.net/products-and-plans/sanapi-plans/) to access real-time or full historical data. You can provide an API key in two ways:
 
-### Read the API key from the environment
+### Environment variable
 
-During loading of the `san` module, if the `SANPY_APIKEY` exists, its content
-is read and set as the API key.
+If the `SANPY_APIKEY` environment variable is set when you import `san`, it is loaded automatically:
 
 ```shell
-export SANPY_APIKEY="my_apikey"
+export SANPY_APIKEY="my_api_key"
 ```
 
 ```python
 import san
->>> san.ApiConfig.api_key
-'my_apikey'
+san.ApiConfig.api_key  # 'my_api_key'
 ```
 
-### Manually configure an API key
+### Programmatic
 
 ```python
 import san
-san.ApiConfig.api_key = "my_apikey"
+san.ApiConfig.api_key = "my_api_key"
 ```
 
-### How to obtain an API key
+### Obtaining an API key
 
-To obtain an API key you should [log in to sanbase](https://app.santiment.net/login)
-and go to the `Account` page - [https://app.santiment.net/account](https://app.santiment.net/account).
-There is an `API Keys` section and a `Generate new api key` button.
+1. [Log in to Sanbase](https://app.santiment.net/login).
+2. Go to the [Account page](https://app.santiment.net/account).
+3. Under **API Keys**, click **Generate new api key**.
 
-## Getting the data
+## Fetching data
 
-### Using the provided functions
+The library provides two main functions for fetching timeseries data:
 
-The library provides the `get` and `get_many` functions that are used to fetch data.
-`get` is used to fetch timeseries data for a single metric/asset pair.
-`get_many` is used to fetch timeseries data for a single metric, but many assets. This is counted as 1 API call.
+- **`san.get(metric, slug=..., ...)`** — fetch data for a single metric/asset pair.
+- **`san.get_many(metric, slugs=[...], ...)`** — fetch data for a single metric across multiple assets. This counts as 1 API call.
 
-The first argument to the functions is the metric name.
+**Common parameters:**
 
-The rest of the parameters are::
+| Parameter | Description | Default |
+|---|---|---|
+| `slug` / `slugs` | Project identifier(s), as listed in [Assets discovery](#assets-discovery) | — |
+| `selector` | Dict for flexible targeting (address, label, holdersCount, etc.) | — |
+| `from_date` | Start of the period (ISO 8601 string) | 365 days ago |
+| `to_date` | End of the period (ISO 8601 string) | now |
+| `interval` | Data point spacing — fixed (`1d`, `1h`, `5m`, `1w`) or semantic (`toStartOfMonth`, `toStartOfWeek`) | `'1d'` |
 
-- `slug` - (for `get`) The project identificator, as seen in [the Available projects section](#available-projects)
-- `slugs` - (for `get_many`) A list of projects' identificators, as seen in [the Available projects section](#available-projects)
-- `selector` - Allow for more flexible selection of the target. Some metrics are
-  computed on blockchain addresses, for others you can provide a list of slugs,
-  labels, amount of top holders. etc.
-- `from_date` - A date or datetime in ISO8601 format specifying the start of the queried period. Defaults to `datetime.utcnow() - 365 days`
-- `to_date` - A date or datetime in ISO86091 format specifying the end of the queried period. Defaults to `datetime.utcnow()`
-- `interval` - The interval between the data points in the timeseries. Defaults to `'1d'`
-  It is represented in two different ways:
-  - a fixed range: an integer followed by one of: `s`, `m`, `h`, `d` or `w`
-  - a function, providing some semantic or a dynamic range: `toStartOfMonth`, `toStartOfDay`, `toStartOfWeek`, `toMonday`..
-
-The returned result for time-series data is transformed into `pandas DataFrame` and is indexed by `datetime`.
+The returned result is a `pandas.DataFrame` indexed by `datetime`.
 For `get`, the value column is named `value`.
-For `get_many`, there is one column per asset queried. The asset slugs are used for the column names.
+For `get_many`, each column is named after the asset slug.
 
-For backwards compatibility, fetching the metric by providing `"metric/slug"` as
-the first instead of using a separate `'slug'`/`'selector'` continues to work,
-but it is not the recommended approach.
-
-For non-metric related data like getting the list of available assets, the data
-is fetched by providing a string in the format `query/argument` and additional
-parameters.
-
-The examples below contain some of the described scenarios.
-
-Fetch metric by providing `metric` as first argument and `slug` as named parameter:
+### Single asset
 
 ```python
 import san
+
 san.get(
-  "price_usd",
-  slug="bitcoin",
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "price_usd",
+    slug="bitcoin",
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00  47686.811509
 2022-01-02 00:00:00+00:00  47345.220564
@@ -174,20 +134,28 @@ datetime                   value
 2022-01-05 00:00:00+00:00  43569.003348
 ```
 
-Fetch prices for multiple assets:
+Using default parameters (last 1 year of data with 1 day interval):
+
+```python
+san.get("daily_active_addresses", slug="santiment")
+san.get("price_usd", slug="santiment")
+```
+
+### Multiple assets
 
 ```python
 import san
+
 san.get_many(
-  "price_usd",
-  slugs=["bitcoin", "ethereum", "tether"],
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "price_usd",
+    slugs=["bitcoin", "ethereum", "tether"],
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                   bitcoin       ethereum     tether
 2022-01-01 00:00:00+00:00  47686.811509  3769.696916  1.000500
 2022-01-02 00:00:00+00:00  47345.220564  3829.565045  1.000460
@@ -196,20 +164,24 @@ datetime                   bitcoin       ethereum     tether
 2022-01-05 00:00:00+00:00  43569.003348  3550.386882  1.000122
 ```
 
-Fetch development activity of a specific Github organization:
+### Using selectors
+
+The `selector` parameter enables querying by organization, contract address, label, and more:
 
 ```python
 import san
+
+# Development activity by GitHub organization
 san.get(
-  "dev_activity",
-  selector={"organization": "google"},
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "dev_activity",
+    selector={"organization": "google"},
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                    value
 2022-01-01 00:00:00+00:00   176.0
 2022-01-02 00:00:00+00:00   129.0
@@ -218,20 +190,18 @@ datetime                    value
 2022-01-05 00:00:00+00:00  1334.0
 ```
 
-Fetch a metric for a contract address, not a slug:
-
 ```python
-import san
+# Transactions for a specific contract address
 san.get(
-  "contract_transactions_count",
-  selector={"contractAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa"},
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "contract_transactions_count",
+    selector={"contractAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa"},
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00   90.0
 2022-01-02 00:00:00+00:00  339.0
@@ -240,20 +210,18 @@ datetime                   value
 2022-01-05 00:00:00+00:00  328.0
 ```
 
-Fetch top holders metric and specify the number of top holders to be counted:
-
 ```python
-import san
+# Amount held by top N holders
 san.get(
-  "amount_in_top_holders",
-  selector={"slug": "santiment", "holdersCount": 10},
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "amount_in_top_holders",
+    selector={"slug": "santiment", "holdersCount": 10},
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00  7.391186e+07
 2022-01-02 00:00:00+00:00  7.391438e+07
@@ -262,21 +230,18 @@ datetime                   value
 2022-01-05 00:00:00+00:00  7.391984e+07
 ```
 
-Fetch trade volume of a given DEX for a given slug
-
 ```python
-import san
-# This requires Santiment API PRO apikey configured
+# DEX trade volume (requires PRO API key)
 san.get(
-  "total_trade_volume_by_dex",
-  selector={"slug": "ethereum", "label": "decentralized_exchange", "owner": "UniswapV2"},
-  from_date="2022-01-01",
-  to_date="2022-01-05",
-  interval="1d"
+    "total_trade_volume_by_dex",
+    selector={"slug": "ethereum", "label": "decentralized_exchange", "owner": "UniswapV2"},
+    from_date="2022-01-01",
+    to_date="2022-01-05",
+    interval="1d"
 )
 ```
 
-```
+```text
 datetime                    value
 2022-01-01 00:00:00+00:00   96882.176846
 2022-01-02 00:00:00+00:00   85184.970249
@@ -285,11 +250,11 @@ datetime                    value
 2022-01-05 00:00:00+00:00  174178.848916
 ```
 
-Fetch metric by providing `metric/slug` as first argument and no `slug` as named parameter:
+### Legacy metric/slug format
+
+The legacy format still works for backwards compatibility:
 
 ```python
-import san
-
 san.get(
     "daily_active_addresses/bitcoin",
     from_date="2018-06-01",
@@ -298,37 +263,20 @@ san.get(
 )
 ```
 
-```
-datetime                   value
-2018-06-01 00:00:00+00:00  692508.0
-2018-06-02 00:00:00+00:00  521887.0
-2018-06-03 00:00:00+00:00  531464.0
-2018-06-04 00:00:00+00:00  702902.0
-2018-06-05 00:00:00+00:00  655695.0
-```
+Prefer the explicit style with separate `slug`/`selector` for new code.
 
-Fetch non-timeseries data:
+### Non-timeseries endpoints
+
+Some endpoints return tabular metadata rather than metric timeseries, for example:
 
 ```python
-import san
 san.get("projects/all")
 ```
 
-```
-                name             slug ticker   totalSupply
-0             0chain           0chain    ZCN     400000000
-1                 0x               0x    ZRX    1000000000
-2          0xBitcoin            0xbtc  0xBTC      20999984
-...
-```
+### Raw GraphQL queries
 
-### Execute an arbitrary GraphQL request
-
-Some of the available queries in the [Santiment API](https://api.santiment.net) do not have a
-dedicated sanpy function. Alternatively, if the returned format needs to be parsed differently, this approach
-can be used, too. They can be fetched by providing the raw GraphQL query.
-
-Fetching data for many slugs at the same time. Note that this is also available as `san.get_many`
+For queries not covered by built-in functions, you can execute arbitrary GraphQL against the
+[Santiment API](https://api.santiment.net/graphiql):
 
 ```python
 import san
@@ -364,7 +312,7 @@ df = pd.DataFrame(rows)
 df.set_index('datetime', inplace=True)
 ```
 
-```
+```text
 datetime              bitcoin       ethereum
 2022-05-05T00:00:00Z  36575.142133  2749.213042
 2022-05-06T00:00:00Z  36040.922350  2694.979684
@@ -391,25 +339,24 @@ result = san.graphql.execute_gql("""{
 pd.DataFrame(result["projectBySlug"], index=[0])
 ```
 
-```
+```text
   infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
 
-## Execute SQL queries and get the result
+## SQL queries (Santiment Queries)
 
-One of the Santiment products is [Santiment Queries](https://academy.santiment.net/santiment-queries/). It allows you to execute SQL queries on a database hosted by Santiment. Explore the documentation in order to get familiar with the available data and how to write SQL queries.
+[Santiment Queries](https://academy.santiment.net/santiment-queries/) lets you execute SQL queries against a ClickHouse database hosted by Santiment. See the [documentation](https://academy.santiment.net/santiment-queries/) for available tables and query syntax. Requires an API key.
 
-In order to execute a query you need to provide your API key.
-
-Executing a query and getting the result as a pandas DataFrame:
+Basic query returning a pandas DataFrame:
 
 ```python
 import san
+
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
 ```
 
-```
+```text
    metric_id  asset_id                    dt  value           computed_at
 0         10      1369  2015-07-17T00:00:00Z    0.0  2020-10-21T08:48:42Z
 1         10      1369  2015-07-18T00:00:00Z    0.0  2020-10-21T08:48:42Z
@@ -418,14 +365,13 @@ san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
 4         10      1369  2015-07-21T00:00:00Z    0.0  2020-10-21T08:48:42Z
 ```
 
-In order to change the index to one of the columns, provide the `set_index` parameter:
+Use `set_index` to set a column as the DataFrame index:
 
 ```python
-import san
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5", set_index="dt")
 ```
 
-```
+```text
 dt                    metric_id  asset_id  value           computed_at
 2015-07-17T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
 2015-07-18T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
@@ -434,30 +380,30 @@ dt                    metric_id  asset_id  value           computed_at
 2015-07-21T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
 ```
 
-The queries can be parametrized. In the query the parameters are named parameters,
-surrounded by two curly brackets `{{key}}`. The parameters is a dictionary. The query
-can be a multiline string:
+### Parameterized queries
+
+Use `{{key}}` placeholders in the query and pass a `parameters` dict:
 
 ```python
 san.execute_sql(query="""
-  SELECT
-    get_metric_name(metric_id) AS metric,
-    get_asset_name(asset_id) AS asset,
-    dt,
-    argMax(value, computed_at)
-  FROM daily_metrics_v2
-  WHERE
-    asset_id = get_asset_id({{slug}}) AND
-    metric_id = get_metric_id({{metric}}) AND
-    dt >= now() - INTERVAL {{last_n_days}} DAY
-  GROUP BY dt, metric_id, asset_id
-  ORDER BY dt ASC
+    SELECT
+        get_metric_name(metric_id) AS metric,
+        get_asset_name(asset_id) AS asset,
+        dt,
+        argMax(value, computed_at)
+    FROM daily_metrics_v2
+    WHERE
+        asset_id = get_asset_id({{slug}}) AND
+        metric_id = get_metric_id({{metric}}) AND
+        dt >= now() - INTERVAL {{last_n_days}} DAY
+    GROUP BY dt, metric_id, asset_id
+    ORDER BY dt ASC
 """,
 parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
 set_index="dt")
 ```
 
-```
+```text
 dt                                    metric    asset        value
 2023-03-22T00:00:00Z  daily_active_addresses  bitcoin     941446.0
 2023-03-23T00:00:00Z  daily_active_addresses  bitcoin     913215.0
@@ -468,48 +414,33 @@ dt                                    metric    asset        value
 2023-03-28T00:00:00Z  daily_active_addresses  bitcoin     311566.0
 ```
 
-## Available metrics
+## Metric discovery
 
-Getting all of the metrics as a list is done using the following code:
+### Available metrics
 
 ```python
 san.available_metrics()
 ```
 
-## Available Metrics for Slug
-
-Getting all of the metrics for a given slug is achieved with the following code:
+### Available metrics for a slug
 
 ```python
 san.available_metrics_for_slug("santiment")
 ```
 
-## Fetch timeseries metric
+### Metric/asset availability since
+
+Fetch the earliest datetime for which a metric is available for a given slug:
 
 ```python
-import san
-
-san.get(
-    "daily_active_addresses",
-    slug="santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
+san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santiment")
 ```
 
-Using the defaults params (last 1 year of data with 1 day interval):
+### Versioned metrics
 
-```python
-san.get("daily_active_addresses", slug="santiment")
-san.get("price_usd", slug="santiment")
-```
+Some metrics support multiple versions (e.g., `"1.0"` and `"2.0"`).
 
-## Versioned metrics
-
-Some metrics support multiple versions (for example `"1.0"` and `"2.0"`).
-
-Check which versions are available for a metric:
+Check which versions are available:
 
 ```python
 import san
@@ -518,11 +449,9 @@ san.available_metric_versions("social_dominance_total")
 # ['1.0', '2.0']
 ```
 
-When needed, pass `version` to `san.get` or `san.get_many`:
+Pass `version` to `san.get` or `san.get_many` to select a specific version:
 
 ```python
-import san
-
 san.get(
     "social_dominance_total",
     slug="bitcoin",
@@ -542,71 +471,77 @@ san.get_many(
 )
 ```
 
-## Fetching metadata for a metric
+### Metric metadata
 
-Fetching the metadata for an on-chain metric.
+Fetch metadata for a metric, including access restrictions and available slugs:
 
 ```python
 san.metadata(
     "nvt",
-    arr=["availableSlugs", "defaultAggregation", "humanReadableName", "isAccessible", "isRestricted", "restrictedFrom", "restrictedTo"]
+    arr=[
+        "availableSlugs",
+        "defaultAggregation",
+        "humanReadableName",
+        "isAccessible",
+        "isRestricted",
+        "restrictedFrom",
+        "restrictedTo",
+    ]
 )
 ```
 
 Example result:
 
 ```python
-{"availableSlugs": ["0chain", "0x", "0xbtc", "0xcert", "1sg", ...],
-"defaultAggregation": "AVG", "humanReadableName": "NVT (Using Circulation)", "isAccessible": True, "isRestricted": True, "restrictedFrom": "2020-03-21T08:44:14Z", "restrictedTo": "2020-06-17T08:44:14Z"}
+{
+    "availableSlugs": ["0chain", "0x", "0xbtc", ...],
+    "defaultAggregation": "AVG",
+    "humanReadableName": "NVT (Using Circulation)",
+    "isAccessible": True,
+    "isRestricted": True,
+    "restrictedFrom": "2020-03-21T08:44:14Z",
+    "restrictedTo": "2020-06-17T08:44:14Z"
+}
 ```
 
-- `availableSlugs` - A list of all slugs available for this metric.
-- `defaultAggregation` - If big interval are queried, all values that fall into
-  this interval will be aggregated with this aggregation.
-- `humanReadableName` - A name of the metric suitable for showing to users.
-- `isAccessible` - `True` if the metric is accessible. If API key is configured, c
-  hecks the API plan subscriptions. `False` if the metric is not accessible. For example
-  `circulation_1d` requires `PRO` plan subscription in order to be accessible at
-  all.
-- `isRestricted` - `True` if time restrictions apply to the metric and your
-  current plan (`Free` if no API key is configured). Check `restrictedFrom` and
-  `restrictedTo`.
-- `restrictedFrom` - The first datetime available of that metric for your current plan.
-- `restrictedTo` - The last datetime available of that metric and your current plan.
+- `availableSlugs` — All slugs that have data for this metric.
+- `defaultAggregation` — Aggregation function used when querying large intervals.
+- `humanReadableName` — Human-readable metric name.
+- `isAccessible` — Whether the metric is accessible with your current API plan. For example, `circulation_1d` requires a `PRO` plan.
+- `isRestricted` — Whether time restrictions apply to your current plan (`Free` if no API key is configured).
+- `restrictedFrom` / `restrictedTo` — The available date range for your current plan.
 
-## Batching multiple queries
+### Metric complexity
 
-Multiple queries can be executed in a batch to speed up the performance.
-
-There are two batch classes provided - `Batch` and `AsyncBatch`.
-
-> Note: Batching improves the performance and the developer experience, but every
-> query put inside the batch is still counted as one separate API call.
-> To fetch a metric for multiple assets at a time take a look at `san.get_many`
-
-- `AsyncBatch` is the recommended batch class. It executes all the queries in
-  separate HTTP requests. The benefit of using `AsyncBatch` over looping and
-  executing every API call is that the queries can be executed concurrently.
-  Putting multiple API calls in separate HTTP calls also allows to fetch more
-  data, otherwise you might run into [Complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) issues.
-  The concurrency is controlled by the `max_workers` optional parameter to the
-  `execute` function. By default the `max_workers` value is 10.
-  It also supports `get_many` function to fetch data for many assets.
-
-- `Batch` combines all the provided queries in a single GraphQL document and
-  executes them in a single HTTP request. This batching technique should be used
-  when lightweight queries that don't fetch a lot of data are used. The reason is
-  that the [complexity](https://academy.santiment.net/for-developers/#graphql-api-complexity) of each query
-  is accumulated and the batch can be rejected.
-
-Note: If you have been using `Batch()` and want to switch to the newer `AsyncBatch()` you only need to
-change the batch initialization. The functions for adding queries and executing the batch, as well as the
-format of the response, are the same.
+Each API request has a [complexity](https://academy.santiment.net/sanapi/complexity/) that depends on the date range, interval, metric, and subscription plan. The maximum complexity per request is 50,000.
 
 ```python
-from san import Batch
+san.metric_complexity(
+    metric="price_usd",
+    from_date="2020-01-01",
+    to_date="2020-02-20",
+    interval="1d"
+)
+```
 
-batch = Batch()
+If a request exceeds the limit, break it into smaller date ranges or upgrade your plan.
+
+## Batching queries
+
+Two batch classes let you execute multiple queries efficiently:
+
+> **Note:** Each query in a batch still counts as a separate API call.
+> To fetch a metric for multiple assets in a single API call, use `san.get_many` instead.
+
+`AsyncBatch` executes queries concurrently in separate HTTP requests.
+Concurrency is controlled by the `max_workers` parameter (default: 10). Because each query
+runs in its own request, you avoid [complexity](https://academy.santiment.net/sanapi/complexity/)
+accumulation. Supports both `get` and `get_many`.
+
+```python
+from san import AsyncBatch
+
+batch = AsyncBatch()
 
 batch.get(
     "daily_active_addresses",
@@ -624,21 +559,6 @@ batch.get(
     interval="1d"
 )
 
-[daa, trx_volume] = batch.execute()
-```
-
-```python
-from san import AsyncBatch
-
-batch = AsyncBatch()
-
-batch.get(
-    "daily_active_addresses",
-    slug="santiment",
-    from_date="2018-06-01",
-    to_date="2018-06-05",
-    interval="1d"
-)
 batch.get_many(
     "daily_active_addresses",
     slugs=["bitcoin", "ethereum"],
@@ -646,17 +566,64 @@ batch.get_many(
     to_date="2018-06-05",
     interval="1d"
 )
-[daa, daa_many] = batch.execute(max_workers=10)
+
+[daa, trx_volume, daa_many] = batch.execute(max_workers=10)
 ```
 
-## Rate Limit Tools
+> **Note:** The older `Batch` class is deprecated. It combines all queries into a single GraphQL
+> document, which causes [complexity](https://academy.santiment.net/sanapi/complexity/) to accumulate
+> and requests to be rejected for larger batches. Use `AsyncBatch` instead — the `get`, `get_many`,
+> and `execute` methods share the same interface, so switching only requires changing the import.
 
-There are two functions, which can help you in handling the rate limits:
+## Transforms and aggregation
 
-- `is_rate_limit_exception` - Returns whether the exception caught is because of rate limitation
-- `rate_limit_time_left` - Returns the time left before the rate limit expires
-- `api_calls_made` - Returns the API calls for each day in which it was used
-- `api_calls_remaining` - Returns the API calls remaining for the month, hour and minute
+Apply server-side transformations to the data:
+
+```python
+san.get(
+    "price_usd",
+    slug="santiment",
+    from_date="2020-06-01",
+    to_date="2021-06-05",
+    interval="1d",
+    transform={"type": "moving_average", "moving_average_base": 100},
+    aggregation="LAST"
+)
+```
+
+**Supported transforms:**
+
+| Type | Description |
+|---|---|
+| `moving_average` | Replace each value with the average of the last `moving_average_base` values |
+| `consecutive_differences` | Replace each value with the difference from the previous value (V_i - V_{i-1}) |
+| `percent_change` | Replace each value with the percent change from the previous value ((V_i / V_{i-1} - 1) * 100) |
+
+`aggregation` controls how values within each interval are combined (e.g., `LAST`, `AVG`, `SUM`).
+
+## Include incomplete data
+
+Daily metrics exclude the current (incomplete) day by default. For example, `daily_active_addresses` queried at 08:00 would only reflect one-third of the day's activity. To include the partial current-day value:
+
+```python
+san.get(
+    "daily_active_addresses",
+    slug="bitcoin",
+    from_date="utc_now-3d",
+    to_date="utc_now",
+    interval="1d",
+    include_incomplete_data=True
+)
+```
+
+## Rate limit tools
+
+Four utility functions help you handle [API rate limits](https://academy.santiment.net/sanapi/rate-limits/):
+
+- `san.is_rate_limit_exception(exception)` — check if an exception was caused by rate limiting.
+- `san.rate_limit_time_left(exception)` — seconds until the rate limit resets.
+- `san.api_calls_made()` — API calls made per day.
+- `san.api_calls_remaining()` — remaining calls for the current month, hour, and minute.
 
 Example:
 
@@ -665,133 +632,48 @@ import time
 import san
 
 try:
-  san.get(
-    "price_usd",
-    slug="santiment",
-    from_date="utc_now-30d",
-    to_date="utc_now",
-    interval="1d"
-  )
+    san.get(
+        "price_usd",
+        slug="santiment",
+        from_date="utc_now-30d",
+        to_date="utc_now",
+        interval="1d"
+    )
 except Exception as e:
-  if san.is_rate_limit_exception(e):
-    rate_limit_seconds = san.rate_limit_time_left(e)
-    print(f"Will sleep for {rate_limit_seconds}")
-    time.sleep(rate_limit_seconds)
-
-...
+    if san.is_rate_limit_exception(e):
+        rate_limit_seconds = san.rate_limit_time_left(e)
+        print(f"Rate limited. Sleeping for {rate_limit_seconds}s")
+        time.sleep(rate_limit_seconds)
 
 calls_by_day = san.api_calls_made()
 calls_remaining = san.api_calls_remaining()
 ```
 
-## Metric Complexity
+## Assets discovery
 
-Fetch the complexity of a metric. The complexity depends on the from/to/interval
-parameters, as well as the metric and the subscription plan. A request might
-have a maximum complexity of 50000. If a request has a higher complexity there
-are a few ways to solve the issue:
-
-- Break down the request into multiple requests with smaller from-to ranges.
-- Upgrade to a higher subscription plan.
-
-More about the complexity can be found on [Santiment Academy]()
-
-```python
-san.metric_complexity(
-    metric="price_usd",
-    from_date="2020-01-01",
-    to_date="2020-02-20",
-    interval="1d"
-)
-```
-
-## Include Incomplete Data Flag
-
-Daily metrics have one value per day. For the current day, the latest computed
-value will not include a full day of data. For example, computing
-`daily_active_addresses` at 08:00 includes data for one third of the day. To
-reduce confusion, the current day value for metrics that have this behaviour is
-excluded. To force fetching the current day value, the `includeIncompleteData`
-flag must be used.
-
-```python
-san.get(
-  "daily_active_addresses/bitcoin",
-  from_date="utc_now-3d",
-  to_date="utc_now",
-  interval="1d",
-  include_incomplete_data=True
-)
-```
-
-## Metric/Asset pair available cince
-
-Fetch the first datetime for which a metric is available for a given slug.
-
-```python
-san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santiment")
-```
-
-## Transform the result
-
-Example usage:
-
-```python
-san.get(
-  "price_usd",
-  slug="santiment",
-  from_date="2020-06-01",
-  to_date="2021-06-05",
-  interval="1d",
-  transform={"type": "moving_average", "moving_average_base": 100},
-  aggregation="LAST"
-)
-```
-
-Where the parameters, that are not mentioned, are optional:
-
-`transform` - Apply a transformation on the data. The supported transformations are:
-
-- "moving_average" - Replace every value V<sub>i</sub> with the average of the last "moving_average_base" values.
-- "consecutive_differences" - Replace every value V<sub>i</sub> with the value V<sub>i</sub> - V<sub>i-1</sub> where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
-- "percent_change" - Replace every value V<sub>i</sub> with the percent change of V<sub>i-1</sub> and V<sub>i</sub> ( (V<sub>i</sub> / V<sub>i-1</sub> - 1) \* 100) where i is the position in the list. Automatically fetches some extra data needed in order to compute the first value.
-
-`aggregation` - the aggregation which is used for the query results.
-
-## Available projects
-
-Returns a DataFrame with all the projects available in the Santiment API. Not all
-metrics will be available for each of the projects.
-
-`slug` is the unique identifier of a project, used in the metrics fetching.
+Returns a DataFrame with all projects tracked by the Santiment API. The `slug` column is the unique identifier used in all metric queries.
 
 ```python
 san.get("projects/all")
 ```
 
-Example result:
-
-```
+```text
                  name             slug ticker   totalSupply
 0              0chain           0chain    ZCN     400000000
 1                  0x               0x    ZRX    1000000000
 2           0xBitcoin            0xbtc  0xBTC      20999984
 3     0xcert Protocol           0xcert    ZXC     500000000
 4              1World           1world    1WO      37219453
-5        AB-Chain RTB     ab-chain-rtb    RTB      27857813
-6             Abulaba          abulaba    AAA     397000000
-7                 AC3              ac3    AC3    80235326.0
 ...
 ```
 
 ## Non-standard metrics
 
-Here is a list of metrics that are not part of the returned list of metrics found above.
-This is due to having different response format and semantics.
+The following metrics have non-standard response formats and are not included in `san.available_metrics()`.
 
-### Other Price metrics
+### Price metrics
 
-#### Marketcap, Price USD, Price BTC and Trading Volume
+**Market Cap, Price USD, Price BTC, and Trading Volume:**
 
 ```python
 san.get(
@@ -803,12 +685,9 @@ san.get(
 )
 ```
 
-#### Open, High, Close, Low Prices, Volume, Marketcap
+**OHLCV (Open, High, Low, Close, Volume, Market Cap):**
 
-Notes:
-
-- This query cannot be batched.
-- The format with separate `slug`/`selector` argument is not supported
+> This query cannot be batched and does not support the separate `slug`/`selector` argument format.
 
 ```python
 san.get(
@@ -819,19 +698,17 @@ san.get(
 )
 ```
 
-Example result:
-
-```python
-datetime                        openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume  marketcap
-2018-06-01 00:00:00+00:00       1.24380        1.27668       1.26599       1.19099       852857  7.736268e+07
-2018-06-02 00:00:00+00:00       1.26136        1.30779       1.27612       1.20958      1242520  7.864724e+07
-2018-06-03 00:00:00+00:00       1.28270        1.28357       1.24625       1.21872      1032910  7.844339e+07
-2018-06-04 00:00:00+00:00       1.23276        1.24910       1.18528       1.18010       617451  7.604326e+07
+```text
+datetime                   openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume  marketcap
+2018-06-01 00:00:00+00:00  1.24380       1.27668        1.26599       1.19099       852857  7.736268e+07
+2018-06-02 00:00:00+00:00  1.26136       1.30779        1.27612       1.20958      1242520  7.864724e+07
+2018-06-03 00:00:00+00:00  1.28270       1.28357        1.24625       1.21872      1032910  7.844339e+07
+2018-06-04 00:00:00+00:00  1.23276       1.24910        1.18528       1.18010       617451  7.604326e+07
 ```
 
-### Historical Balance
+### Historical balance
 
-Historical balance for erc20 token or eth address. Returns the historical balance for a given address in the given interval.
+Returns the historical balance for an ERC-20 token or ETH address:
 
 ```python
 san.get(
@@ -844,9 +721,7 @@ san.get(
 )
 ```
 
-Example result:
-
-```
+```text
 datetime                     balance
 2019-04-18 00:00:00+00:00  382338.33
 2019-04-19 00:00:00+00:00  382338.33
@@ -855,15 +730,9 @@ datetime                     balance
 2019-04-22 00:00:00+00:00  215664.33
 ```
 
-### Ethereum Top Transactions
+### Ethereum top transactions
 
-Top ETH transactions for project's team wallets.
-
-Available transaction types:
-
-- ALL
-- IN
-- OUT
+Top ETH transactions for a project's team wallets. `transaction_type` can be `ALL`, `IN`, or `OUT`.
 
 ```python
 san.get(
@@ -876,11 +745,7 @@ san.get(
 )
 ```
 
-Example result:
-
-**The result is shortened for convenience**
-
-```
+```text
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-29 21:33:31+00:00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
 2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
@@ -888,9 +753,9 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-19 14:09:58+00:00  0x1f3df0b8390bb8...                  False  0x723fb5c14eaff...                False  0x78e0720b9e72d1...         15.15
 ```
 
-### Ethereum Spent Over Time
+### Ethereum spent over time
 
-ETH spent for each interval from the project's team wallet and time period
+ETH spent per interval from a project's team wallets:
 
 ```python
 san.get(
@@ -902,9 +767,7 @@ san.get(
 )
 ```
 
-Example result:
-
-```
+```text
 datetime                    ethSpent
 2019-04-18 00:00:00+00:00   0.000000
 2019-04-19 00:00:00+00:00  34.630284
@@ -913,9 +776,9 @@ datetime                    ethSpent
 2019-04-22 00:00:00+00:00   0.000000
 ```
 
-### Token Top Transactions
+### Token top transactions
 
-Top transactions for the token of a given project
+Top transactions for a project's token:
 
 ```python
 san.get(
@@ -927,11 +790,7 @@ san.get(
 )
 ```
 
-Example result:
-
-**The result is shortened for convenience**
-
-```
+```text
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-21 13:51:59+00:00  0x1f3df0b8390bb8...                  False  0x5eaae5e949952...                False  0xdbced935b09dd0...  166674.00000
 2019-04-28 07:43:38+00:00  0x0a920bfdf7f977...                  False  0x868074aab18ea...                False  0x5f2214d34bcdc3...   33181.82279
@@ -940,9 +799,9 @@ datetime                           fromAddress  fromAddressInExchange           
 2019-04-30 15:17:28+00:00  0x876eabf441b2ee...                   True  0x1f4a90043cf2d...                False  0xc85892b9ef8c64...   20544.42975
 ```
 
-### Top Transfers
+### Top transfers
 
-Top transfers for the token of a given project, `address` and `transaction_type` arguments can be added as well, in the form of a key-value pair. The `transaction_type` parameter can have one of these three values: `ALL`, `OUT`, `IN`.
+Top token transfers for a project. Optionally filter by `address` and `transaction_type` (`ALL`, `IN`, `OUT`):
 
 ```python
 san.get(
@@ -953,11 +812,7 @@ san.get(
 )
 ```
 
-**The result is shortened for convenience**
-
-Example result:
-
-```
+```text
                           fromAddress   toAddress     trxHash       trxValue
 datetime
 2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
@@ -965,6 +820,8 @@ datetime
 2021-06-19 21:36:03+00:00  0x59646...  0x0d45b...  0x5de31...  112336.882707
 ...
 ```
+
+Filter by address and transaction type:
 
 ```python
 san.get(
@@ -977,9 +834,7 @@ san.get(
 )
 ```
 
-Example result:
-
-```
+```text
                           fromAddress  toAddress    trxHash   trxValue
 datetime
 2021-06-13 09:14:01+00:00  0x26e06...  0xfd3d...  0x4af6...  69854.528
@@ -988,9 +843,9 @@ datetime
 ...
 ```
 
-### Emerging Trends
+### Emerging trends
 
-Emerging trends for a given period of time.
+Trending words in crypto social media for a given period:
 
 ```python
 san.get(
@@ -1002,9 +857,7 @@ san.get(
 )
 ```
 
-Example result:
-
-```
+```text
 datetime                        score    word
 2019-07-01 00:00:00+00:00  375.160034    lnbc
 2019-07-01 00:00:00+00:00  355.323281    dent
@@ -1020,82 +873,34 @@ datetime                        score    word
 
 ## Extras
 
-Take a look at the [examples](/examples/extras) folder.
+Backtesting and event study utilities are available in `san/extras/`. See the [examples/extras](examples/extras) folder for usage.
 
 ## Development
 
-It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing your local environment.
-
-Setup project:
+It is recommended to use [pipenv](https://github.com/pypa/pipenv) for managing the local development environment.
 
 ```bash
+# Set up the project
 pipenv install
-```
 
-Install main dependencies:
-
-```bash
+# Install the package in editable mode
 pipenv run pip install -e .
-```
 
-Install dev dependencies:
-
-```bash
+# Install dev dependencies (ruff, pytest)
 pipenv run pip install -e '.[dev]'
-```
 
-Install extra dependencies:
-
-```bash
+# Install extra dependencies (numpy, matplotlib, scipy, mlfinlab)
 pipenv run pip install -e '.[extras]'
-```
 
-Running tests:
-
-```bash
+# Run tests (integration tests are excluded by default)
 pipenv run pytest
-```
 
-Running integration tests:
-
-```bash
+# Run integration tests (requires SANPY_APIKEY)
 pipenv run pytest -m integration
-```
 
-## Running tests
+# Lint
+pipenv run ruff check .
 
-```bash
-pytest
-```
-
-## Running integration tests
-
-```bash
-pytest -m integration
-```
-
-## transformations
-
-```sh
-pip install ruff
-```
-
-```python
-ruff format
-```
-
-## Linting
-
-```bash
-pip install '.[dev]'
-```
-
-or just
-
-```bash
-pip install ruff
-```
-
-```bash
-ruff check
+# Format
+pipenv run ruff format .
 ```
