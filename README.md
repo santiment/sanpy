@@ -9,6 +9,7 @@ For full API documentation and metric definitions, see [Santiment Academy](https
 ## Table of contents
 
 - [Installation](#installation)
+  - [Extra packages](#extra-packages)
 - [Configuration](#configuration)
   - [Environment variable](#environment-variable)
   - [Programmatic](#programmatic)
@@ -17,6 +18,8 @@ For full API documentation and metric definitions, see [Santiment Academy](https
   - [Single asset](#single-asset)
   - [Multiple assets](#multiple-assets)
   - [Using selectors](#using-selectors)
+  - [Legacy metric/slug format](#legacy-metricslug-format)
+  - [Non-timeseries endpoints](#non-timeseries-endpoints)
   - [Raw GraphQL queries](#raw-graphql-queries)
 - [SQL queries (Santiment Queries)](#sql-queries-santiment-queries)
 - [Metric discovery](#metric-discovery)
@@ -30,7 +33,7 @@ For full API documentation and metric definitions, see [Santiment Academy](https
 - [Transforms and aggregation](#transforms-and-aggregation)
 - [Include incomplete data](#include-incomplete-data)
 - [Rate limit tools](#rate-limit-tools)
-- [Available projects](#available-projects)
+- [Assets discovery](#assets-discovery)
 - [Non-standard metrics](#non-standard-metrics)
 - [Extras](#extras)
 - [Development](#development)
@@ -54,7 +57,7 @@ pip install --upgrade sanpy
 There are a few utilities in the `san/extras/` directory for backtesting and event studies. To install their dependencies:
 
 ```bash
-pip install sanpy[extras]
+pip install 'sanpy[extras]'
 ```
 
 ## Configuration
@@ -98,7 +101,7 @@ The library provides two main functions for fetching timeseries data:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `slug` / `slugs` | Project identifier(s), as listed in [Available projects](#available-projects) | — |
+| `slug` / `slugs` | Project identifier(s), as listed in [Assets discovery](#assets-discovery) | — |
 | `selector` | Dict for flexible targeting (address, label, holdersCount, etc.) | — |
 | `from_date` | Start of the period (ISO 8601 string) | 365 days ago |
 | `to_date` | End of the period (ISO 8601 string) | now |
@@ -122,7 +125,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00  47686.811509
 2022-01-02 00:00:00+00:00  47345.220564
@@ -152,7 +155,7 @@ san.get_many(
 )
 ```
 
-```
+```text
 datetime                   bitcoin       ethereum     tether
 2022-01-01 00:00:00+00:00  47686.811509  3769.696916  1.000500
 2022-01-02 00:00:00+00:00  47345.220564  3829.565045  1.000460
@@ -178,7 +181,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                    value
 2022-01-01 00:00:00+00:00   176.0
 2022-01-02 00:00:00+00:00   129.0
@@ -198,7 +201,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00   90.0
 2022-01-02 00:00:00+00:00  339.0
@@ -218,7 +221,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                   value
 2022-01-01 00:00:00+00:00  7.391186e+07
 2022-01-02 00:00:00+00:00  7.391438e+07
@@ -238,7 +241,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                    value
 2022-01-01 00:00:00+00:00   96882.176846
 2022-01-02 00:00:00+00:00   85184.970249
@@ -247,7 +250,28 @@ datetime                    value
 2022-01-05 00:00:00+00:00  174178.848916
 ```
 
-> **Note:** The legacy format `san.get("metric/slug", ...)` still works for backwards compatibility, but using the separate `slug` parameter is recommended.
+### Legacy metric/slug format
+
+The legacy format still works for backwards compatibility:
+
+```python
+san.get(
+    "daily_active_addresses/bitcoin",
+    from_date="2018-06-01",
+    to_date="2018-06-05",
+    interval="1d"
+)
+```
+
+Prefer the explicit style with separate `slug`/`selector` for new code.
+
+### Non-timeseries endpoints
+
+Some endpoints return tabular metadata rather than metric timeseries, for example:
+
+```python
+san.get("projects/all")
+```
 
 ### Raw GraphQL queries
 
@@ -288,7 +312,7 @@ df = pd.DataFrame(rows)
 df.set_index('datetime', inplace=True)
 ```
 
-```
+```text
 datetime              bitcoin       ethereum
 2022-05-05T00:00:00Z  36575.142133  2749.213042
 2022-05-06T00:00:00Z  36040.922350  2694.979684
@@ -315,7 +339,7 @@ result = san.graphql.execute_gql("""{
 pd.DataFrame(result["projectBySlug"], index=[0])
 ```
 
-```
+```text
   infrastructure                         mainContractAddress       name       slug ticker                        twitterLink
 0            ETH  0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098  Santiment  santiment    SAN  https://twitter.com/santimentfeed
 ```
@@ -332,7 +356,7 @@ import san
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5")
 ```
 
-```
+```text
    metric_id  asset_id                    dt  value           computed_at
 0         10      1369  2015-07-17T00:00:00Z    0.0  2020-10-21T08:48:42Z
 1         10      1369  2015-07-18T00:00:00Z    0.0  2020-10-21T08:48:42Z
@@ -347,7 +371,7 @@ Use `set_index` to set a column as the DataFrame index:
 san.execute_sql(query="SELECT * FROM daily_metrics_v2 LIMIT 5", set_index="dt")
 ```
 
-```
+```text
 dt                    metric_id  asset_id  value           computed_at
 2015-07-17T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
 2015-07-18T00:00:00Z         10      1369    0.0  2020-10-21T08:48:42Z
@@ -379,7 +403,7 @@ parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days'
 set_index="dt")
 ```
 
-```
+```text
 dt                                    metric    asset        value
 2023-03-22T00:00:00Z  daily_active_addresses  bitcoin     941446.0
 2023-03-23T00:00:00Z  daily_active_addresses  bitcoin     913215.0
@@ -625,7 +649,7 @@ calls_by_day = san.api_calls_made()
 calls_remaining = san.api_calls_remaining()
 ```
 
-## Available projects
+## Assets discovery
 
 Returns a DataFrame with all projects tracked by the Santiment API. The `slug` column is the unique identifier used in all metric queries.
 
@@ -633,7 +657,7 @@ Returns a DataFrame with all projects tracked by the Santiment API. The `slug` c
 san.get("projects/all")
 ```
 
-```
+```text
                  name             slug ticker   totalSupply
 0              0chain           0chain    ZCN     400000000
 1                  0x               0x    ZRX    1000000000
@@ -649,7 +673,7 @@ The following metrics have non-standard response formats and are not included in
 
 ### Price metrics
 
-**Marketcap, Price USD, Price BTC, and Trading Volume:**
+**Market Cap, Price USD, Price BTC, and Trading Volume:**
 
 ```python
 san.get(
@@ -661,7 +685,7 @@ san.get(
 )
 ```
 
-**OHLCV (Open, High, Low, Close, Volume, Marketcap):**
+**OHLCV (Open, High, Low, Close, Volume, Market Cap):**
 
 > This query cannot be batched and does not support the separate `slug`/`selector` argument format.
 
@@ -674,7 +698,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                   openPriceUsd  closePriceUsd  highPriceUsd  lowPriceUsd   volume  marketcap
 2018-06-01 00:00:00+00:00  1.24380       1.27668        1.26599       1.19099       852857  7.736268e+07
 2018-06-02 00:00:00+00:00  1.26136       1.30779        1.27612       1.20958      1242520  7.864724e+07
@@ -697,7 +721,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                     balance
 2019-04-18 00:00:00+00:00  382338.33
 2019-04-19 00:00:00+00:00  382338.33
@@ -721,9 +745,7 @@ san.get(
 )
 ```
 
-Example result (shortened for convenience):
-
-```
+```text
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-29 21:33:31+00:00  0xe76fe52a251c8f...                  False  0x45d6275d9496b...                False  0x776cd57382456a...        100.00
 2019-04-29 21:21:18+00:00  0xe76fe52a251c8f...                  False  0x468bdccdc334f...                False  0x848414fb5c382f...         40.95
@@ -745,7 +767,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                    ethSpent
 2019-04-18 00:00:00+00:00   0.000000
 2019-04-19 00:00:00+00:00  34.630284
@@ -768,9 +790,7 @@ san.get(
 )
 ```
 
-Example result (shortened for convenience):
-
-```
+```text
 datetime                           fromAddress  fromAddressInExchange           toAddress  toAddressInExchange              trxHash      trxValue
 2019-04-21 13:51:59+00:00  0x1f3df0b8390bb8...                  False  0x5eaae5e949952...                False  0xdbced935b09dd0...  166674.00000
 2019-04-28 07:43:38+00:00  0x0a920bfdf7f977...                  False  0x868074aab18ea...                False  0x5f2214d34bcdc3...   33181.82279
@@ -792,9 +812,7 @@ san.get(
 )
 ```
 
-Example result (shortened for convenience):
-
-```
+```text
                           fromAddress   toAddress     trxHash       trxValue
 datetime
 2021-06-17 00:16:26+00:00  0xa48df...  0x876ea...  0x62a56...  136114.069733
@@ -816,7 +834,7 @@ san.get(
 )
 ```
 
-```
+```text
                           fromAddress  toAddress    trxHash   trxValue
 datetime
 2021-06-13 09:14:01+00:00  0x26e06...  0xfd3d...  0x4af6...  69854.528
@@ -839,7 +857,7 @@ san.get(
 )
 ```
 
-```
+```text
 datetime                        score    word
 2019-07-01 00:00:00+00:00  375.160034    lnbc
 2019-07-01 00:00:00+00:00  355.323281    dent
@@ -881,8 +899,8 @@ pipenv run pytest
 pipenv run pytest -m integration
 
 # Lint
-ruff check .
+pipenv run ruff check .
 
 # Format
-ruff format
+pipenv run ruff format .
 ```
