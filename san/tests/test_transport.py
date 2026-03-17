@@ -28,6 +28,17 @@ class InvalidJsonResponse:
         raise ValueError("no json")
 
 
+class InvalidJsonHttpErrorResponse:
+    headers = {}
+
+    def __init__(self, status_code, text=""):
+        self.status_code = status_code
+        self.text = text
+
+    def json(self):
+        raise ValueError("no json")
+
+
 @pytest.fixture(autouse=True)
 def restore_api_config():
     original_timeout = ApiConfig.request_timeout
@@ -132,6 +143,30 @@ def test_transport_raises_invalid_json_error(monkeypatch):
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: InvalidJsonResponse())
 
     with pytest.raises(SanQueryError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_maps_non_json_401_to_auth_error(monkeypatch):
+    response = InvalidJsonHttpErrorResponse(status_code=401, text="<html>Unauthorized</html>")
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanAuthError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_maps_non_json_429_to_rate_limit_error(monkeypatch):
+    response = InvalidJsonHttpErrorResponse(status_code=429, text="Too many requests")
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanRateLimitError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_maps_non_json_503_to_server_error(monkeypatch):
+    response = InvalidJsonHttpErrorResponse(status_code=503, text="<html>Service unavailable</html>")
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanServerError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 

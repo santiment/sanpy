@@ -40,16 +40,21 @@ def __build_headers():
 
 
 def __raise_response_error__(response, gql_query_str):
-    response_json = __json_response__(response)
-    error_response = __extract_error_details__(response_json)
+    error_response = __extract_response_error_details__(response)
     message = "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
 
-    if response.status_code in (400, 401, 403) and __is_auth_error__(error_response):
+    if response.status_code in (401, 403):
         raise SanAuthError(message)
-    if response.status_code == 429 or __is_rate_limit_error__(error_response):
+    if response.status_code == 400 and __is_auth_error__(error_response):
+        raise SanAuthError(message)
+    if response.status_code == 429:
         raise SanRateLimitError(message)
     if response.status_code >= 500:
         raise SanServerError(message)
+    if __is_rate_limit_error__(error_response):
+        raise SanRateLimitError(message)
+    if __is_auth_error__(error_response):
+        raise SanAuthError(message)
     raise SanQueryError(message)
 
 
@@ -58,6 +63,26 @@ def __json_response__(response):
         return response.json()
     except ValueError as exc:
         raise SanQueryError(f"Invalid JSON response received from API: {exc}") from exc
+
+
+def __extract_response_error_details__(response):
+    response_json = __optional_json_response__(response)
+    if response_json is not None:
+        error_response = __extract_error_details__(response_json)
+        if error_response:
+            return error_response
+
+    response_text = getattr(response, "text", "")
+    if response_text:
+        return response_text.strip()
+    return ""
+
+
+def __optional_json_response__(response):
+    try:
+        return response.json()
+    except ValueError:
+        return None
 
 
 def __result_has_gql_errors__(response_json):
