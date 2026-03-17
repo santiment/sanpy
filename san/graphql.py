@@ -1,7 +1,5 @@
-import warnings
-
 from san.api_config import ApiConfig
-from san.error import SanAuthError, SanEmptyResultError, SanPartialResultWarning, SanQueryError, SanRateLimitError, SanServerError
+from san.error import SanAuthError, SanEmptyResultError, SanQueryError, SanRateLimitError, SanServerError
 from san.transport import RequestsTransport
 
 DEFAULT_TRANSPORT = RequestsTransport()
@@ -25,14 +23,9 @@ def get_response_headers(gql_query_str):
 
 def __handle_success_response__(response, gql_query_str):
     response_json = __json_response__(response)
-    has_data = __exist_not_empty_result(response_json)
     if __result_has_gql_errors__(response_json):
-        errors = response_json["errors"]
-        if has_data:
-            __warn_partial_success__(gql_query_str, errors)
-            return response_json["data"]
-        __raise_graphql_error__(gql_query_str, errors)
-    if has_data:
+        __raise_graphql_error__(gql_query_str, response_json["errors"])
+    if __exist_not_empty_result(response_json):
         return response_json["data"]
     raise SanEmptyResultError(
         "Error running query, the results are empty. Status code: {}.\n {}".format(response.status_code, gql_query_str)
@@ -125,12 +118,3 @@ def __format_graphql_error__(error):
     if path is not None:
         parts.append(f"path={path}")
     return " | ".join(parts)
-
-
-def __warn_partial_success__(gql_query_str, errors):
-    error_response = __extract_error_details__({"errors": errors})
-    warnings.warn(
-        "GraphQL partial success running query {} \n errors: {}".format(gql_query_str, error_response),
-        SanPartialResultWarning,
-        stacklevel=2,
-    )

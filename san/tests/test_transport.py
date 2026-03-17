@@ -11,7 +11,6 @@ from san.error import (
     SanAuthError,
     SanEmptyResultError,
     SanNetworkError,
-    SanPartialResultWarning,
     SanQueryError,
     SanRateLimitError,
     SanServerError,
@@ -87,7 +86,7 @@ def test_transport_maps_graphql_auth_error(test_response, monkeypatch):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
-def test_transport_returns_data_and_warns_on_partial_success(test_response, monkeypatch):
+def test_transport_raises_on_partial_graphql_failure(test_response, monkeypatch):
     partial_response = {
         "data": {"query_0": [{"slug": "bitcoin"}], "query_1": None},
         "errors": [{"message": "Field failed", "path": ["query_1"]}],
@@ -95,10 +94,8 @@ def test_transport_returns_data_and_warns_on_partial_success(test_response, monk
     response = test_response(status_code=200, data=partial_response)
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
-    with pytest.warns(SanPartialResultWarning):
-        result = execute_gql("{ query_0: projectsAll { slug } query_1: getMetric(metric: \"bad\") { metadata { metric } } }")
-
-    assert result == partial_response["data"]
+    with pytest.raises(SanQueryError):
+        execute_gql("{ query_0: projectsAll { slug } query_1: getMetric(metric: \"bad\") { metadata { metric } } }")
 
 
 def test_transport_raises_empty_result_error(test_response, monkeypatch):
