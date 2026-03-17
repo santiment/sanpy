@@ -7,10 +7,10 @@ Supports JSON, CSV, and table (human-readable) output formats.
 import csv
 import io
 import json
-import sys
 from typing import List
 
 import pandas as pd
+import typer
 
 
 def format_dataframe(df: pd.DataFrame, fmt: str = "table") -> str:
@@ -35,13 +35,14 @@ def format_dataframe(df: pd.DataFrame, fmt: str = "table") -> str:
         return df.to_string()
 
 
-def format_list(items: List[str], fmt: str = "table") -> str:
+def format_list(items: List[str], fmt: str = "table", header: str = "name") -> str:
     """
     Format a list of strings for CLI output.
 
     Args:
         items: List of strings to format
         fmt: Output format - 'json', 'csv', or 'table'
+        header: Column header for CSV output
 
     Returns:
         Formatted string representation
@@ -49,7 +50,12 @@ def format_list(items: List[str], fmt: str = "table") -> str:
     if fmt == "json":
         return json.dumps(items, indent=2)
     elif fmt == "csv":
-        return "\n".join(items)
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow([header])
+        for item in items:
+            writer.writerow([item])
+        return buffer.getvalue().rstrip("\n")
     else:  # table
         return "\n".join(items)
 
@@ -74,7 +80,7 @@ def format_dict(data: dict, fmt: str = "table") -> str:
         writer.writerow(["key", "value"])
         for k, v in data.items():
             writer.writerow([k, v])
-        return buffer.getvalue()
+        return buffer.getvalue().rstrip("\n")
     else:  # table
         max_key_len = max(len(str(k)) for k in data.keys()) if data else 0
         lines = []
@@ -98,10 +104,12 @@ def format_api_calls(calls: List[tuple], fmt: str = "table") -> str:
         data = [{"date": str(date), "api_calls": count} for date, count in calls]
         return json.dumps(data, indent=2)
     elif fmt == "csv":
-        lines = ["date,api_calls"]
+        buffer = io.StringIO()
+        writer = csv.writer(buffer, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(["date", "api_calls"])
         for date, count in calls:
-            lines.append(f"{date},{count}")
-        return "\n".join(lines)
+            writer.writerow([date, count])
+        return buffer.getvalue().rstrip("\n")
     else:  # table
         if not calls:
             return "No API calls recorded"
@@ -119,7 +127,4 @@ def output(text: str, err: bool = False) -> None:
         text: Text to print
         err: If True, print to stderr
     """
-    if err:
-        print(text, file=sys.stderr)
-    else:
-        print(text)
+    typer.echo(text, err=err)

@@ -14,7 +14,7 @@ from typer.testing import CliRunner
 from san.cli import app
 
 
-runner = CliRunner()
+runner = CliRunner(mix_stderr=False)
 
 
 # =============================================================================
@@ -289,7 +289,7 @@ def test_rate_limit_integration():
         assert "remaining" in result.stdout.lower() or "month" in result.stdout.lower()
     else:
         # Expected to fail without API key
-        assert "error" in result.stdout.lower() or result.exit_code == 1
+        assert "error" in result.stderr.lower() or result.exit_code == 1
 
 
 # =============================================================================
@@ -315,7 +315,7 @@ def test_invalid_metric_integration():
     )
     # Should fail gracefully
     assert result.exit_code == 1
-    assert "error" in result.stdout.lower()
+    assert "error" in result.stderr.lower()
 
 
 @pytest.mark.integration

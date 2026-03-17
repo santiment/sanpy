@@ -9,6 +9,7 @@ Usage:
 """
 
 from typing import Optional
+import click
 import typer
 from typing_extensions import Annotated
 
@@ -28,6 +29,17 @@ from san.cli_formatters import (
     output,
 )
 from san.error import SanError
+
+# Reusable option types
+FormatOption = Annotated[
+    str,
+    typer.Option("--format", "-f", help="Output format: json, csv, table",
+                 click_type=click.Choice(["json", "csv", "table"])),
+]
+ApiKeyOption = Annotated[
+    Optional[str],
+    typer.Option(envvar="SANPY_APIKEY", help="API key"),
+]
 
 # Main app
 app = typer.Typer(
@@ -115,14 +127,8 @@ def metrics(
         Optional[str],
         typer.Option(help="Filter metrics available for this asset slug"),
     ] = None,
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
-        Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
-    ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """List available metrics."""
     _init_api_key(api_key)
@@ -131,27 +137,21 @@ def metrics(
             result = san.available_metrics_for_slug(slug)
         else:
             result = san.available_metrics()
-        output(format_list(result, format))
+        output(format_list(result, fmt, header="metric"))
     except Exception as e:
         _handle_error(e)
 
 
 @app.command()
 def projects(
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
-        Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
-    ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """List all available projects/assets."""
     _init_api_key(api_key)
     try:
         df = san.get("projects/all")
-        output(format_dataframe(df, format))
+        output(format_dataframe(df, fmt))
     except Exception as e:
         _handle_error(e)
 
@@ -177,26 +177,26 @@ def get(
         str,
         typer.Option(help="Data interval (e.g., 1d, 1h, 1w)"),
     ] = "1d",
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
+    aggregation: Annotated[
         Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
+        typer.Option(help="Aggregation: avg, sum, min, max, first, last, etc."),
     ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """Fetch timeseries data for a single metric/asset pair."""
     _init_api_key(api_key)
     try:
-        df = san.get(
-            metric,
+        kwargs = dict(
             slug=slug,
             from_date=from_date,
             to_date=to_date,
             interval=interval,
         )
-        output(format_dataframe(df, format))
+        if aggregation:
+            kwargs["aggregation"] = aggregation.upper()
+        df = san.get(metric, **kwargs)
+        output(format_dataframe(df, fmt))
     except Exception as e:
         _handle_error(e)
 
@@ -217,27 +217,27 @@ def get_many(
         str,
         typer.Option(help="Data interval (e.g., 1d, 1h, 1w)"),
     ] = "1d",
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
+    aggregation: Annotated[
         Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
+        typer.Option(help="Aggregation: avg, sum, min, max, first, last, etc."),
     ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """Fetch timeseries data for a metric across multiple assets."""
     _init_api_key(api_key)
     try:
         slug_list = [s.strip() for s in slugs.split(",") if s.strip()]
-        df = san.get_many(
-            metric,
+        kwargs = dict(
             slugs=slug_list,
             from_date=from_date,
             to_date=to_date,
             interval=interval,
         )
-        output(format_dataframe(df, format))
+        if aggregation:
+            kwargs["aggregation"] = aggregation.upper()
+        df = san.get_many(metric, **kwargs)
+        output(format_dataframe(df, fmt))
     except Exception as e:
         _handle_error(e)
 
@@ -249,40 +249,28 @@ def get_many(
 
 @app.command("rate-limit")
 def rate_limit(
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
-        Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
-    ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """Show API rate limit status (calls remaining)."""
     _init_api_key(api_key)
     try:
         remaining = san.api_calls_remaining()
-        output(format_dict(remaining, format))
+        output(format_dict(remaining, fmt))
     except Exception as e:
         _handle_error(e)
 
 
 @app.command("api-calls")
 def api_calls(
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
-        Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
-    ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """Show API calls history."""
     _init_api_key(api_key)
     try:
         calls = san.api_calls_made()
-        output(format_api_calls(calls, format))
+        output(format_api_calls(calls, fmt))
     except Exception as e:
         _handle_error(e)
 
@@ -302,14 +290,8 @@ def complexity(
         str,
         typer.Option(help="Data interval (e.g., 1d, 1h, 1w)"),
     ] = "1d",
-    format: Annotated[
-        str,
-        typer.Option("--format", "-f", help="Output format: json, csv, table"),
-    ] = "table",
-    api_key: Annotated[
-        Optional[str],
-        typer.Option(envvar="SANPY_APIKEY", help="API key"),
-    ] = None,
+    fmt: FormatOption = "table",
+    api_key: ApiKeyOption = None,
 ) -> None:
     """Check query complexity for a metric."""
     _init_api_key(api_key)
@@ -327,7 +309,7 @@ def complexity(
             "interval": interval,
             "complexity": result,
         }
-        output(format_dict(data, format))
+        output(format_dict(data, fmt))
     except Exception as e:
         _handle_error(e)
 

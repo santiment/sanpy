@@ -75,8 +75,13 @@ def _save_config(config: dict) -> None:
     _ensure_config_dir()
     config_path = get_config_path()
     try:
-        with open(config_path, "w") as f:
-            json.dump(config, f, indent=2)
+        if os.name == "nt":
+            with open(config_path, "w") as f:
+                json.dump(config, f, indent=2)
+        else:
+            fd = os.open(config_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w") as f:
+                json.dump(config, f, indent=2)
     except (OSError, IOError) as e:
         raise ConfigError(
             f"Cannot write configuration file '{config_path}': {e.strerror}"

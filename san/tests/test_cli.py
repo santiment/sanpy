@@ -13,7 +13,7 @@ import pandas as pd
 from san.cli import app
 
 
-runner = CliRunner()
+runner = CliRunner(mix_stderr=False)
 
 
 # =============================================================================
@@ -338,6 +338,25 @@ def test_rate_limit_json(mock_remaining):
     assert data["month_remaining"] == "9000"
 
 
+@patch("san.api_calls_remaining")
+def test_rate_limit_csv_has_single_trailing_newline(mock_remaining):
+    """Test rate-limit CSV output does not include an extra blank line."""
+    mock_remaining.return_value = {
+        "month_remaining": "9000",
+        "hour_remaining": "100",
+        "minute_remaining": "10",
+    }
+
+    result = runner.invoke(app, ["rate-limit", "-f", "csv"])
+    assert result.exit_code == 0
+    assert result.stdout == (
+        "key,value\n"
+        "month_remaining,9000\n"
+        "hour_remaining,100\n"
+        "minute_remaining,10\n"
+    )
+
+
 @patch("san.api_calls_made")
 def test_api_calls(mock_calls_made):
     """Test api-calls command."""
@@ -379,6 +398,23 @@ def test_complexity_json(mock_complexity):
     assert data["metric"] == "price_usd"
 
 
+@patch("san.metric_complexity")
+def test_complexity_csv_has_single_trailing_newline(mock_complexity):
+    """Test complexity CSV output does not include an extra blank line."""
+    mock_complexity.return_value = 1500
+
+    result = runner.invoke(app, ["complexity", "price_usd", "-f", "csv"])
+    assert result.exit_code == 0
+    assert result.stdout == (
+        "key,value\n"
+        "metric,price_usd\n"
+        "from,utc_now-30d\n"
+        "to,utc_now\n"
+        "interval,1d\n"
+        "complexity,1500\n"
+    )
+
+
 # =============================================================================
 # Error Handling Tests
 # =============================================================================
@@ -393,4 +429,4 @@ def test_error_handling(mock_get):
 
     result = runner.invoke(app, ["get", "invalid_metric", "--slug", "bitcoin"])
     assert result.exit_code == 1
-    assert "error" in result.stdout.lower()
+    assert "error" in result.stderr.lower()
