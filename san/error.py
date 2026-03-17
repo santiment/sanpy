@@ -22,6 +22,10 @@ class SanRateLimitError(SanError):
     pass
 
 
+class SanResponseSizeLimitError(SanError):
+    pass
+
+
 class SanServerError(SanError):
     pass
 

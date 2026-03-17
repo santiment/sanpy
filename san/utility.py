@@ -1,3 +1,5 @@
+import re
+
 import san.sanbase_graphql
 from san.graphql import execute_gql, get_response_headers
 from san.error import SanError, SanRateLimitError
@@ -8,10 +10,10 @@ def is_rate_limit_exception(exception):
 
 
 def rate_limit_time_left(exception):
-    words = str(exception).split()
-    return int(
-        list(filter(lambda x: x.isnumeric(), words))[0]
-    )  # Message is: API Rate Limit Reached. Try again in X seconds (<human readable time>)
+    match = re.search(r"Try again in (\d+) seconds", str(exception))
+    if match is None:
+        raise SanError("The exception does not contain a retry-after rate limit delay.")
+    return int(match.group(1))
 
 
 def api_calls_remaining():

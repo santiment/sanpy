@@ -13,6 +13,7 @@ from san.error import (
     SanNetworkError,
     SanQueryError,
     SanRateLimitError,
+    SanResponseSizeLimitError,
     SanServerError,
     SanTimeoutError,
 )
@@ -158,7 +159,7 @@ def test_transport_maps_non_json_429_to_rate_limit_error(monkeypatch):
     response = InvalidJsonHttpErrorResponse(status_code=429, text="Too many requests")
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
-    with pytest.raises(SanRateLimitError):
+    with pytest.raises(SanQueryError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
@@ -167,6 +168,14 @@ def test_transport_maps_non_json_503_to_server_error(monkeypatch):
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
     with pytest.raises(SanServerError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+def test_transport_maps_response_size_limit_429_to_distinct_error(test_response, monkeypatch):
+    response = test_response(status_code=429, data={"errors": {"details": "Response size limit exceeded"}})
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanResponseSizeLimitError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 

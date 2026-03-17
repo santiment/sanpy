@@ -1,5 +1,5 @@
 from san.api_config import ApiConfig
-from san.error import SanAuthError, SanEmptyResultError, SanQueryError, SanRateLimitError, SanServerError
+from san.error import SanAuthError, SanEmptyResultError, SanQueryError, SanRateLimitError, SanResponseSizeLimitError, SanServerError
 from san.transport import RequestsTransport
 
 DEFAULT_TRANSPORT = RequestsTransport()
@@ -48,7 +48,7 @@ def __raise_response_error__(response, gql_query_str):
     if response.status_code == 400 and __is_auth_error__(error_response):
         raise SanAuthError(message)
     if response.status_code == 429:
-        raise SanRateLimitError(message)
+        __raise_too_many_requests_error__(message, error_response)
     if response.status_code >= 500:
         raise SanServerError(message)
     if __is_rate_limit_error__(error_response):
@@ -113,6 +113,10 @@ def __is_rate_limit_error__(error_response):
     return "API Rate Limit Reached" in str(error_response)
 
 
+def __is_response_size_limit_error__(error_response):
+    return "response size limit" in str(error_response).lower()
+
+
 def __is_auth_error__(error_response):
     auth_markers = ["invalid jwt", "invalid apikey", "apikey", "authorization", "unauthorized", "authentication"]
     error_text = str(error_response).lower()
@@ -127,6 +131,14 @@ def __raise_graphql_error__(gql_query_str, errors):
         raise SanRateLimitError(message)
     if __is_auth_error__(error_response):
         raise SanAuthError(message)
+    raise SanQueryError(message)
+
+
+def __raise_too_many_requests_error__(message, error_response):
+    if __is_rate_limit_error__(error_response):
+        raise SanRateLimitError(message)
+    if __is_response_size_limit_error__(error_response):
+        raise SanResponseSizeLimitError(message)
     raise SanQueryError(message)
 
 

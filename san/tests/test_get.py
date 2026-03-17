@@ -1,7 +1,7 @@
 import san
 import pandas as pd
 import pandas.testing as pdt
-from san.error import SanError
+from san.error import SanError, SanResponseSizeLimitError
 import pytest
 from unittest.mock import patch
 from san.pandas_utils import convert_to_datetime_idx_df
@@ -422,6 +422,14 @@ def test_rate_limits():
 
     assert san.is_rate_limit_exception(exception)
     assert san.rate_limit_time_left(exception) == 366
+
+
+def test_response_size_limit_is_not_treated_as_rate_limit():
+    exception = SanResponseSizeLimitError("Error running query. Status code: 429.\n Response size limit exceeded")
+
+    assert not san.is_rate_limit_exception(exception)
+    with pytest.raises(SanError):
+        san.rate_limit_time_left(exception)
 
 
 def test_api_calls_made_exception_without_key():
