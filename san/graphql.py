@@ -110,11 +110,12 @@ def __extract_error_details__(response_json):
 
 
 def __is_rate_limit_error__(error_response):
-    return "API Rate Limit Reached" in str(error_response)
+    return "api rate limit" in str(error_response).lower()
 
 
 def __is_response_size_limit_error__(error_response):
-    return "response size limit" in str(error_response).lower()
+    error_text = str(error_response).lower()
+    return "response size" in error_text and "limit exceeded" in error_text
 
 
 def __is_auth_error__(error_response):

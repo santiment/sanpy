@@ -171,8 +171,15 @@ def test_transport_maps_non_json_503_to_server_error(monkeypatch):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
-def test_transport_maps_response_size_limit_429_to_distinct_error(test_response, monkeypatch):
-    response = test_response(status_code=429, data={"errors": {"details": "Response size limit exceeded"}})
+@pytest.mark.parametrize(
+    "error_details",
+    [
+        "Total response size (in MBs) limit exceeded. Try again in 5 seconds (5 seconds).",
+        "Response size limit exceeded",
+    ],
+)
+def test_transport_maps_response_size_limit_429_to_distinct_error(error_details, test_response, monkeypatch):
+    response = test_response(status_code=429, data={"errors": {"details": error_details}})
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
     with pytest.raises(SanResponseSizeLimitError):
