@@ -1,7 +1,7 @@
 import json
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
@@ -215,6 +215,20 @@ def test_transport_rebuilds_session_when_retry_config_changes():
     ApiConfig.request_retry_count += 1
     session2 = transport._get_session()
 
+    assert session1 is not session2
+
+
+def test_transport_closes_old_session_when_rebuilding():
+    transport = RequestsTransport()
+
+    session1 = transport._get_session()
+    close_spy = MagicMock()
+    session1.close = close_spy
+
+    ApiConfig.request_retry_count += 1
+    session2 = transport._get_session()
+
+    close_spy.assert_called_once_with()
     assert session1 is not session2
 
 

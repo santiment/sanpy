@@ -36,6 +36,8 @@ class RequestsTransport:
         session = getattr(self._local, "session", None)
         config_signature = self._config_signature()
         if session is None or getattr(self._local, "config_signature", None) != config_signature:
+            if session is not None:
+                session.close()
             session = requests.Session()
             adapter = HTTPAdapter(
                 max_retries=self._build_retry_strategy(),
