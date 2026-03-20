@@ -1,67 +1,174 @@
-import requests
 from san.api_config import ApiConfig
-from san.env_vars import SANBASE_GQL_HOST
-from san.error import SanError
+from san.error import (
+    SanAuthError,
+    SanEmptyResultError,
+    SanGraphqlQueryError,
+    SanRateLimitError,
+    SanResponseSizeLimitError,
+    SanServerError,
+)
+from san.transport import RequestsTransport
+
+DEFAULT_TRANSPORT = RequestsTransport()
 
 
 def execute_gql(gql_query_str):
-    headers = {}
-    if ApiConfig.api_key:
-        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
-
-    try:
-        response = requests.post(SANBASE_GQL_HOST, json={"query": gql_query_str}, headers=headers)
-    except requests.exceptions.RequestException as e:
-        raise SanError("Error running query: ({})".format(e))
+    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
-    else:
-        if __result_has_gql_errors__(response):
-            error_response = response.json()["errors"]["details"]
-        else:
-            error_response = ""
-        raise SanError(
-            "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
-        )
+    __raise_response_error__(response, gql_query_str)
 
 
 def get_response_headers(gql_query_str):
-    headers = {}
-    if ApiConfig.api_key:
-        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
-
-    try:
-        response = requests.post(SANBASE_GQL_HOST, json={"query": gql_query_str}, headers=headers)
-    except requests.exceptions.RequestException as e:
-        raise SanError("Error running query: ({})".format(e))
+    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
 
     if response.status_code == 200:
         return response.headers
-    else:
-        if __result_has_gql_errors__(response):
-            error_response = response.json()["errors"]["details"]
-        else:
-            error_response = ""
-        raise SanError(
-            "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
-        )
+    __raise_response_error__(response, gql_query_str)
 
 
 def __handle_success_response__(response, gql_query_str):
-    if __result_has_gql_errors__(response):
-        raise SanError("GraphQL error occured running query {} \n errors: {}".format(gql_query_str, response.json()["errors"]))
-    elif __exist_not_empty_result(response):
-        return response.json()["data"]
-    else:
-        raise SanError(
-            "Error running query, the results are empty. Status code: {}.\n {}".format(response.status_code, gql_query_str)
+    response_json = __json_response__(response)
+    if __result_has_gql_errors__(response_json):
+        __raise_graphql_error__(gql_query_str, response_json["errors"])
+    if __has_resolved_queries(response_json):
+        return response_json["data"]
+    raise SanEmptyResultError(
+        "Error running query, no top-level GraphQL fields resolved to a non-null value. Status code: {}.\n {}".format(
+            response.status_code, gql_query_str
         )
+    )
 
 
-def __result_has_gql_errors__(response):
-    return "errors" in response.json().keys()
+def __build_headers():
+    headers = {}
+    if ApiConfig.api_key:
+        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
+    return headers
 
 
-def __exist_not_empty_result(response):
-    return "data" in response.json().keys() and len(list(filter(lambda x: x is not None, response.json()["data"].values()))) > 0
+def __raise_response_error__(response, gql_query_str):
+    error_response = __extract_response_error_details__(response)
+    message = "Error running query. Status code: {}.\n {}\n {}".format(response.status_code, error_response, gql_query_str)
+
+    if response.status_code in (401, 403):
+        raise SanAuthError(message)
+    if response.status_code == 400 and __is_auth_error__(error_response):
+        raise SanAuthError(message)
+    if response.status_code == 429:
+        __raise_too_many_requests_error__(message, error_response)
+    if response.status_code >= 500:
+        raise SanServerError(message)
+    if __is_auth_error__(error_response):
+        raise SanAuthError(message)
+    raise SanGraphqlQueryError(message)
+
+
+def __json_response__(response):
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise SanGraphqlQueryError(f"Invalid JSON response received from API: {exc}") from exc
+
+
+def __extract_response_error_details__(response):
+    response_json = __optional_json_response__(response)
+    if response_json is not None:
+        error_response = __extract_error_details__(response_json)
+        if error_response:
+            return error_response
+
+    response_text = getattr(response, "text", "")
+    if response_text:
+        return response_text.strip()
+    return ""
+
+
+def __optional_json_response__(response):
+    try:
+        return response.json()
+    except ValueError:
+        return None
+
+
+def __result_has_gql_errors__(response_json):
+    return "errors" in response_json.keys()
+
+
+def __has_resolved_queries(response_json):
+    if "data" not in response_json.keys():
+        return False
+
+    data = response_json["data"]
+    if isinstance(data, dict):
+        # A query is considered resolved if at least one top-level field is non-null,
+        # even when the nested payload itself is empty (for example an empty list).
+        return len(list(filter(lambda x: x is not None, data.values()))) > 0
+
+    return data is not None
+
+
+def __extract_error_details__(response_json):
+    errors = response_json.get("errors", "")
+    if isinstance(errors, dict) and "details" in errors:
+        return errors["details"]
+    if isinstance(errors, list):
+        return "; ".join(filter(None, map(__format_graphql_error__, errors)))
+    return errors
+
+
+def __is_rate_limit_error__(error_response):
+    return "api rate limit" in str(error_response).lower()
+
+
+def __is_response_size_limit_error__(error_response):
+    error_text = str(error_response).lower()
+    return "response size" in error_text and "limit exceeded" in error_text
+
+
+def __is_auth_error__(error_response):
+    auth_markers = [
+        "invalid jwt",
+        "invalid apikey",
+        "missing apikey",
+        "invalid api key",
+        "missing api key",
+        "authorization",
+        "unauthorized",
+        "authentication",
+    ]
+    error_text = str(error_response).lower()
+    return any(marker in error_text for marker in auth_markers)
+
+
+def __raise_graphql_error__(gql_query_str, errors):
+    error_response = __extract_error_details__({"errors": errors})
+    message = "GraphQL error occurred running query {} \n errors: {}".format(gql_query_str, error_response)
+
+    if __is_rate_limit_error__(error_response):
+        raise SanRateLimitError(message)
+    if __is_auth_error__(error_response):
+        raise SanAuthError(message)
+    raise SanGraphqlQueryError(message)
+
+
+def __raise_too_many_requests_error__(message, error_response):
+    if __is_response_size_limit_error__(error_response):
+        raise SanResponseSizeLimitError(message)
+    raise SanRateLimitError(message)
+
+
+def __format_graphql_error__(error):
+    if not isinstance(error, dict):
+        return str(error)
+
+    message = error.get("message", "")
+    details = error.get("details")
+    path = error.get("path")
+    parts = [message] if message else []
+    if details is not None:
+        parts.append(f"details={details}")
+    if path is not None:
+        parts.append(f"path={path}")
+    return " | ".join(parts)

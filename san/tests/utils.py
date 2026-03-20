@@ -20,6 +20,7 @@ def month_ago():
 class TestResponse:
     def setup(self, **kwargs):
         self.status_code = kwargs["status_code"]
+        self.headers = kwargs.get("headers", {})
         if "errors" in kwargs["data"]:
             self.data = kwargs["data"]
         else:

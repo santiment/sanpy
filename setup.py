@@ -16,7 +16,7 @@ setuptools.setup(
     url="https://github.com/santiment/sanpy",
     packages=setuptools.find_packages(),
     setup_requires=["numpy", "Cython"],
-    install_requires=["pandas>=1.3.0", "requests", "iso8601", "setuptools"],
+    install_requires=["pandas>=1.3.0", "requests", "urllib3", "iso8601", "setuptools"],
     extras_require={
         "extras": ["numpy", "matplotlib", "scipy", "mlfinlab"],
         "dev": ["ruff", "pytest"],
