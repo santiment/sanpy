@@ -2,7 +2,7 @@ import re
 
 import san.sanbase_graphql
 from san.graphql import execute_gql, get_response_headers
-from san.error import SanError, SanRateLimitError
+from san.error import SanEmptyResultError, SanError, SanRateLimitError
 
 
 def is_rate_limit_exception(exception):
@@ -33,9 +33,9 @@ def api_calls_made():
 def __request_api_call_data(query):
     try:
         res = execute_gql(query)["currentUser"]["apiCallsHistory"]
+    except SanEmptyResultError as exc:
+        raise SanError("No API Key detected...") from exc
     except Exception as exc:
-        if "the results are empty" in str(exc):
-            raise SanError("No API Key detected...") from exc
         raise SanError(str(exc)) from exc
 
     return res

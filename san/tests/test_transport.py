@@ -125,7 +125,7 @@ def test_transport_raises_empty_result_error(test_response, monkeypatch):
     with pytest.raises(SanEmptyResultError) as exc:
         execute_gql("{ query_0: projectsAll { slug } }")
 
-    assert "results are empty" in str(exc.value)
+    assert "no top-level GraphQL fields resolved to a non-null value" in str(exc.value)
 
 
 def test_transport_raises_timeout_error(monkeypatch):

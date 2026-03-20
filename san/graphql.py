@@ -32,10 +32,12 @@ def __handle_success_response__(response, gql_query_str):
     response_json = __json_response__(response)
     if __result_has_gql_errors__(response_json):
         __raise_graphql_error__(gql_query_str, response_json["errors"])
-    if __exist_not_empty_result(response_json):
+    if __has_resolved_queries(response_json):
         return response_json["data"]
     raise SanEmptyResultError(
-        "Error running query, the results are empty. Status code: {}.\n {}".format(response.status_code, gql_query_str)
+        "Error running query, no top-level GraphQL fields resolved to a non-null value. Status code: {}.\n {}".format(
+            response.status_code, gql_query_str
+        )
     )
 
 
@@ -58,8 +60,6 @@ def __raise_response_error__(response, gql_query_str):
         __raise_too_many_requests_error__(message, error_response)
     if response.status_code >= 500:
         raise SanServerError(message)
-    if __is_rate_limit_error__(error_response):
-        raise SanRateLimitError(message)
     if __is_auth_error__(error_response):
         raise SanAuthError(message)
     raise SanGraphqlQueryError(message)
@@ -96,12 +96,14 @@ def __result_has_gql_errors__(response_json):
     return "errors" in response_json.keys()
 
 
-def __exist_not_empty_result(response_json):
+def __has_resolved_queries(response_json):
     if "data" not in response_json.keys():
         return False
 
     data = response_json["data"]
     if isinstance(data, dict):
+        # A query is considered resolved if at least one top-level field is non-null,
+        # even when the nested payload itself is empty (for example an empty list).
         return len(list(filter(lambda x: x is not None, data.values()))) > 0
 
     return data is not None
@@ -142,7 +144,7 @@ def __is_auth_error__(error_response):
 
 def __raise_graphql_error__(gql_query_str, errors):
     error_response = __extract_error_details__({"errors": errors})
-    message = "GraphQL error occured running query {} \n errors: {}".format(gql_query_str, error_response)
+    message = "GraphQL error occurred running query {} \n errors: {}".format(gql_query_str, error_response)
 
     if __is_rate_limit_error__(error_response):
         raise SanRateLimitError(message)
