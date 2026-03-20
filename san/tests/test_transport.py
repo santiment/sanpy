@@ -10,8 +10,8 @@ from san.api_config import ApiConfig
 from san.error import (
     SanAuthError,
     SanEmptyResultError,
+    SanGraphqlQueryError,
     SanNetworkError,
-    SanQueryError,
     SanRateLimitError,
     SanResponseSizeLimitError,
     SanServerError,
@@ -86,7 +86,7 @@ def test_transport_maps_graphql_query_error(test_response, monkeypatch):
     response = test_response(status_code=200, data={"errors": [{"message": "Unknown field", "locations": [{"line": 1, "column": 2}]}]})
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
-    with pytest.raises(SanQueryError):
+    with pytest.raises(SanGraphqlQueryError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
@@ -98,6 +98,14 @@ def test_transport_maps_graphql_auth_error(test_response, monkeypatch):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
+def test_transport_does_not_treat_generic_apikey_mentions_as_auth_error(test_response, monkeypatch):
+    response = test_response(status_code=200, data={"errors": [{"message": "apikey parameter is optional"}]})
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanGraphqlQueryError):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
 def test_transport_raises_on_partial_graphql_failure(test_response, monkeypatch):
     partial_response = {
         "data": {"query_0": [{"slug": "bitcoin"}], "query_1": None},
@@ -106,7 +114,7 @@ def test_transport_raises_on_partial_graphql_failure(test_response, monkeypatch)
     response = test_response(status_code=200, data=partial_response)
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
-    with pytest.raises(SanQueryError):
+    with pytest.raises(SanGraphqlQueryError):
         execute_gql("{ query_0: projectsAll { slug } query_1: getMetric(metric: \"bad\") { metadata { metric } } }")
 
 
@@ -143,7 +151,7 @@ def test_transport_raises_connection_error(monkeypatch):
 def test_transport_raises_invalid_json_error(monkeypatch):
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: InvalidJsonResponse())
 
-    with pytest.raises(SanQueryError):
+    with pytest.raises(SanGraphqlQueryError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
@@ -159,7 +167,7 @@ def test_transport_maps_non_json_429_to_rate_limit_error(monkeypatch):
     response = InvalidJsonHttpErrorResponse(status_code=429, text="Too many requests")
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
-    with pytest.raises(SanQueryError):
+    with pytest.raises(SanRateLimitError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 

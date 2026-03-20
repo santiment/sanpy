@@ -1,5 +1,12 @@
 from san.api_config import ApiConfig
-from san.error import SanAuthError, SanEmptyResultError, SanQueryError, SanRateLimitError, SanResponseSizeLimitError, SanServerError
+from san.error import (
+    SanAuthError,
+    SanEmptyResultError,
+    SanGraphqlQueryError,
+    SanRateLimitError,
+    SanResponseSizeLimitError,
+    SanServerError,
+)
 from san.transport import RequestsTransport
 
 DEFAULT_TRANSPORT = RequestsTransport()
@@ -55,14 +62,14 @@ def __raise_response_error__(response, gql_query_str):
         raise SanRateLimitError(message)
     if __is_auth_error__(error_response):
         raise SanAuthError(message)
-    raise SanQueryError(message)
+    raise SanGraphqlQueryError(message)
 
 
 def __json_response__(response):
     try:
         return response.json()
     except ValueError as exc:
-        raise SanQueryError(f"Invalid JSON response received from API: {exc}") from exc
+        raise SanGraphqlQueryError(f"Invalid JSON response received from API: {exc}") from exc
 
 
 def __extract_response_error_details__(response):
@@ -119,7 +126,16 @@ def __is_response_size_limit_error__(error_response):
 
 
 def __is_auth_error__(error_response):
-    auth_markers = ["invalid jwt", "invalid apikey", "apikey", "authorization", "unauthorized", "authentication"]
+    auth_markers = [
+        "invalid jwt",
+        "invalid apikey",
+        "missing apikey",
+        "invalid api key",
+        "missing api key",
+        "authorization",
+        "unauthorized",
+        "authentication",
+    ]
     error_text = str(error_response).lower()
     return any(marker in error_text for marker in auth_markers)
 
@@ -132,15 +148,13 @@ def __raise_graphql_error__(gql_query_str, errors):
         raise SanRateLimitError(message)
     if __is_auth_error__(error_response):
         raise SanAuthError(message)
-    raise SanQueryError(message)
+    raise SanGraphqlQueryError(message)
 
 
 def __raise_too_many_requests_error__(message, error_response):
-    if __is_rate_limit_error__(error_response):
-        raise SanRateLimitError(message)
     if __is_response_size_limit_error__(error_response):
         raise SanResponseSizeLimitError(message)
-    raise SanQueryError(message)
+    raise SanRateLimitError(message)
 
 
 def __format_graphql_error__(error):

@@ -4,7 +4,7 @@ from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
 import pytest
 
-from san.error import SanQueryError
+from san.error import SanGraphqlQueryError
 
 
 @patch("san.transport.requests.Session.post")
@@ -76,5 +76,5 @@ def test_batch_raises_on_partial_graphql_failure(mock, test_response):
         interval="1d",
     )
 
-    with pytest.raises(SanQueryError):
+    with pytest.raises(SanGraphqlQueryError):
         batch.execute()

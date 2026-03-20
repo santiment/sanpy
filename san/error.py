@@ -30,7 +30,7 @@ class SanServerError(SanError):
     pass
 
 
-class SanQueryError(SanError):
+class SanGraphqlQueryError(SanError):
     pass
 
 
@@ -40,3 +40,6 @@ class SanEmptyResultError(SanError):
 
 class SanPartialResultWarning(UserWarning):
     pass
+
+
+SanQueryError = SanGraphqlQueryError
