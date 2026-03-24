@@ -21,6 +21,7 @@ More documentation regarding the API and definitions of metrics can be found on 
   - [Configuration](#configuration)
     - [Read the API key from the environment](#read-the-api-key-from-the-environment)
     - [Manually configure an API key](#manually-configure-an-api-key)
+    - [Configure retries, timeouts, and connection pooling](#configure-retries-timeouts-and-connection-pooling)
     - [How to obtain an API key](#how-to-obtain-an-api-key)
   - [Getting the data](#getting-the-data)
     - [Using the provided functions](#using-the-provided-functions)
@@ -58,7 +59,7 @@ To install the latest [sanpy from PyPI](https://pypi.org/project/sanpy/):
 
 ```bash
 # Install the latest version
-pip install sanpy==0.12.5
+pip install sanpy==0.13.0
 ```
 
 ## Upgrade to latest version
@@ -105,6 +106,38 @@ import san
 ```python
 import san
 san.ApiConfig.api_key = "my_apikey"
+```
+
+### Configure retries, timeouts, and connection pooling
+
+By default, `sanpy` reuses HTTP sessions and retries transient GraphQL transport failures.
+
+- `san.ApiConfig.request_timeout` controls `(connect_timeout, read_timeout)` and defaults to `(3.05, 30)`
+- `san.ApiConfig.request_retry_count` controls how many retries are attempted and defaults to `3`
+- `san.ApiConfig.request_backoff_factor` controls exponential backoff between retries and defaults to `0.5`
+- `san.ApiConfig.pool_connections` controls how many connection pools are cached and defaults to `10`
+- `san.ApiConfig.pool_maxsize` controls how many reusable connections are kept per pool and defaults to `10`
+
+Retries apply to connection/read failures and HTTP `408`, `429`, `500`, `502`, `503`, and `504`.
+
+To disable retries:
+
+```python
+import san
+
+san.ApiConfig.request_retry_count = 0
+```
+
+To customize retry and timeout behavior:
+
+```python
+import san
+
+san.ApiConfig.request_timeout = (2, 20)
+san.ApiConfig.request_retry_count = 5
+san.ApiConfig.request_backoff_factor = 0.25
+san.ApiConfig.pool_connections = 20
+san.ApiConfig.pool_maxsize = 50
 ```
 
 ### How to obtain an API key
