@@ -1,7 +1,7 @@
 import san
 import pandas as pd
 import pandas.testing as pdt
-from san.error import SanError
+from san.error import SanError, SanResponseSizeLimitError
 import pytest
 from unittest.mock import patch
 from san.pandas_utils import convert_to_datetime_idx_df
@@ -9,7 +9,7 @@ from copy import deepcopy
 from san.batch import Batch
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_get(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -31,7 +31,7 @@ def test_get(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_prices(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -50,14 +50,14 @@ def test_prices(mock, test_response):
     pdt.assert_frame_equal(res, df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_error_response(mock, test_response):
     mock.return_value = test_response(status_code=500, data={"errors": {"details": "Internal server error"}})
     with pytest.raises(SanError):
         san.get("prices/santiment_usd", from_date="2018-06-01", to_date="2018-06-05", interval="1d")
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_get_without_transform(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -82,7 +82,7 @@ def test_get_without_transform(mock, test_response):
     pdt.assert_frame_equal(res, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_get_with_transform(mock, test_response):
     api_call_result = {
         "query_0": {
@@ -140,7 +140,7 @@ def test_get_with_transform(mock, test_response):
     pdt.assert_frame_equal(result, expected_df, check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_batch_only_with_nontransform_queries(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -199,7 +199,7 @@ def test_batch_only_with_nontransform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_batch_only_with_transform_queries(mock, test_response):
     api_call_result = {
         "query_0": {
@@ -312,7 +312,7 @@ def test_batch_only_with_transform_queries(mock, test_response):
         pdt.assert_frame_equal(result[i], expected_result[i], check_dtype=False)
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_batch_with_mixed_queries(mock, test_response):
     api_call_result = {
         "query_0": [
@@ -424,6 +424,14 @@ def test_rate_limits():
     assert san.rate_limit_time_left(exception) == 366
 
 
+def test_response_size_limit_is_not_treated_as_rate_limit():
+    exception = SanResponseSizeLimitError("Error running query. Status code: 429.\n Response size limit exceeded")
+
+    assert not san.is_rate_limit_exception(exception)
+    with pytest.raises(SanError):
+        san.rate_limit_time_left(exception)
+
+
 def test_api_calls_made_exception_without_key():
     san.ApiConfig.api_key = None
     with pytest.raises(SanError):
@@ -446,7 +454,7 @@ def test_transform_arg_no_transform_given():
     assert san.sanbase_graphql._transform_arg_helper(kwargs) == ""
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_get_metric_with_version_in_query(mock, test_response):
     api_call_result = {
         "query_0": {
@@ -471,7 +479,7 @@ def test_get_metric_with_version_in_query(mock, test_response):
     assert 'getMetric(metric: "price_usd", version: "2.0")' in query
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_get_many_metric_with_version_in_query(mock, test_response):
     api_call_result = {
         "query_0": {

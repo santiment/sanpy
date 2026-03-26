@@ -13,6 +13,7 @@ For full API documentation and metric definitions, see [Santiment Academy](https
 - [Configuration](#configuration)
   - [Environment variable](#environment-variable)
   - [Programmatic](#programmatic)
+  - [Configure retries, timeouts, and connection pooling](#configure-retries-timeouts-and-connection-pooling)
   - [Obtaining an API key](#obtaining-an-api-key)
 - [Fetching data](#fetching-data)
   - [Single asset](#single-asset)
@@ -82,6 +83,39 @@ san.ApiConfig.api_key  # 'my_api_key'
 ```python
 import san
 san.ApiConfig.api_key = "my_api_key"
+```
+
+### Configure retries, timeouts, and connection pooling
+
+By default, `sanpy` reuses HTTP sessions and retries transient GraphQL transport failures.
+
+- `san.ApiConfig.request_timeout` controls `(connect_timeout, read_timeout)` and defaults to `(3.05, 30)`
+- `san.ApiConfig.request_retry_count` controls how many retries are attempted and defaults to `3`
+- `san.ApiConfig.request_backoff_factor` controls exponential backoff between retries and defaults to `0.5`
+- `san.ApiConfig.pool_connections` controls how many connection pools are cached and defaults to `10`
+- `san.ApiConfig.pool_maxsize` controls how many reusable connections are kept per pool and defaults to `10`
+
+Retries apply to connection/read failures and HTTP `408`, `500`, `502`, `503`, and `504`.
+HTTP `429` responses are surfaced to callers as rate-limit errors instead of being retried automatically.
+
+To disable retries:
+
+```python
+import san
+
+san.ApiConfig.request_retry_count = 0
+```
+
+To customize retry and timeout behavior:
+
+```python
+import san
+
+san.ApiConfig.request_timeout = (2, 20)
+san.ApiConfig.request_retry_count = 5
+san.ApiConfig.request_backoff_factor = 0.25
+san.ApiConfig.pool_connections = 20
+san.ApiConfig.pool_maxsize = 50
 ```
 
 ### Obtaining an API key

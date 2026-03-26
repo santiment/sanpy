@@ -2,9 +2,12 @@ from san import Batch
 from unittest.mock import patch
 from san.pandas_utils import convert_to_datetime_idx_df
 import pandas.testing as pdt
+import pytest
+
+from san.error import SanGraphqlQueryError
 
 
-@patch("san.graphql.requests.post")
+@patch("san.transport.requests.Session.post")
 def test_batch(mock, test_response):
     expected = {
         "query_0": [
@@ -44,3 +47,34 @@ def test_batch(mock, test_response):
 
     pdt.assert_frame_equal(res1, df1, check_dtype=False)
     pdt.assert_frame_equal(res2, df2, check_dtype=False)
+
+
+@patch("san.transport.requests.Session.post")
+def test_batch_raises_on_partial_graphql_failure(mock, test_response):
+    partial_response = {
+        "data": {
+            "query_0": [{"balance": 1.0, "datetime": "2019-05-18T00:00:00Z"}],
+            "query_1": None,
+        },
+        "errors": [{"message": "Field failed", "path": ["query_1"]}],
+    }
+    mock.return_value = test_response(status_code=200, data=partial_response)
+
+    batch = Batch()
+    batch.get(
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-18",
+        to_date="2019-05-23",
+        interval="1d",
+    )
+    batch.get(
+        "historical_balance/santiment",
+        address="0x1f3df0b8390bb8e9e322972c5e75583e87608ec2",
+        from_date="2019-05-23",
+        to_date="2019-05-26",
+        interval="1d",
+    )
+
+    with pytest.raises(SanGraphqlQueryError):
+        batch.execute()
