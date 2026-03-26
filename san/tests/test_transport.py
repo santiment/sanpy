@@ -60,7 +60,7 @@ def restore_api_config():
 @pytest.mark.parametrize(
     ("status_code", "error_payload", "expected_error"),
     [
-        (400, {"errors": {"details": "Invalid apikey"}}, SanAuthError),
+        (400, {"errors": {"details": "Apikey '***masked***' is not valid"}}, SanAuthError),
         (401, {"errors": {"details": "Unauthorized"}}, SanAuthError),
         (429, {"errors": {"details": "API Rate Limit Reached. Try again in 5 seconds"}}, SanRateLimitError),
         (503, {"errors": {"details": "Service unavailable"}}, SanServerError),
@@ -71,6 +71,23 @@ def test_transport_maps_http_errors(status_code, error_payload, expected_error, 
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
     with pytest.raises(expected_error):
+        execute_gql("{ query_0: projectsAll { slug } }")
+
+
+@pytest.mark.parametrize(
+    "error_details",
+    [
+        "Invalid JSON Web Token (JWT)",
+        'Unsupported authorization header value: "Token abc".',
+        "Apikey '***masked***' is not valid",
+        "Unauthorized. Reason: The authentication must have been done less than 10 minutes ago.",
+    ],
+)
+def test_transport_maps_known_backend_auth_messages_to_auth_error(error_details, test_response, monkeypatch):
+    response = test_response(status_code=400, data={"errors": {"details": error_details}})
+    monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
+
+    with pytest.raises(SanAuthError):
         execute_gql("{ query_0: projectsAll { slug } }")
 
 
@@ -91,7 +108,7 @@ def test_transport_maps_graphql_query_error(test_response, monkeypatch):
 
 
 def test_transport_maps_graphql_auth_error(test_response, monkeypatch):
-    response = test_response(status_code=200, data={"errors": [{"message": "unauthorized"}]})
+    response = test_response(status_code=200, data={"errors": [{"message": "Invalid JSON Web Token (JWT)"}]})
     monkeypatch.setattr("san.transport.requests.Session.post", lambda *args, **kwargs: response)
 
     with pytest.raises(SanAuthError):
@@ -308,6 +325,49 @@ def test_transport_retries_until_success_on_retryable_status():
         assert response.status_code == 200
         assert response.json() == {"data": {"query_0": [{"slug": "bitcoin"}]}}
         assert RetryHandler.call_count == 3
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=1)
+
+
+def test_transport_does_not_retry_on_429():
+    class TooManyRequestsHandler(BaseHTTPRequestHandler):
+        call_count = 0
+
+        def do_POST(self):
+            TooManyRequestsHandler.call_count += 1
+            length = int(self.headers.get("Content-Length", "0"))
+            self.rfile.read(length)
+
+            if TooManyRequestsHandler.call_count == 1:
+                self.send_response(429)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"errors": {"details": "API Rate Limit Reached. Try again in 5 seconds"}}).encode())
+                return
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"data": {"query_0": [{"slug": "bitcoin"}]}}).encode())
+
+        def log_message(self, format, *args):
+            return
+
+    ApiConfig.request_retry_count = 3
+    ApiConfig.request_backoff_factor = 0
+
+    server = HTTPServer(("127.0.0.1", 0), TooManyRequestsHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    try:
+        transport = RequestsTransport(base_url=f"http://127.0.0.1:{server.server_port}")
+        response = transport.execute("{ query_0: projectsAll { slug } }")
+
+        assert response.status_code == 429
+        assert TooManyRequestsHandler.call_count == 1
     finally:
         server.shutdown()
         server.server_close()

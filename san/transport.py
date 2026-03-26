@@ -57,7 +57,7 @@ class RequestsTransport:
             read=ApiConfig.request_retry_count,
             status=ApiConfig.request_retry_count,
             allowed_methods=frozenset(["POST"]),
-            status_forcelist=(408, 429, 500, 502, 503, 504),
+            status_forcelist=(408, 500, 502, 503, 504),
             backoff_factor=ApiConfig.request_backoff_factor,
             respect_retry_after_header=True,
             raise_on_status=False,

@@ -95,7 +95,8 @@ By default, `sanpy` reuses HTTP sessions and retries transient GraphQL transport
 - `san.ApiConfig.pool_connections` controls how many connection pools are cached and defaults to `10`
 - `san.ApiConfig.pool_maxsize` controls how many reusable connections are kept per pool and defaults to `10`
 
-Retries apply to connection/read failures and HTTP `408`, `429`, `500`, `502`, `503`, and `504`.
+Retries apply to connection/read failures and HTTP `408`, `500`, `502`, `503`, and `504`.
+HTTP `429` responses are surfaced to callers as rate-limit errors instead of being retried automatically.
 
 To disable retries:
 

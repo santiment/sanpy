@@ -128,17 +128,16 @@ def __is_response_size_limit_error__(error_response):
 
 
 def __is_auth_error__(error_response):
-    auth_markers = [
-        "invalid jwt",
-        "invalid apikey",
-        "missing apikey",
-        "invalid api key",
-        "missing api key",
-        "authorization",
-        "unauthorized",
-        "authentication",
-    ]
     error_text = str(error_response).lower()
+    auth_markers = [
+        "invalid json web token (jwt)",
+        "unsupported authorization header value",
+        "unauthorized.",
+    ]
+
+    if error_text.startswith("apikey '") and error_text.endswith("' is not valid"):
+        return True
+
     return any(marker in error_text for marker in auth_markers)
 
 
