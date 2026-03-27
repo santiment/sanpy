@@ -331,9 +331,20 @@ def main(
         Optional[bool],
         typer.Option("--version", "-v", callback=version_callback, is_eager=True, help="Show version"),
     ] = None,
+    retries: Annotated[
+        Optional[int],
+        typer.Option("--retries", help="Number of retry attempts on failure (default: 3)"),
+    ] = None,
+    timeout: Annotated[
+        Optional[float],
+        typer.Option("--timeout", help="Request read timeout in seconds (default: 30)"),
+    ] = None,
 ) -> None:
     """Santiment API CLI - cryptocurrency data at your fingertips."""
-    pass
+    if retries is not None:
+        san.ApiConfig.request_retry_count = retries
+    if timeout is not None:
+        san.ApiConfig.request_timeout = (3.05, timeout)
 
 
 if __name__ == "__main__":

@@ -430,3 +430,108 @@ def test_error_handling(mock_get):
     result = runner.invoke(app, ["get", "invalid_metric", "--slug", "bitcoin"])
     assert result.exit_code == 1
     assert "error" in result.stderr.lower()
+
+
+# =============================================================================
+# Global Options Tests (--retries, --timeout)
+# =============================================================================
+
+
+@patch("san.get")
+def test_retries_option(mock_get, sample_dataframe):
+    """Test --retries sets ApiConfig.request_retry_count."""
+    import san
+
+    original = san.ApiConfig.request_retry_count
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["--retries", "5", "get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_retry_count == 5
+
+    san.ApiConfig.request_retry_count = original
+
+
+@patch("san.get")
+def test_retries_zero(mock_get, sample_dataframe):
+    """Test --retries 0 disables retries."""
+    import san
+
+    original = san.ApiConfig.request_retry_count
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["--retries", "0", "get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_retry_count == 0
+
+    san.ApiConfig.request_retry_count = original
+
+
+@patch("san.get")
+def test_timeout_option(mock_get, sample_dataframe):
+    """Test --timeout sets the read timeout in ApiConfig.request_timeout."""
+    import san
+
+    original = san.ApiConfig.request_timeout
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["--timeout", "60", "get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_timeout == (3.05, 60.0)
+
+    san.ApiConfig.request_timeout = original
+
+
+@patch("san.get")
+def test_retries_and_timeout_combined(mock_get, sample_dataframe):
+    """Test --retries and --timeout work together."""
+    import san
+
+    original_retries = san.ApiConfig.request_retry_count
+    original_timeout = san.ApiConfig.request_timeout
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(
+        app, ["--retries", "1", "--timeout", "10", "get", "price_usd", "--slug", "bitcoin"]
+    )
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_retry_count == 1
+    assert san.ApiConfig.request_timeout == (3.05, 10.0)
+
+    san.ApiConfig.request_retry_count = original_retries
+    san.ApiConfig.request_timeout = original_timeout
+
+
+@patch("san.get")
+def test_defaults_without_global_options(mock_get, sample_dataframe):
+    """Test that ApiConfig defaults are unchanged when no global options are passed."""
+    import san
+
+    original_retries = san.ApiConfig.request_retry_count
+    original_timeout = san.ApiConfig.request_timeout
+    # Reset to known defaults
+    san.ApiConfig.request_retry_count = 3
+    san.ApiConfig.request_timeout = (3.05, 30)
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_retry_count == 3
+    assert san.ApiConfig.request_timeout == (3.05, 30)
+
+    san.ApiConfig.request_retry_count = original_retries
+    san.ApiConfig.request_timeout = original_timeout
+
+
+def test_retries_shown_in_help():
+    """Test that --retries appears in top-level help."""
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "--retries" in result.stdout
+
+
+def test_timeout_shown_in_help():
+    """Test that --timeout appears in top-level help."""
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "--timeout" in result.stdout
