@@ -1,0 +1,61 @@
+import pandas.testing as pdt
+from unittest.mock import patch
+
+import san
+from san.pandas_utils import convert_to_datetime_idx_df
+
+
+@patch("san.client.requests.post")
+def test_san_client_get_uses_explicit_api_key(mock, test_response):
+    api_call_result = {
+        "query_0": {
+            "timeseriesDataJson": [
+                {"datetime": "2026-01-01T00:00:00Z", "value": 1.0},
+                {"datetime": "2026-01-02T00:00:00Z", "value": 2.0},
+            ]
+        }
+    }
+    mock.return_value = test_response(status_code=200, data=api_call_result)
+
+    client = san.SanClient(api_key="client-key")
+    result = client.get(
+        "price_usd",
+        slug="bitcoin",
+        from_date="2026-01-01",
+        to_date="2026-01-02",
+        interval="1d",
+    )
+
+    expected = convert_to_datetime_idx_df(api_call_result["query_0"]["timeseriesDataJson"])
+    pdt.assert_frame_equal(result, expected, check_dtype=False)
+    assert mock.call_args.kwargs["headers"]["authorization"] == "Apikey client-key"
+
+
+@patch("san.client.requests.post")
+def test_module_get_uses_default_client_compat_api_key(mock, test_response):
+    api_call_result = {
+        "query_0": {
+            "timeseriesDataJson": [
+                {"datetime": "2026-01-01T00:00:00Z", "value": 1.0},
+                {"datetime": "2026-01-02T00:00:00Z", "value": 2.0},
+            ]
+        }
+    }
+    mock.return_value = test_response(status_code=200, data=api_call_result)
+
+    previous_api_key = san.ApiConfig.api_key
+    try:
+        san.ApiConfig.api_key = "compat-key"
+        result = san.get(
+            "price_usd",
+            slug="bitcoin",
+            from_date="2026-01-01",
+            to_date="2026-01-02",
+            interval="1d",
+        )
+    finally:
+        san.ApiConfig.api_key = previous_api_key
+
+    expected = convert_to_datetime_idx_df(api_call_result["query_0"]["timeseriesDataJson"])
+    pdt.assert_frame_equal(result, expected, check_dtype=False)
+    assert mock.call_args.kwargs["headers"]["authorization"] == "Apikey compat-key"
