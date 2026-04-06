@@ -7,6 +7,7 @@ from .api_config import ApiConfig
 from .async_batch import AsyncBatch
 from .available_metrics import available_metric_for_slug_since, available_metric_versions, available_metrics, available_metrics_for_slug
 from .batch import Batch
+from .client import SanClient
 from .env_vars import SANPY_APIKEY
 from .get import get
 from .get_many import get_many
@@ -52,6 +53,7 @@ __all__ = [
     "execute_sql",
     "metadata",
     "metric_complexity",
+    "SanClient",
     "api_calls_made",
     "api_calls_remaining",
     "is_rate_limit_exception",

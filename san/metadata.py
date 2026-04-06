@@ -2,6 +2,10 @@ from .graphql import execute_gql
 
 
 def metadata(metric, arr):
+    return _metadata(execute_gql, metric, arr)
+
+
+def _metadata(execute, metric, arr):
     query_str = (
         """{{
     getMetric (metric: \"{metric}\") {{
@@ -15,4 +19,4 @@ def metadata(metric, arr):
     """
     ).format(metric=metric)
 
-    return execute_gql(query_str)["getMetric"]["metadata"]
+    return execute(query_str)["getMetric"]["metadata"]

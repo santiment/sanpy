@@ -3,6 +3,10 @@ from san.graphql import execute_gql
 
 
 def metric_complexity(metric, from_date, to_date, interval):
+    return _metric_complexity(execute_gql, metric, from_date, to_date, interval)
+
+
+def _metric_complexity(execute, metric, from_date, to_date, interval):
     query_str = (
         """{{
     getMetric (metric: \"{metric}\") {{
@@ -16,4 +20,4 @@ def metric_complexity(metric, from_date, to_date, interval):
     """
     ).format(metric=metric, from_date=_format_from_date(from_date), to_date=_format_to_date(to_date), interval=interval)
 
-    return execute_gql(query_str)["getMetric"]["timeseriesDataComplexity"]
+    return execute(query_str)["getMetric"]["timeseriesDataComplexity"]

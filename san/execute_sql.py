@@ -25,6 +25,10 @@ def execute_sql(**kwargs):
         parameters={'slug': 'bitcoin', 'metric': 'daily_active_addresses', 'last_n_days': 7},
         set_index="dt")
     """
+    return _execute_sql_with_executor(execute_gql, **kwargs)
+
+
+def _execute_sql_with_executor(execute, **kwargs):
     if "query" in kwargs:
         query = kwargs.pop("query")
     else:
@@ -32,13 +36,13 @@ def execute_sql(**kwargs):
 
     parameters = kwargs.pop("parameters", {})
 
-    result = __execute_sql(query, parameters, **kwargs)
+    result = __execute_sql(execute, query, parameters, **kwargs)
     transformed_result = result
 
     return transformed_result
 
 
-def __execute_sql(query, parameters, **kwargs):
+def __execute_sql(execute, query, parameters, **kwargs):
     idx = kwargs.pop("idx", 0)
     # Export the python dictionary parameters to a JSON string
     # where each of the quotes " is replaced with \", so when interpolated
@@ -60,7 +64,7 @@ def __execute_sql(query, parameters, **kwargs):
         }}
     }}"""
 
-    res = execute_gql(gql_query)
+    res = execute(gql_query)
     res = __transform_sql_result(res, idx, **kwargs)
 
     return res
