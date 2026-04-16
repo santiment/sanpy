@@ -133,13 +133,13 @@ The library provides two main functions for fetching timeseries data:
 
 **Common parameters:**
 
-| Parameter | Description | Default |
-|---|---|---|
-| `slug` / `slugs` | Project identifier(s), as listed in [Assets discovery](#assets-discovery) | — |
-| `selector` | Dict for flexible targeting (address, label, holdersCount, etc.) | — |
-| `from_date` | Start of the period (ISO 8601 string) | 365 days ago |
-| `to_date` | End of the period (ISO 8601 string) | now |
-| `interval` | Data point spacing — fixed (`1d`, `1h`, `5m`, `1w`) or semantic (`toStartOfMonth`, `toStartOfWeek`) | `'1d'` |
+| Parameter        | Description                                                                                         | Default      |
+| ---------------- | --------------------------------------------------------------------------------------------------- | ------------ |
+| `slug` / `slugs` | Project identifier(s), as listed in [Assets discovery](#assets-discovery)                           | —            |
+| `selector`       | Dict for flexible targeting (address, label, holdersCount, etc.)                                    | —            |
+| `from_date`      | Start of the period (ISO 8601 string)                                                               | 365 days ago |
+| `to_date`        | End of the period (ISO 8601 string)                                                                 | now          |
+| `interval`       | Data point spacing — fixed (`1d`, `1h`, `5m`, `1w`) or semantic (`toStartOfMonth`, `toStartOfWeek`) | `'1d'`       |
 
 The returned result is a `pandas.DataFrame` indexed by `datetime`.
 For `get`, the value column is named `value`.
@@ -472,6 +472,8 @@ san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santi
 
 ### Versioned metrics
 
+> Make sure the version of sanpy is 0.12.6 or newer
+
 Some metrics support multiple versions (e.g., `"1.0"` and `"2.0"`).
 
 Check which versions are available:
@@ -627,11 +629,11 @@ san.get(
 
 **Supported transforms:**
 
-| Type | Description |
-|---|---|
-| `moving_average` | Replace each value with the average of the last `moving_average_base` values |
-| `consecutive_differences` | Replace each value with the difference from the previous value (V_i - V_{i-1}) |
-| `percent_change` | Replace each value with the percent change from the previous value ((V_i / V_{i-1} - 1) * 100) |
+| Type                      | Description                                                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| `moving_average`          | Replace each value with the average of the last `moving_average_base` values                    |
+| `consecutive_differences` | Replace each value with the difference from the previous value (V*i - V*{i-1})                  |
+| `percent_change`          | Replace each value with the percent change from the previous value ((V*i / V*{i-1} - 1) \* 100) |
 
 `aggregation` controls how values within each interval are combined (e.g., `LAST`, `AVG`, `SUM`).
 
