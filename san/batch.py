@@ -4,6 +4,7 @@ from san.query import get_gql_query
 from san.graphql import execute_gql
 from san.transform import transform_timeseries_data_query_result
 from san.error import SanError
+from san.param_validation import validate_kwargs
 
 
 class Batch:
@@ -11,6 +12,7 @@ class Batch:
         self.queries = []
 
     def get(self, dataset, **kwargs):
+        validate_kwargs("Batch.get", kwargs)
         self.queries.append([dataset, kwargs])
 
     def execute(self):

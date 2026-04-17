@@ -5,6 +5,7 @@ from san.graphql import execute_gql
 from san.query import get_gql_query, parse_dataset
 from san.transform import transform_timeseries_data_query_result
 from san.error import SanError
+from san.param_validation import validate_kwargs
 
 
 def get(dataset, **kwargs):
@@ -36,6 +37,7 @@ def get(dataset, **kwargs):
         from_date="utc_now-60d",
         to_date="utc_now-40d")
     """
+    validate_kwargs("san.get", kwargs)
     query, slug = parse_dataset(dataset)
     if slug or query in NO_SLUG_QUERIES:
         return __get_metric_slug_string_selector(query, slug, dataset, **kwargs)

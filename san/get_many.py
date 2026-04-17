@@ -3,6 +3,7 @@ from san.graphql import execute_gql
 from san.query import parse_dataset
 from san.transform import transform_timeseries_data_per_slug_query_result
 from san.error import SanError
+from san.param_validation import validate_kwargs
 
 
 def get_many(dataset, **kwargs):
@@ -13,6 +14,7 @@ def get_many(dataset, **kwargs):
         from_date="2020-01-01"
         to_date="2020-01-10")
     """
+    validate_kwargs("san.get_many", kwargs)
     query, slug = parse_dataset(dataset)
     return __get_many(query, **kwargs)
 
