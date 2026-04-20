@@ -66,7 +66,7 @@ pip install 'sanpy[extras]'
 
 Sanpy includes a command-line interface for quick data access without writing Python.
 
-```
+```bash
 san --help
 san --version
 ```
@@ -74,7 +74,8 @@ san --version
 ### Configuration
 
 ```bash
-san config set-key <your-api-key>   # Store API key
+san config set-key                  # Prompt for API key with hidden input (recommended)
+san config set-key <your-api-key>   # Store API key (exposed to shell history — prefer the prompt form)
 san config show                     # Show current config
 san config path                     # Config file location
 san config clear                    # Remove stored API key
@@ -108,7 +109,7 @@ san api-calls                 # API call history
 san complexity price_usd      # Query complexity check
 ```
 
-All commands support `--format` (`table`, `json`, `csv`) and `--api-key` options.
+The discovery (`metrics`, `projects`), data (`get`, `get-many`), and diagnostic (`rate-limit`, `api-calls`, `complexity`) commands registered in `san/cli.py` support `--format` (`table`, `json`, `csv`) and `--api-key` options. The `config` subcommands (`set-key`, `show`, `path`, `clear`) do not accept these flags.
 
 ## Configuration
 

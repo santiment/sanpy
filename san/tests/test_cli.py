@@ -106,13 +106,13 @@ def test_config_show(tmp_path, monkeypatch):
     """Test showing config."""
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
 
-    # First set a key
-    runner.invoke(app, ["config", "set-key", "test_key_abcd1234"])
+    key = "test_key_abcd1234"
+    runner.invoke(app, ["config", "set-key", key])
 
-    # Then show config
     result = runner.invoke(app, ["config", "show"])
     assert result.exit_code == 0
-    assert "test" in result.stdout  # Masked key shows first chars
+    assert key[:4] in result.stdout
+    assert key not in result.stdout
 
 
 def test_config_clear(tmp_path, monkeypatch):

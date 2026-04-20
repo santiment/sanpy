@@ -83,9 +83,16 @@ def _handle_error(e: Exception) -> None:
 
 @config_app.command("set-key")
 def config_set_key(
-    api_key: Annotated[str, typer.Argument(help="Your Santiment API key")],
+    api_key: Annotated[
+        Optional[str],
+        typer.Argument(
+            help="Your Santiment API key. Omit to be prompted with hidden input.",
+        ),
+    ] = None,
 ) -> None:
     """Store API key in config file."""
+    if api_key is None:
+        api_key = typer.prompt("API key", hide_input=True)
     set_api_key(api_key)
     output(f"API key saved to {get_config_path()}")
 
@@ -225,9 +232,14 @@ def get_many(
     api_key: ApiKeyOption = None,
 ) -> None:
     """Fetch timeseries data for a metric across multiple assets."""
+    slug_list = [s.strip() for s in slugs.split(",") if s.strip()]
+    if not slug_list:
+        raise click.BadParameter(
+            "--slugs must contain at least one non-empty slug",
+            param_hint="'--slugs'",
+        )
     _init_api_key(api_key)
     try:
-        slug_list = [s.strip() for s in slugs.split(",") if s.strip()]
         kwargs = dict(
             slugs=slug_list,
             from_date=from_date,
