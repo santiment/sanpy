@@ -417,6 +417,91 @@ def test_invalid_method():
         san.get("invalid_method/slug")
 
 
+def test_get_raises_on_unsupported_kwarg():
+    with pytest.raises(SanError, match="unsupported parameter"):
+        san.get("price_usd", slug="bitcoin", vlkajsdsakd=123)
+
+
+def test_get_many_raises_on_unsupported_kwarg():
+    with pytest.raises(SanError, match="unsupported parameter"):
+        san.get_many("price_usd", slugs=["bitcoin"], foo_bar=1)
+
+
+def test_batch_get_raises_on_unsupported_kwarg():
+    batch = Batch()
+    with pytest.raises(SanError, match="unsupported parameter"):
+        batch.get("price_usd/bitcoin", nonsense=True)
+
+
+def test_async_batch_raises_on_unsupported_kwarg():
+    from san import AsyncBatch
+
+    ab = AsyncBatch()
+    with pytest.raises(SanError, match="unsupported parameter"):
+        ab.get("price_usd", slug="bitcoin", typo_param=1)
+    with pytest.raises(SanError, match="unsupported parameter"):
+        ab.get_many("price_usd", slugs=["bitcoin"], typo_param=1)
+
+
+@patch("san.transport.requests.Session.post")
+def test_strict_kwargs_disabled_allows_unknown(mock, test_response):
+    api_call_result = {"query_0": {"timeseriesDataJson": []}}
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.ApiConfig.strict_kwargs = False
+    try:
+        san.get("price_usd", slug="bitcoin", from_date="2026-01-01", to_date="2026-01-02", vlkajsdsakd=123)
+    finally:
+        san.ApiConfig.strict_kwargs = True
+
+
+@patch("san.transport.requests.Session.post")
+def test_get_with_only_finalized_data(mock, test_response):
+    api_call_result = {"query_0": {"timeseriesDataJson": [{"datetime": "2026-01-01T00:00:00Z", "value": 1.0}]}}
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.get(
+        "price_usd",
+        slug="bitcoin",
+        from_date="2026-01-01",
+        to_date="2026-01-02",
+        interval="1d",
+        only_finalized_data=True,
+    )
+
+    query = mock.call_args.kwargs["json"]["query"]
+    assert "onlyFinalizedData: true" in query
+
+
+@patch("san.transport.requests.Session.post")
+def test_get_many_with_only_finalized_data(mock, test_response):
+    api_call_result = {"query_0": {"timeseriesDataPerSlugJson": []}}
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.get_many(
+        "price_usd",
+        slugs=["bitcoin", "ethereum"],
+        from_date="2026-01-01",
+        to_date="2026-01-02",
+        interval="1d",
+        only_finalized_data=False,
+    )
+
+    query = mock.call_args.kwargs["json"]["query"]
+    assert "onlyFinalizedData: false" in query
+
+
+@patch("san.transport.requests.Session.post")
+def test_get_omits_only_finalized_data_when_absent(mock, test_response):
+    api_call_result = {"query_0": {"timeseriesDataJson": []}}
+    mock.return_value = test_response(status_code=200, data=deepcopy(api_call_result))
+
+    san.get("price_usd", slug="bitcoin", from_date="2026-01-01", to_date="2026-01-02", interval="1d")
+
+    query = mock.call_args.kwargs["json"]["query"]
+    assert "onlyFinalizedData" not in query
+
+
 def test_rate_limits():
     exception = SanError("API Rate Limit Reached. Try again in 366 seconds(7 minutes)")
 

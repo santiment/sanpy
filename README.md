@@ -195,6 +195,10 @@ The returned result is a `pandas.DataFrame` indexed by `datetime`.
 For `get`, the value column is named `value`.
 For `get_many`, each column is named after the asset slug.
 
+> **Note (v0.13.0):** `san.get`, `san.get_many`, and `AsyncBatch.get`/`.get_many`
+> now raise `SanError` when passed unknown keyword arguments instead of silently ignoring them.
+> If a parameter you expect is rejected, upgrade sanpy with `pip install --upgrade sanpy`.
+
 ### Single asset
 
 ```python
@@ -699,6 +703,21 @@ san.get(
     to_date="utc_now",
     interval="1d",
     include_incomplete_data=True
+)
+```
+
+## Only finalized data
+
+For metrics whose values can be recomputed after publication (see `canMutate` in metric metadata), pass `only_finalized_data=True` to restrict the response to data points that have passed their stabilization period:
+
+```python
+san.get(
+    "price_usd",
+    slug="bitcoin",
+    from_date="utc_now-30d",
+    to_date="utc_now",
+    interval="1d",
+    only_finalized_data=True
 )
 ```
 

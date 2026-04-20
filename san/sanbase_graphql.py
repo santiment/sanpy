@@ -211,6 +211,7 @@ def __choose_selector_or_slug(slug, **kwargs):
 
 
 def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
+    only_finalized_data_arg = _only_finalized_data_arg_helper(kwargs)
     kwargs = sgh.transform_query_args("get_metric", **kwargs)
     selector_or_slug = __choose_selector_or_slug(slug, **kwargs)
     version_arg = _version_arg_helper(kwargs)
@@ -227,17 +228,25 @@ def get_metric_timeseries_data(idx, metric, slug=None, **kwargs):
             interval: \"{interval}\"
             aggregation: {aggregation}
             includeIncompleteData: {include_incomplete_data}
+            {only_finalized_data_arg}
         )
     }}
     """
     ).format(
-        idx=idx, metric=metric, version_arg=version_arg, selector_or_slug=selector_or_slug, transform_arg=transform_arg, **kwargs
+        idx=idx,
+        metric=metric,
+        version_arg=version_arg,
+        selector_or_slug=selector_or_slug,
+        transform_arg=transform_arg,
+        only_finalized_data_arg=only_finalized_data_arg,
+        **kwargs,
     )
 
     return query_str
 
 
 def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
+    only_finalized_data_arg = _only_finalized_data_arg_helper(kwargs)
     kwargs = sgh.transform_query_args("get_metric", **kwargs)
     selector_or_slugs = __choose_selector_or_slugs(slugs, **kwargs)
     version_arg = _version_arg_helper(kwargs)
@@ -254,6 +263,7 @@ def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
             interval: \"{interval}\"
             aggregation: {aggregation}
             includeIncompleteData: {include_incomplete_data}
+            {only_finalized_data_arg}
         )
     }}
     """
@@ -263,6 +273,7 @@ def get_metric_timeseries_data_per_slug(idx, metric, slugs=None, **kwargs):
         version_arg=version_arg,
         selector_or_slugs=selector_or_slugs,
         transform_arg=transform_arg,
+        only_finalized_data_arg=only_finalized_data_arg,
         **kwargs,
     )
 
@@ -274,6 +285,15 @@ def _version_arg_helper(kwargs):
         return f', version: "{kwargs["version"]}"'
 
     return ""
+
+
+def _only_finalized_data_arg_helper(kwargs):
+    value = kwargs.pop("only_finalized_data", None)
+    if value is None:
+        return ""
+    if not isinstance(value, bool):
+        raise SanError(f'"only_finalized_data" must be a bool, got: {value!r}')
+    return f"onlyFinalizedData: {'true' if value else 'false'}"
 
 
 def _transform_arg_helper(kwargs):

@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from san.sanbase_graphql_helper import QUERY_MAPPING
 from san.error import SanError
+from san.param_validation import validate_kwargs
 
 
 def task(request):
@@ -27,9 +28,11 @@ class AsyncBatch:
         self.queries = []
 
     def get(self, dataset, **kwargs):
+        validate_kwargs("AsyncBatch.get", kwargs)
         self.queries.append(["get", dataset, kwargs])
 
     def get_many(self, dataset, **kwargs):
+        validate_kwargs("AsyncBatch.get_many", kwargs)
         self.queries.append(["get_many", dataset, kwargs])
 
     def execute(self, max_workers=10):
