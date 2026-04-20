@@ -10,6 +10,7 @@ For full API documentation and metric definitions, see [Santiment Academy](https
 
 - [Installation](#installation)
   - [Extra packages](#extra-packages)
+- [CLI](#cli)
 - [Configuration](#configuration)
   - [Environment variable](#environment-variable)
   - [Programmatic](#programmatic)
@@ -60,6 +61,55 @@ There are a few utilities in the `san/extras/` directory for backtesting and eve
 ```bash
 pip install 'sanpy[extras]'
 ```
+
+## CLI
+
+Sanpy includes a command-line interface for quick data access without writing Python.
+
+```bash
+san --help
+san --version
+```
+
+### Configuration
+
+```bash
+san config set-key                  # Prompt for API key with hidden input (recommended)
+san config set-key <your-api-key>   # Store API key (exposed to shell history — prefer the prompt form)
+san config show                     # Show current config
+san config path                     # Config file location
+san config clear                    # Remove stored API key
+```
+
+The CLI reads the API key from (in order): `--api-key` flag, `SANPY_APIKEY` env var, stored config file.
+
+### Discovery
+
+```bash
+san metrics                   # List all metrics
+san metrics --slug bitcoin    # Metrics for a specific asset
+san projects                  # List all projects
+```
+
+### Fetching data
+
+```bash
+san get price_usd --slug bitcoin --from 2024-01-01 --to 2024-01-05
+san get price_usd --slug bitcoin --from 2024-01-01 --to 2024-01-05 -f json
+san get price_usd --slug bitcoin --aggregation avg
+
+san get-many price_usd --slugs bitcoin,ethereum --from 2024-01-01 --to 2024-01-05
+```
+
+### Rate limits & complexity
+
+```bash
+san rate-limit                # API calls remaining
+san api-calls                 # API call history
+san complexity price_usd      # Query complexity check
+```
+
+The discovery (`metrics`, `projects`), data (`get`, `get-many`), and diagnostic (`rate-limit`, `api-calls`, `complexity`) commands registered in `san/cli.py` support `--format` (`table`, `json`, `csv`) and `--api-key` options. The `config` subcommands (`set-key`, `show`, `path`, `clear`) do not accept these flags.
 
 ## Configuration
 
