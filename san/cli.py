@@ -30,6 +30,12 @@ from san.cli_formatters import (
 )
 from san.error import SanError
 
+# Fallback connect timeout in seconds, used only when ApiConfig.request_timeout
+# has been set to a non-tuple/non-scalar value. 3.05 = 3s (one TCP SYN
+# retransmit window on Linux) + 50ms of jitter padding, matching the default
+# in san/api_config.py and the pattern recommended by the requests docs.
+_FALLBACK_CONNECT_TIMEOUT = 3.05
+
 # Reusable option types
 FormatOption = Annotated[
     str,
@@ -349,14 +355,25 @@ def main(
     ] = None,
     timeout: Annotated[
         Optional[float],
-        typer.Option("--timeout", help="Request read timeout in seconds (default: 30)"),
+        typer.Option(
+            "--timeout",
+            help="Request read timeout in seconds (default: 30). "
+                 "Connect timeout is preserved from ApiConfig.request_timeout.",
+        ),
     ] = None,
 ) -> None:
     """Santiment API CLI - cryptocurrency data at your fingertips."""
     if retries is not None:
         san.ApiConfig.request_retry_count = retries
     if timeout is not None:
-        san.ApiConfig.request_timeout = (3.05, timeout)
+        current = san.ApiConfig.request_timeout
+        if isinstance(current, tuple) and len(current) == 2:
+            connect_timeout = current[0]
+        elif isinstance(current, (int, float)):
+            connect_timeout = current
+        else:
+            connect_timeout = _FALLBACK_CONNECT_TIMEOUT
+        san.ApiConfig.request_timeout = (connect_timeout, timeout)
 
 
 if __name__ == "__main__":

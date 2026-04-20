@@ -483,6 +483,38 @@ def test_timeout_option(mock_get, sample_dataframe):
 
 
 @patch("san.get")
+def test_timeout_preserves_custom_connect(mock_get, sample_dataframe):
+    """--timeout updates only the read timeout; connect is preserved."""
+    import san
+
+    original = san.ApiConfig.request_timeout
+    san.ApiConfig.request_timeout = (10, 20)
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["--timeout", "120", "get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_timeout == (10, 120.0)
+
+    san.ApiConfig.request_timeout = original
+
+
+@patch("san.get")
+def test_timeout_with_scalar_existing_value(mock_get, sample_dataframe):
+    """--timeout handles a scalar ApiConfig.request_timeout without crashing."""
+    import san
+
+    original = san.ApiConfig.request_timeout
+    san.ApiConfig.request_timeout = 15
+    mock_get.return_value = sample_dataframe
+
+    result = runner.invoke(app, ["--timeout", "45", "get", "price_usd", "--slug", "bitcoin"])
+    assert result.exit_code == 0
+    assert san.ApiConfig.request_timeout == (15, 45.0)
+
+    san.ApiConfig.request_timeout = original
+
+
+@patch("san.get")
 def test_retries_and_timeout_combined(mock_get, sample_dataframe):
     """Test --retries and --timeout work together."""
     import san
