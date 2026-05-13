@@ -12,8 +12,9 @@ For full API documentation and metric definitions, see [Santiment Academy](https
   - [Extra packages](#extra-packages)
 - [CLI](#cli)
 - [Configuration](#configuration)
+  - [Programmatic (recommended)](#programmatic-recommended)
   - [Environment variable](#environment-variable)
-  - [Programmatic](#programmatic)
+    - [`.env` files are not loaded automatically](#env-files-are-not-loaded-automatically)
   - [Configure retries, timeouts, and connection pooling](#configure-retries-timeouts-and-connection-pooling)
   - [Obtaining an API key](#obtaining-an-api-key)
 - [Fetching data](#fetching-data)
@@ -113,26 +114,42 @@ The discovery (`metrics`, `projects`), data (`get`, `get-many`), and diagnostic 
 
 ## Configuration
 
-Some metrics require a paid [SanAPI plan](https://academy.santiment.net/products-and-plans/sanapi-plans/) to access real-time or full historical data. You can provide an API key in two ways:
+A paid [SanAPI plan](https://academy.santiment.net/products-and-plans/sanapi-plans/) is required for real-time data, full historical data, and access to some metrics that are not available on the free tier at all.
 
-### Environment variable
+Without a configured API key, requests use the free tier: the last 30 days are cut off and some metrics are unavailable regardless of date range. Use `san.metadata(metric, arr=["isAccessible", "restrictedFrom", "restrictedTo"])` to check access for a specific metric.
 
-If the `SANPY_APIKEY` environment variable is set when you import `san`, it is loaded automatically:
-
-```shell
-export SANPY_APIKEY="my_api_key"
-```
-
-```python
-import san
-san.ApiConfig.api_key  # 'my_api_key'
-```
-
-### Programmatic
+### Programmatic (recommended)
 
 ```python
 import san
 san.ApiConfig.api_key = "my_api_key"
+```
+
+### Environment variable
+
+If `SANPY_APIKEY` is set in the process environment when `san` is imported, it is loaded automatically:
+
+```shell
+export SANPY_APIKEY="my_api_key"
+python my_script.py
+```
+
+#### `.env` files are not loaded automatically
+
+`sanpy` reads `os.environ` only. A `SANPY_APIKEY` line in a `.env` file is ignored unless a loader puts it into the environment before `import san`. Options:
+
+- [`python-dotenv`](https://pypi.org/project/python-dotenv/): `load_dotenv()` before `import san`
+- Shell: `export SANPY_APIKEY=...`
+- `pipenv run` (auto-loads `.env` in the project dir)
+- `poetry run` (does not auto-load `.env` by default; use [`poetry-plugin-dotenv`](https://pypi.org/project/poetry-plugin-dotenv/) or `direnv`)
+- IDE run config with an `envFile` setting
+- `docker run --env-file .env`
+
+```python
+from dotenv import load_dotenv
+load_dotenv()
+
+import san
 ```
 
 ### Configure retries, timeouts, and connection pooling
