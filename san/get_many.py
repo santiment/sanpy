@@ -14,12 +14,12 @@ def get_many(dataset, **kwargs):
         from_date="2020-01-01"
         to_date="2020-01-10")
     """
-    validate_kwargs("san.get_many", kwargs)
-    query, slug = parse_dataset(dataset)
-    return __get_many(query, **kwargs)
+    return _get_many_with_executor(dataset, execute_gql, "san.get_many", **kwargs)
 
 
-def __get_many(query, **kwargs):
+def _get_many_with_executor(dataset, execute, func_name, **kwargs):
+    validate_kwargs(func_name, kwargs)
+    query, _ = parse_dataset(dataset)
     if not ("selector" in kwargs or "slugs" in kwargs):
         raise SanError("""
             Invalid call of the get function,you need to either
@@ -28,6 +28,6 @@ def __get_many(query, **kwargs):
     idx = kwargs.pop("idx", 0)
 
     gql_query = "{" + san.sanbase_graphql.get_metric_timeseries_data_per_slug(idx, query, **kwargs) + "}"
-    res = execute_gql(gql_query)
+    res = execute(gql_query)
 
     return transform_timeseries_data_per_slug_query_result(idx, query, res)

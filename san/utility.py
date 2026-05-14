@@ -17,22 +17,30 @@ def rate_limit_time_left(exception):
 
 
 def api_calls_remaining():
+    return _api_calls_remaining(get_response_headers)
+
+
+def _api_calls_remaining(get_headers):
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
-    res = get_response_headers(gql_query_str)
+    res = get_headers(gql_query_str)
     return __get_headers_remaining(res)
 
 
 def api_calls_made():
+    return _api_calls_made(execute_gql)
+
+
+def _api_calls_made(execute):
     gql_query_str = san.sanbase_graphql.get_api_calls_made()
-    res = __request_api_call_data(gql_query_str)
+    res = __request_api_call_data(execute, gql_query_str)
     api_calls = __parse_out_calls_data(res)
 
     return api_calls
 
 
-def __request_api_call_data(query):
+def __request_api_call_data(execute, query):
     try:
-        res = execute_gql(query)["currentUser"]["apiCallsHistory"]
+        res = execute(query)["currentUser"]["apiCallsHistory"]
     except SanEmptyResultError as exc:
         raise SanError("No API Key detected...") from exc
     except Exception as exc:

@@ -37,15 +37,19 @@ def get(dataset, **kwargs):
         from_date="utc_now-60d",
         to_date="utc_now-40d")
     """
-    validate_kwargs("san.get", kwargs)
+    return _get_with_executor(dataset, execute_gql, "san.get", **kwargs)
+
+
+def _get_with_executor(dataset, execute, func_name, **kwargs):
+    validate_kwargs(func_name, kwargs)
     query, slug = parse_dataset(dataset)
     if slug or query in NO_SLUG_QUERIES:
-        return __get_metric_slug_string_selector(query, slug, dataset, **kwargs)
+        return __get_metric_slug_string_selector(query, slug, dataset, execute, **kwargs)
     elif query and not slug:
-        return __get(query, **kwargs)
+        return __get(query, execute, **kwargs)
 
 
-def __get_metric_slug_string_selector(query, slug, dataset, **kwargs):
+def __get_metric_slug_string_selector(query, slug, dataset, execute, **kwargs):
     idx = kwargs.pop("idx", 0)
 
     if query in DEPRECATED_QUERIES:
@@ -64,12 +68,12 @@ def __get_metric_slug_string_selector(query, slug, dataset, **kwargs):
             gql_query = "{" + san.sanbase_graphql.get_metric_timeseries_data(idx, query, slug, **kwargs) + "}"
         else:
             raise SanError("Invalid metric!")
-    res = execute_gql(gql_query)
+    res = execute(gql_query)
 
     return transform_timeseries_data_query_result(idx, query, res)
 
 
-def __get(query, **kwargs):
+def __get(query, execute, **kwargs):
     if not ("selector" in kwargs or "slug" in kwargs):
         raise SanError("""
             Invalid call of the get function,you need to either
@@ -82,6 +86,6 @@ def __get(query, **kwargs):
     else:
         gql_query = "{" + san.sanbase_graphql.get_metric_timeseries_data(idx, query, **kwargs) + "}"
 
-    res = execute_gql(gql_query)
+    res = execute(gql_query)
 
     return transform_timeseries_data_query_result(idx, query, res)

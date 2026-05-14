@@ -13,15 +13,23 @@ DEFAULT_TRANSPORT = RequestsTransport()
 
 
 def execute_gql(gql_query_str):
-    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
+    return _execute_gql(gql_query_str, transport=DEFAULT_TRANSPORT, api_key=ApiConfig.api_key)
+
+
+def get_response_headers(gql_query_str):
+    return _get_response_headers(gql_query_str, transport=DEFAULT_TRANSPORT, api_key=ApiConfig.api_key)
+
+
+def _execute_gql(gql_query_str, transport, api_key=None):
+    response = transport.execute(gql_query_str, headers=__build_headers(api_key))
 
     if response.status_code == 200:
         return __handle_success_response__(response, gql_query_str)
     __raise_response_error__(response, gql_query_str)
 
 
-def get_response_headers(gql_query_str):
-    response = DEFAULT_TRANSPORT.execute(gql_query_str, headers=__build_headers())
+def _get_response_headers(gql_query_str, transport, api_key=None):
+    response = transport.execute(gql_query_str, headers=__build_headers(api_key))
 
     if response.status_code == 200:
         return response.headers
@@ -41,10 +49,10 @@ def __handle_success_response__(response, gql_query_str):
     )
 
 
-def __build_headers():
+def __build_headers(api_key):
     headers = {}
-    if ApiConfig.api_key:
-        headers = {"authorization": "Apikey {}".format(ApiConfig.api_key)}
+    if api_key:
+        headers = {"authorization": "Apikey {}".format(api_key)}
     return headers
 
 
