@@ -13,6 +13,7 @@ from .get_many import get_many
 from .execute_sql import execute_sql
 from .metadata import metadata
 from .metric_complexity import metric_complexity
+from .signals import available_signals, get_raw_signals, get_signal
 from .utility import api_calls_made, api_calls_remaining, is_rate_limit_exception, rate_limit_time_left
 
 if SANPY_APIKEY:
@@ -46,9 +47,12 @@ __all__ = [
     "available_metric_versions",
     "available_metrics",
     "available_metrics_for_slug",
+    "available_signals",
     "Batch",
     "get",
     "get_many",
+    "get_signal",
+    "get_raw_signals",
     "execute_sql",
     "metadata",
     "metric_complexity",
