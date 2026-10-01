@@ -543,7 +543,7 @@ san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santi
 
 ### Versioned metrics
 
-> Make sure the version of sanpy is 0.12.6 or newer
+> Make sure the version of sanpy is 0.15.0 or newer
 
 Some metrics support multiple versions, identified by name: `original:v1` (the
 default), `modern:v1`, `modern_pit:v1`, and so on.
