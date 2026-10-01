@@ -545,7 +545,8 @@ san.available_metric_for_slug_since(metric="daily_active_addresses", slug="santi
 
 > Make sure the version of sanpy is 0.12.6 or newer
 
-Some metrics support multiple versions (e.g., `"1.0"` and `"2.0"`).
+Some metrics support multiple versions, identified by name: `original:v1` (the
+default), `modern:v1`, `modern_pit:v1`, and so on.
 
 Check which versions are available:
 
@@ -553,7 +554,7 @@ Check which versions are available:
 import san
 
 san.available_metric_versions("social_dominance_total")
-# ['1.0', '2.0']
+# ['original:v1', 'modern:v1', 'modern_pit:v1', 'stock:v1', 'stock_pit:v1']
 ```
 
 Pass `version` to `san.get` or `san.get_many` to select a specific version:
@@ -565,7 +566,7 @@ san.get(
     from_date="2026-01-01",
     to_date="2026-01-10",
     interval="1d",
-    version="2.0"
+    version="modern:v1"
 )
 
 san.get_many(
@@ -574,7 +575,7 @@ san.get_many(
     from_date="2026-01-01",
     to_date="2026-01-10",
     interval="1d",
-    version="2.0"
+    version="modern:v1"
 )
 ```
 

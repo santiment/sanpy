@@ -23,12 +23,21 @@ def available_metrics_for_slug(slug):
     return execute_gql(query_str)["projectBySlug"]["availableMetrics"]
 
 
-def available_metric_versions(metric):
+def available_metric_versions(metric, names=True):
+    """
+    Return the versions of a metric by name, e.g.
+    ['original:v1', 'modern:v1', 'modern_pit:v1']. A version without a name is
+    returned as is. Pass the name as the `version` parameter of san.get and
+    san.get_many.
+
+    names=False returns the internal version numbers instead, e.g.
+    ['1.0', '2.0', '2.1'].
+    """
     query_str = (
         """{{
         getMetric(metric: \"{metric}\"){{
             metadata{{
-                availableVersions{{ version }}
+                availableVersions{{ version versionName }}
             }}
         }}
     }}
@@ -39,6 +48,8 @@ def available_metric_versions(metric):
     get_metric = result.get("getMetric") or {}
     metadata = get_metric.get("metadata") or {}
     versions = metadata.get("availableVersions") or []
+    if names:
+        return [v.get("versionName") or v["version"] for v in versions]
     return [v["version"] for v in versions]
 
 
