@@ -23,6 +23,7 @@ For full API documentation and metric definitions, see [Santiment Academy](https
   - [Using selectors](#using-selectors)
   - [Legacy metric/slug format](#legacy-metricslug-format)
   - [Non-timeseries endpoints](#non-timeseries-endpoints)
+  - [Signal endpoints](#signal-endpoints)
   - [Raw GraphQL queries](#raw-graphql-queries)
 - [SQL queries (Santiment Queries)](#sql-queries-santiment-queries)
 - [Metric discovery](#metric-discovery)
@@ -376,6 +377,27 @@ Some endpoints return tabular metadata rather than metric timeseries, for exampl
 
 ```python
 san.get("projects/all")
+```
+
+### Signal endpoints
+
+Signal endpoints expose Santiment signals and anomaly events:
+
+```python
+signals = san.available_signals()
+
+signal_data = san.get_signal(
+    "anomaly_total_liquidations",
+    slug="ethereum",
+    from_date="2026-01-01",
+    to_date="2026-05-18",
+)
+
+raw_signals = san.get_raw_signals(
+    signals=["anomaly_total_liquidations"],
+    from_date="2026-01-01",
+    to_date="2026-05-18",
+)
 ```
 
 ### Raw GraphQL queries
