@@ -593,3 +593,39 @@ def test_get_many_metric_with_version_in_query(mock, test_response):
 
     query = mock.call_args.kwargs["json"]["query"]
     assert 'getMetric(metric: "price_usd", version: "2.0")' in query
+
+
+AVAILABLE_VERSIONS_RESPONSE = {
+    "getMetric": {
+        "metadata": {
+            "availableVersions": [
+                {"version": "1.0", "versionName": "original:v1"},
+                {"version": "2.1", "versionName": "modern_pit:v1"},
+                {"version": "Experimental (Weighted Age)", "versionName": None},
+            ]
+        }
+    }
+}
+
+
+@patch("san.transport.requests.Session.post")
+def test_available_metric_versions(mock, test_response):
+    mock.return_value = test_response(status_code=200, data=deepcopy(AVAILABLE_VERSIONS_RESPONSE))
+
+    assert san.available_metric_versions("social_volume_total") == [
+        "original:v1",
+        "modern_pit:v1",
+        "Experimental (Weighted Age)",
+    ]
+    assert "versionName" in mock.call_args.kwargs["json"]["query"]
+
+
+@patch("san.transport.requests.Session.post")
+def test_available_metric_versions_numbers(mock, test_response):
+    mock.return_value = test_response(status_code=200, data=deepcopy(AVAILABLE_VERSIONS_RESPONSE))
+
+    assert san.available_metric_versions("social_volume_total", names=False) == [
+        "1.0",
+        "2.1",
+        "Experimental (Weighted Age)",
+    ]
