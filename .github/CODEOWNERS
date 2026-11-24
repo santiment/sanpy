@@ -1,0 +1,3 @@
+# Default owners: auto-requested as reviewers on every PR.
+# The last matching pattern wins, so put more specific rules after `*`.
+* @IvanIvanoff @createMonster @tspenov
