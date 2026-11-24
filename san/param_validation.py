@@ -23,6 +23,7 @@ _SUPPORTED_KWARGS = frozenset(
         "social_volume_type",
         "source",
         "search_text",
+        "signals",
         "idx",
     }
 )
